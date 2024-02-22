@@ -24,5 +24,9 @@
     "eslint-plugin-react-refresh": "^0.4.5",
     "typescript": "^5.2.2",
     "vite": "^5.1.4"
-  }
+  },
+  "main": "index.js",
+  "repository": "git@github.com:JoAnisky/rotation-app-frontend.git",
+  "author": "JoAnisky <jonathanconcept@gmail.com>",
+  "license": "MIT"
 }
