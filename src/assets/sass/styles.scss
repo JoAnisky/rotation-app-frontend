@@ -1,11 +1,37 @@
-/* UTILS */
+/**
+* All .SCSS files are imported here. 
+* This file is imported only once in src/main.tsx
+*/
 
+/* ###### UTILS ###### */
 @import
-    './utils/variables';
+    './utils/variables',
+    './utils/mixins';
+    // './utils/functions',
+    // './utils/placeholders';
 
-    
-/* BASE */
+/* ###### BASE ###### */
 @import
     './base/base',
     './base/reset',
     './base/typography';
+
+/* ###### LAYOUTS ###### */
+
+// @import
+// './layout/page',
+// './layout/main',
+// './layout/grid',
+// './layout/sections',
+// './layout/animations';
+
+// /* ###### COMPONENTS ###### */
+
+// @import
+//     './components/header',
+//     './components/main-logo',
+//     './components/navbar',
+
+/* ###### PAGES ###### */
+@import
+'./pages/index'
