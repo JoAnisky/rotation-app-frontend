@@ -10,9 +10,9 @@ const App = () => {
         </div>
 
         <div className="roles-choice">
-          <Button text="Participant" color="#cd1414"></Button>
-          <Button text="Animateur" color="#cd1414"></Button>
-          <Button text="Maître du jeu" color="#cd1414"></Button>
+          <Button text="Participant"></Button>
+          <Button text="Animateur"></Button>
+          <Button text="Maître du jeu"></Button>
         </div>
       </div>
     </div>
