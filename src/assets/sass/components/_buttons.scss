@@ -1,0 +1,10 @@
+/**
+* Note : Styling Material UI component 
+*
+* Material-UI uses inline styles for many of its components, which can override class styles due to higher specificity. 
+* To ensure your styles take precedence, you might need to increase specificity in your SCSS. 
+* One common way to do this is by repeating the class name
+*/
+.btnChoiceRole.btnChoiceRole{
+    background-color: $color-red-10t;
+}
