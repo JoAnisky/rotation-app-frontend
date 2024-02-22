@@ -1,4 +1,10 @@
-import Button from "./components/Button";
+//import Button from "./components/Button";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+import Participant from "./pages/Participant";
+import Animator from "./pages/Animator";
+import Gamemaster from "./pages/Gamemaster";
+import Roleschoice from "./components/Roleschoice";
 
 const App = () => {
   return (
@@ -9,14 +15,22 @@ const App = () => {
           <p>Quel rôle avez-vous pour cette insolite activité ?</p>
         </div>
 
-        <div className="roles-choice">
-          <Button text="Participant"></Button>
-          <Button text="Animateur"></Button>
-          <Button text="Maître du jeu"></Button>
-        </div>
+        <Router>
+          <Roleschoice />
+          <Routes>
+            <Route path="/participant" element={<Participant/>} />
+            <Route path="/animateur" element={<Animator />} />
+            <Route path="/gamemaster" element={<Gamemaster />} />
+          </Routes>
+        </Router>
+        {/* <div className="roles-choice">
+          <Button component={Link} to="/path"text="Participant"></Button>
+          <Button component={Link} to="/path" text="Animateur"></Button>
+          <Button component={Link} to="/path" text="Maître du jeu"></Button>
+        </div> */}
       </div>
     </div>
   );
-}
+};
 
 export default App;
