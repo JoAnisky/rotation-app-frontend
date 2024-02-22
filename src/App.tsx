@@ -1,9 +1,20 @@
-import "./App.css";
+import Button from "./components/Button";
 
-function App() {
+const App = () => {
   return (
-    <div>
-      <h1>Hello Rotation App !</h1>
+    <div className="index">
+      <div className="_content">
+        <div className="_welcome">
+          <h1>Bienvenue !</h1>
+          <p>Quel rôle avez-vous pour cette insolite activité ?</p>
+        </div>
+
+        <div className="roles-choice">
+          <Button text="Participant" color="#cd1414"></Button>
+          <Button text="Animateur" color="#cd1414"></Button>
+          <Button text="Maître du jeu" color="#cd1414"></Button>
+        </div>
+      </div>
     </div>
   );
 }
