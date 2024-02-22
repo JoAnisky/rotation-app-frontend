@@ -1,0 +1,22 @@
+.index {
+  @include verticalCenterColumn;
+  min-height: 100vh;
+
+  & ._content {
+    @extend .index;
+    gap: 30px;
+  }
+
+  & ._welcome{
+    @include verticalCenterColumn;
+    gap: 35px;
+    margin-bottom: 50px;
+  }
+}
+
+.roles-choice {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    width: 80%;
+}
