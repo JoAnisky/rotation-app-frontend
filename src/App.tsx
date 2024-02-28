@@ -6,7 +6,7 @@ import Participant from "./pages/Participant";
 import Animator from "./pages/Animator";
 import Gamemaster from "./pages/Gamemaster";
 
-const App = () => {
+const App: React.FC = () => {
   return (
     <>
       <Routes>
