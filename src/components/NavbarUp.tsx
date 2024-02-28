@@ -2,32 +2,47 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
-import { Link } from 'react-router-dom';
+import HomeIcon from "@mui/icons-material/Home";
+import { Link } from "react-router-dom";
 
-const NavbarUp = () => {
+// Define a type for the props expected by NavbarUp
+type NavbarUpProps = {
+  role: string; // Add a role prop
+};
+
+const NavbarUp: React.FC<NavbarUpProps> = ({ role }) => {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
+          {/* IconButton with HomeIcon and Link */}
           <IconButton
+            component={Link} // Use Link here
+            to="/" // Path to navigate to
             size="large"
             edge="start"
             color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
+            aria-label="home"
+            sx={{ mr: 2 }} // Adjust spacing as needed
           >
-            <MenuIcon />
+            <HomeIcon />
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Role utilisateur
+          {/* Typography centered by using flex-grow and text-align */}
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{ flexGrow: 1, textAlign: "center" }}
+          >
+            {role}
           </Typography>
-          <Button component={Link} to="/" color="inherit">Retour</Button>
+          {/* Invisible spacer to balance the IconButton and center the Typography */}
+          <Box sx={{ width: 48, height: 48 }} />{" "}
+          {/* Adjust size to match IconButton */}
         </Toolbar>
       </AppBar>
     </Box>
   );
 };
+
 export default NavbarUp;
