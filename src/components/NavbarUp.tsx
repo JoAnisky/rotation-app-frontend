@@ -13,7 +13,7 @@ type NavbarUpProps = {
 
 const NavbarUp: React.FC<NavbarUpProps> = ({ role }) => {
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box>
       <AppBar position="static">
         <Toolbar>
           {/* IconButton with HomeIcon and Link */}
