@@ -1,8 +1,11 @@
-const Participant = () => {
+import React from "react";
+import Layout from "../components/Layout";
+
+const Participant: React.FC = () => {
   return (
-    <div className="index">
+    <Layout>
       <h1>Participant</h1>
-    </div>
+    </Layout>
   );
 };
 
