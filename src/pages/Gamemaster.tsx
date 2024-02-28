@@ -3,7 +3,7 @@ import Layout from "../components/Layout";
 
 const Gamemaster: React.FC = () => {
   return (
-    <Layout>
+    <Layout role="Maître du jeu">
       <h1>Maître du jeu</h1>
     </Layout>
   );

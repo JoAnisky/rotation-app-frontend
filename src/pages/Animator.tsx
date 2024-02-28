@@ -3,7 +3,7 @@ import Layout from "../components/Layout";
 
 const Animator: React.FC = () => {
   return (
-    <Layout>
+    <Layout role="Animateur">
       <h1>Animateur</h1>
     </Layout>
   );

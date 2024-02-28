@@ -3,7 +3,7 @@ import Layout from "../components/Layout";
 
 const Participant: React.FC = () => {
   return (
-    <Layout>
+    <Layout role="Participant">
       <h1>Participant</h1>
     </Layout>
   );
