@@ -15,7 +15,7 @@ const Layout: React.FC<LayoutProps> = ({ children, role }) => {
       <CssBaseline />
       <Box height="100vh" display="flex" flexDirection="column">
         <NavbarUp role={role} />
-        <Box display="flex" flex="1" justifyContent="space-around">
+        <Box className="content-wrapper">
           { children }
         </Box>
         <Box
