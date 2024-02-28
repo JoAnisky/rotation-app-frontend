@@ -1,0 +1,6 @@
+//*** Pages Layout *** \\\
+
+.content-wrapper{
+    @include verticalCenterColumn;
+    flex-grow: 1;
+}
