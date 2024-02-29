@@ -1,12 +1,12 @@
 // Layout.tsx
-import React from 'react';
-import { Box, CssBaseline } from '@mui/material';
-import NavbarUp from './NavbarUp';
-import NavbarDown from './NavbarDown';
+import React from "react";
+import { Box, CssBaseline } from "@mui/material";
+import NavbarUp from "../components/NavbarUp";
+import NavbarDown from "../components/NavbarDown";
 
 type LayoutProps = {
   children: React.ReactNode; // To accept any valid React component or HTML element
-  role: string
+  role: string;
 };
 
 const Layout: React.FC<LayoutProps> = ({ children, role }) => {
@@ -15,19 +15,16 @@ const Layout: React.FC<LayoutProps> = ({ children, role }) => {
       <CssBaseline />
       <Box height="100vh" display="flex" flexDirection="column">
         <NavbarUp role={role} />
-        <Box className="content-wrapper">
-          { children }
-        </Box>
+        <Box className="content-wrapper">{children}</Box>
         <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        width="100%"
-      >
-        <NavbarDown />
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          width="100%"
+        >
+          <NavbarDown />
+        </Box>
       </Box>
-      </Box>
-
     </React.Fragment>
   );
 };
