@@ -4,7 +4,7 @@ import './assets/sass/styles.scss'
 import React from 'react';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+  <React.Fragment>
     <App />
-  </React.StrictMode>
+  </React.Fragment>
 );
