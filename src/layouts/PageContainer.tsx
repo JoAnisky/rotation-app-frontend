@@ -1,15 +1,15 @@
-// Layout.tsx
+// PageContainer.tsx
 import React from "react";
 import { Box, CssBaseline } from "@mui/material";
 import NavbarUp from "../components/NavbarUp";
 import NavbarDown from "../components/NavbarDown";
 
-type LayoutProps = {
+type PageContainerProps = {
   children: React.ReactNode; // To accept any valid React component or HTML element
   role: string;
 };
 
-const Layout: React.FC<LayoutProps> = ({ children, role }) => {
+const PageContainer: React.FC<PageContainerProps> = ({ children, role }) => {
   return (
     <React.Fragment>
       <CssBaseline />
@@ -29,4 +29,4 @@ const Layout: React.FC<LayoutProps> = ({ children, role }) => {
   );
 };
 
-export default Layout;
+export default PageContainer;

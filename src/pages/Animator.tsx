@@ -1,11 +1,11 @@
 import React from "react";
-import Layout from "../layouts/PageLayout";
+import PageContainer from "../layouts/PageContainer";
 
 const Animator: React.FC = () => {
   return (
-    <Layout role="Animateur">
+    <PageContainer role="Animateur">
       <h1>Animateur</h1>
-    </Layout>
+    </PageContainer>
   );
 };
 
