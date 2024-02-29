@@ -1,6 +1,6 @@
 //import Button from "./components/Button";
 import { BrowserRouter } from 'react-router-dom';
-import Router from './pages/router';
+import Router from './routes/router';
 
 const App: React.FC = () => {
   return (
