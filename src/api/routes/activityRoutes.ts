@@ -1,11 +1,11 @@
 // Défines all Activities routes
-const ACTIVITIES_ENDPOINT = "/api/activity";
+const ACTIVITY_ENDPOINT = "/api/activity";
 
-export const ACTIVITIES_API = {
+export const ACTIVITY_API = {
   // List all activities
-  activities: `${ACTIVITIES_ENDPOINT}`,
+  activities: `${ACTIVITY_ENDPOINT}`,
 
   // Get, Update, or Delete a single activity by ID (GET, PUT/PATCH, DELETE methods)
   activityById: (activityId: string): string =>
-    `${ACTIVITIES_ENDPOINT}/${activityId}`,
+    `${ACTIVITY_ENDPOINT}/${activityId}`,
 };
