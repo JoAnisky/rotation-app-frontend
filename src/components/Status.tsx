@@ -1,9 +1,11 @@
-const Status: React.FC = () => {
+import STATUS from "../utils/statusCode";
+
+const Status: React.FC<{ status: STATUS }> = ({ status }) =>  {
   return (
-    <>
+    <div>
       <h2>Statut</h2>
-      <p>Dynamique</p>
-    </>
+      <p>{status}</p>
+    </div>
   );
 };
 
