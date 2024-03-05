@@ -1,11 +1,12 @@
 //import Button from "./components/Button";
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import Router from "./routes/router";
 import TimeProvider from "./context/TimeProvider";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 
 const App: React.FC = () => {
+  // On app launch, store the application's start time in localStorage.
   const { getItem, setItem } = useLocalStorage("app_start_time");
 
   useEffect(() => {
