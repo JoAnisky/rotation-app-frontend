@@ -26,7 +26,6 @@ const useFetch = <T>(url: string, options?: UseFetchOptions): [T | null, boolean
           body: options?.body,
         });
         if (!response.ok) {
-          // Here we're throwing an error with a message that includes the status to make it more informative
           throw new Error(`Network response was not ok, status: ${response.status}`);
         }
         const json = await response.json();
@@ -45,7 +44,7 @@ const useFetch = <T>(url: string, options?: UseFetchOptions): [T | null, boolean
     };
 
     fetchData();
-  }, [url, options]); // Consider adding 'options' as a dependency if your fetch options are dynamic
+  }, [url, options]); // Consider adding 'options' as a dependency if fetch options are dynamic
 
   return [data, loading, error];
 }
