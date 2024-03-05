@@ -1,7 +1,8 @@
-import React, { useContext} from 'react';
+import React, { useContext } from "react";
 
 export interface ITimeContext {
-  time: number;
+  turnTime: number;
+  elapsedTime: number;
   isActive: boolean;
   isPaused: boolean;
   start: () => void;
@@ -10,7 +11,8 @@ export interface ITimeContext {
 }
 
 export const defaultState: ITimeContext = {
-  time: 0,
+  turnTime: 0,
+  elapsedTime: 0,
   isActive: false,
   isPaused: true,
   start: () => {},
