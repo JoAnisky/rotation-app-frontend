@@ -17,7 +17,7 @@ const ControlButtons: React.FC = () => {
         Stop
       </Button>
       <Button variant="contained" color="success" onClick={pauseResume}>
-        {isPaused ? "Play" : "Pause"}
+        {isPaused ? "Reprendre" : "Pause"}
       </Button>
     </div>
   );
