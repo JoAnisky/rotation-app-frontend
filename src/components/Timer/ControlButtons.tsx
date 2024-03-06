@@ -3,7 +3,7 @@ import { Button } from '@mui/material';
 import { useTime } from '../../context/TimeContext'; // Adjust the import path as necessary
 
 const ControlButtons: React.FC = () => {
-  const { isActive, isPaused, start, pauseResume, reset } = useTime();
+  const { isActive, isPaused, start, pauseResume, stop } = useTime();
 
   const StartButton = (
     <Button variant="contained" color="primary" onClick={start}>
@@ -13,7 +13,7 @@ const ControlButtons: React.FC = () => {
 
   const ActiveButtons = (
     <div>
-      <Button variant="contained" color="error" onClick={reset}>
+      <Button variant="contained" color="error" onClick={stop}>
         Stop
       </Button>
       <Button variant="contained" color="success" onClick={pauseResume}>
