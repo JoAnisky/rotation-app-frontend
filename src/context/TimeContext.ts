@@ -7,7 +7,7 @@ export interface ITimeContext {
   isPaused: boolean;
   start: () => void;
   pauseResume: () => void;
-  reset: () => void;
+  stop: () => void;
 }
 
 export const defaultState: ITimeContext = {
@@ -17,7 +17,7 @@ export const defaultState: ITimeContext = {
   isPaused: true,
   start: () => {},
   pauseResume: () => {},
-  reset: () => {},
+  stop: () => {},
 };
 
 const TimeContext = React.createContext<ITimeContext>(defaultState);
