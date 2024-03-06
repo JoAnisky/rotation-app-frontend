@@ -2,10 +2,10 @@
  * TimeShow component
  */
 import React, { useContext } from "react";
-import TimeContext from "../../context/TimeContext"; // Ensure the path is correct
+import TimeContext from "../../context/TimeContext";
 
 const Timer: React.FC = () => {
-  
+
   // Use useContext hook to access the current context value for TimeContext
   const { turnTime } = useContext(TimeContext);
 
