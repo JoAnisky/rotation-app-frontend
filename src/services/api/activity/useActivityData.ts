@@ -1,70 +1,33 @@
-// In useActivityData.ts
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ACTIVITY_API } from "../../../api/routes/activityRoutes";
-import { useLocalStorage } from "../../../hooks/useLocalStorage";
 import { IActivityData } from "./activityTypes";
+import useFetch from "../../../hooks/useFetch";
 
 const useActivityData = () => {
-  const { getItem, setItem } = useLocalStorage("activityData");
-
-  // Try to get the Activity Data value from local storage if it exists
-  const storedActivityData = getItem() ? JSON.parse(getItem() as string) : null;
-  //
-  const [activityData, setActivityData] = useState<IActivityData | null>(storedActivityData);
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  // Function to update activity data if different from newData, memoized with useCallback
-  const updateActivityData = useCallback(
-    (newData: IActivityData) => {
-      const currentDataString = JSON.stringify(activityData);
-      const newDataString = JSON.stringify(newData);
-
-      if (newDataString !== currentDataString) {
-        setActivityData(newData);
-        setItem(newDataString); // Assuming setItem does not change, otherwise include it in the dependencies array
-      } else {
-        // This else branch might be unnecessary if you don't need to explicitly set it to null
-        // when the data hasn't changed. Consider removing it if not needed.
-        setActivityData(null);
-      }
-    },
-    [setActivityData, setItem, activityData]
+  const [activityData, setActivityData] = useState<IActivityData | null>(null);
+  const [data, loading, error] = useFetch<IActivityData>(
+    ACTIVITY_API.activityById("1")
   );
 
-  const fetchActivityData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      // If ActivityData in localStorage
-      if (storedActivityData) {
-        // update activityData state with this value
-        updateActivityData(storedActivityData);
-      } else {
-        // No activityData stored, let's fetch it !
-        const response = await fetch(ACTIVITY_API.activityById("1"));
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data: IActivityData = await response.json();
-        updateActivityData(data);
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err : new Error("Failed to fetch activity data")
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [updateActivityData, storedActivityData]);
+  // Use useRef to keep track of the current value of activityData without causing re-renders
+  const activityDataRef = useRef<IActivityData | null>(activityData);
 
   useEffect(() => {
-    if (activityData == null) {
-      fetchActivityData();
-    }
-  }, [activityData, fetchActivityData]);
+    activityDataRef.current = activityData;
+  }, [activityData]);
 
-  return { activityData, isLoading, error };
+  useEffect(() => {
+    if (data) {
+      const currentDataString = JSON.stringify(activityDataRef.current);
+      const newDataString = JSON.stringify(data);
+      // Only update the state if the new data is different from the current data
+      if (newDataString !== currentDataString) {
+        setActivityData(data);
+      }
+    }
+  }, [data]); // Dependency on 'data' ensures this effect runs whenever 'data' changes
+
+  return { activityData, loading, error };
 };
 
 export default useActivityData;
