@@ -3,10 +3,10 @@ import { ACTIVITY_API } from "../../../api/routes/activityRoutes";
 import { IActivityData } from "./activityTypes";
 import useFetch from "../../../hooks/useFetch";
 
-const useActivityData = () => {
+const useActivityData = (id: string) => {
   const [activityData, setActivityData] = useState<IActivityData | null>(null);
   const [data, loading, error] = useFetch<IActivityData>(
-    ACTIVITY_API.activityById("1")
+    ACTIVITY_API.activityById(id)
   );
 
   // Use useRef to keep track of the current value of activityData without causing re-renders
