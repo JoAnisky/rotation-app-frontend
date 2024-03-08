@@ -2,34 +2,98 @@ import React, { useState, useEffect, ReactNode, useCallback } from "react";
 import TimeContext from "./TimeContext";
 import { minsToMilliseconds } from "../utils/timeUtils";
 import { ACTIVITY_API } from "../api/routes/activityRoutes";
+import { useLocalStorage } from "../hooks/useLocalStorage";
+import useActivityData from "../services/api/activity/useActivityData";
 
 interface TimeProviderProps {
   children: ReactNode;
-  elapsedTime: number; // Assuming elapsedTime could be null if not set
-  activityStartTime: string; // Accept null and undefined
-  activityStatus: string;
 }
 
-const TimeProvider: React.FC<TimeProviderProps> = ({
-  children,
-  elapsedTime,
-  activityStartTime,
-  activityStatus,
-}) => {
+const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
+
   // Duration of the Activity
   const activityDuration = minsToMilliseconds(10); // Change mins to ms
 
+  // State to track the elapsed time since the user connected, after the activity launch
+  const [userElapsedTime, setUserElapsedTime] = useState<number>(0);
+
+  // Sets Activity start time
+  const [activityStartTime, setActivityStartTime] = useState<string>("");
+
+  // Get activity Status
+  const [activityStatus, setActivityStatus] = useState("");
+
+  // Set or get 'app_start_time' from localStorage
+  const [appStartTime, setAppStartTime] = useState("");
+
+  const { activityData, error } = useActivityData("1"); // Use the custom hook
+
   const [timer, setTimer] = useState({
     turnTime: activityDuration,
-    elapsedTime,
+    elapsedTime: 0,
     isActive: false,
     isPaused: true,
   });
 
+  /**
+   * Get or set User connexion time */
+  const { getItem } = useLocalStorage("app_start_time");
+
   useEffect(() => {
+    let appStartTimeStorage = getItem();
+    if (appStartTimeStorage) {
+      appStartTimeStorage = Date.now().toString();
+      setAppStartTime(appStartTimeStorage);
+    }
+  }, []);
+
+  const countElapsedTime = useCallback(() => {
+    const parsedAppStartTime = parseInt(appStartTime, 10);
+    const parsedActivityStartTimeDB = parseInt(activityStartTime, 10);
+
+    // On a récupéré un temps de lancement de l'activité, elle a démarré
+    if (!isNaN(parsedActivityStartTimeDB) && !isNaN(parsedAppStartTime)) {
+      // Both times are valid numbers
+
+      const initialElapsedTime = parsedAppStartTime - parsedActivityStartTimeDB;
+      setUserElapsedTime(initialElapsedTime); // Set the initial elapsed time
+
+      // Calculate the elapsed time if the user connected after the activity started
+      if (parsedAppStartTime > parsedActivityStartTimeDB) {
+        const elapsedTime = parsedAppStartTime - parsedActivityStartTimeDB;
+        setUserElapsedTime(elapsedTime);
+      }
+    }
+  }, [appStartTime, activityStartTime]);
+
+  useEffect(() => {
+    // Check if there is an activity
+    if (activityData) {
+      const { activity_start_time, status } = activityData;
+
+      if (activity_start_time !== null) {
+        setActivityStartTime(activity_start_time);
+        setActivityStatus(status);
+      }
+
+      countElapsedTime();
+    } else if (error) {
+      console.error("Error fetching activity data:", error);
+    } else {
+      console.log("Pas de données d'activité ! ");
+    }
+  }, [activityData, activityStartTime, countElapsedTime, error]);
+
+  useEffect(() => {
+    console.log("activityStatus : ", activityStatus);
     if (activityStatus == "ROTATING" || activityStatus == "IN_PROGRESS") {
       // Rotating
       setTimer((prev) => ({ ...prev, isActive: true, isPaused: false }));
+    }else if (activityStatus === "PAUSED"){
+      setTimer((prev) => ({
+        ...prev,
+        isActive: true, isPaused: true
+      }));
     }
   }, [activityStatus]);
 
@@ -77,7 +141,7 @@ const TimeProvider: React.FC<TimeProviderProps> = ({
       ...prevTimer,
       isActive: true,
       isPaused: false,
-      elapsedTime: 5000, // ou la valeur que vous souhaitez
+      elapsedTime: userElapsedTime || 0, // ou la valeur que vous souhaitez
     }));
     updateActivity("ROTATING", now);
     tick();
@@ -152,7 +216,6 @@ const TimeProvider: React.FC<TimeProviderProps> = ({
       elapsed = 0;
     }
 
-    console.log("Elapsed Time : ", elapsedTime);
     const timeLeft = Math.max(activityDuration - elapsed, 0); // Calculate remaining time, ensuring it doesn't go below 0
 
     // Update the timer state with the new elapsed time and remaining time
@@ -165,17 +228,16 @@ const TimeProvider: React.FC<TimeProviderProps> = ({
     if (timeLeft <= 0) {
       stop(); // Call stop function to update activity status and reset timer
     }
-  }, [activityDuration, parsedActivityStartTime, stop, elapsedTime]);
+  }, [activityDuration, parsedActivityStartTime, stop]);
 
   useEffect(() => {
     // Check if the activity is active, not paused, and has a valid start time
     if (timer.isActive && !timer.isPaused) {
-      //const timeoutId =
-      setTimeout(tick, 1000); // Set a timeout to call 'tick' after 1 second
+      const timeoutId = setTimeout(tick, 1000); // Set a timeout to call 'tick' after 1 second
 
       // Return a cleanup function that clears the timeout
       // This ensures the timeout is cleared when the component unmounts or the dependencies change
-      //return () => clearTimeout(timeoutId);
+      return () => clearTimeout(timeoutId);
     }
   }, [timer, tick]);
 
