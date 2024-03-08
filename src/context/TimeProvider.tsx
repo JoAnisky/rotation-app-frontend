@@ -30,9 +30,8 @@ const TimeProvider: React.FC<TimeProviderProps> = ({
     if (activityStatus == "ROTATING" || activityStatus == "IN_PROGRESS") {
       // Rotating
       setTimer((prev) => ({ ...prev, isActive: true, isPaused: false }));
-
     }
-  },[activityStatus]);
+  }, [activityStatus]);
 
   /**
    * Update the activity status in Database
@@ -73,9 +72,13 @@ const TimeProvider: React.FC<TimeProviderProps> = ({
    * Handle Start Activity, set Activity status to ROTATING
    */
   const start = () => {
-    activityStatus = "ROTATING";
     const now = Date.now();
-    setTimer((prev) => ({ ...prev, isActive: true, isPaused: false, elapsedTime: 5000 }));
+    setTimer((prevTimer) => ({
+      ...prevTimer,
+      isActive: true,
+      isPaused: false,
+      elapsedTime: 5000, // ou la valeur que vous souhaitez
+    }));
     updateActivity("ROTATING", now);
     tick();
   };
