@@ -1,117 +1,64 @@
-import { useState, useEffect, ReactNode } from "react";
-import TimeContext, { defaultState } from "./TimeContext";
-import { useLocalStorage } from "../hooks/useLocalStorage";
+import React, { useState, useEffect, ReactNode, useCallback } from "react";
+import TimeContext from "./TimeContext";
 import { minsToMilliseconds } from "../utils/timeUtils";
 import { ACTIVITY_API } from "../api/routes/activityRoutes";
-import { useTimer } from "../hooks/useTimer";
 
-const TimeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+interface TimeProviderProps {
+  children: ReactNode;
+  elapsedTime: number; // Assuming elapsedTime could be null if not set
+  activityStartTime: string; // Accept null and undefined
+}
 
-  const initialTime = minsToMilliseconds(1); // Converts minutes to milliseconds
-  // Get the app start time from user
-  const { getItem, setItem } = useLocalStorage("app_start_time");
+const TimeProvider: React.FC<TimeProviderProps> = ({
+  children,
+  elapsedTime,
+  activityStartTime,
+}) => {
+  // Duration of the Activity
+  const activityDuration = minsToMilliseconds(10); // Change mins to ms
 
-  // Activity start time
-  const [activityStartTime, setActivityStartTime] = useState<number | null>(null);
-
-  const [timerState, setTimerState] = useState({
-    turnTime: initialTime,
-    isActive: defaultState.isActive,
-    isPaused: defaultState.isPaused,
-    elapsedTime: 0,
+  const [timer, setTimer] = useState({
+    turnTime: activityDuration,
+    elapsedTime,
+    isActive: true,
+    isPaused: false,
   });
 
-  const { turnTime, isActive, isPaused, elapsedTime } = timerState;
+  useEffect(() => {
+    console.log("time provider elapsed Time : ", elapsedTime);
+    // Define a function 'tick' that will be called every second
+    const tick = () => {
+      const parsedActivityStartTime = parseInt(activityStartTime, 10);
 
-  useTimer(setTimerState, isActive, isPaused, getItem, initialTime); // Custom hook for timer logic
+      const now = Date.now(); // Get the current time
+      const elapsed = now - (parsedActivityStartTime || 0); // Calculate elapsed time since the activity started
+      console.log("Elapsed Time : ", elapsed);
+      const timeLeft = Math.max(activityDuration - elapsed, 0); // Calculate remaining time, ensuring it doesn't go below 0
 
-  const start = async () => {
-    const now = Date.now();
-    setTimerState((prev) => ({ ...prev, isActive: true, isPaused: false }));
-    setActivityStartTime(now);
-    setItem(now.toString());
-
-    // Define data for the PUT request using the same timestamp
-    const postData = JSON.stringify({
-      activity_start_time: now.toString(),
-      status: 'ROTATING'
-    });
-  
-    // Define the options for the PUT request
-    const options = {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: postData,
+      // Update the timer state with the new elapsed time and remaining time
+      setTimer((prev) => ({
+        ...prev,
+        elapsedTime: elapsed, // Update elapsed time
+        turnTime: activityDuration, // Update remaining time
+      }));
+      // If there's no time left (activity is over)
+      if (timeLeft <= 0) {
+        //stop(); // Call stop function to update activity status and reset timer
+      }
     };
 
-    try {
-      const response = await fetch(ACTIVITY_API.activityById("1"), options);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const result = await response.json();
-      console.log(result);
-      // Handle successful response, e.g., update state or UI based on result
-    } catch (error) {
-      console.error("Failed to start activity:", error);
-      // Handle error, e.g., show error message to user
+    // Check if the activity is active, not paused, and has a valid start time
+    if (timer.isActive && !timer.isPaused && activityStartTime) {
+      const timeoutId = setTimeout(tick, 1000); // Set a timeout to call 'tick' after 1 second
+
+      // Return a cleanup function that clears the timeout
+      // This ensures the timeout is cleared when the component unmounts or the dependencies change
+      return () => clearTimeout(timeoutId);
     }
-
-  };
-  
-  const pauseResume = () => {
-    setTimerState((prev) => ({ ...prev, isPaused: !prev.isPaused }));
-  };
-
-  const reset = () => {
-    setTimerState({
-      turnTime: initialTime,
-      isActive: false,
-      isPaused: true,
-      elapsedTime: 0,
-    });
-  };
-
-  // useEffect(() => {
-  //   let interval: number = 0;
-  //   if (isActive && !isPaused) {
-  //     interval = setInterval(() => {
-  //       const startTime = getItem();
-  //       if (startTime) {
-  //         const now = Date.now();
-  //         const elapsed = now - parseInt(startTime, 10); // Calculate elapsed time
-  //         setElapsedTime(elapsed);
-
-  //         // Stop the timer when it reaches 0
-  //         if (turnTime <= 0) {
-  //           clearInterval(interval);
-  //           setIsActive(false);
-  //         } else {
-  //           setTurnTime((prevTime) => prevTime);
-  //         }
-  //       }
-  //     }, 1000); // Update every second
-  //   } else {
-  //     clearInterval(interval);
-  //   }
-  //   // Clear the interval on effect cleanup
-  //   return () => clearInterval(interval);
-  // }, [isActive, isPaused, getItem]);
+  }, [timer, activityStartTime, activityDuration, elapsedTime]);
 
   return (
-    <TimeContext.Provider
-      value={{
-        turnTime,
-        elapsedTime,
-        isActive,
-        isPaused,
-        start,
-        pauseResume,
-        reset,
-      }}
-    >
+    <TimeContext.Provider value={{ ...timer }}>
       {children}
     </TimeContext.Provider>
   );
