@@ -6,7 +6,7 @@ interface TeamMember {
 export interface IActivityData {
   name: string;
   activity_date: Date | null;
-  activity_start_time: number | null;
+  activity_start_time: string | null;
   createdAt: Date;
   global_duration: number;
   nb_participants: number;
