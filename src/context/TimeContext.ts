@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 
-export interface ITimeContext {
+interface ITimeContext {
   turnTime: number;
   elapsedTime: number;
   isActive: boolean;
