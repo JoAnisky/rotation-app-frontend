@@ -10,12 +10,11 @@ interface TimeProviderProps {
 }
 
 const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
-
   // Duration of the Activity
   const activityDuration = minsToMilliseconds(10); // Change mins to ms
 
   // State to track the elapsed time since the user connected, after the activity launch
-  const [userElapsedTime, setUserElapsedTime] = useState<number>(0);
+  // const [userElapsedTime, setUserElapsedTime] = useState<number>(0);
 
   // Sets Activity start time
   const [activityStartTime, setActivityStartTime] = useState<string>("");
@@ -35,6 +34,21 @@ const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
     isPaused: true,
   });
 
+  const [userElapsedTime, setUserElapsedTime] = useState(() => {
+    const parsedAppStartTime = parseInt(appStartTime, 10);
+    const parsedActivityStartTimeDB = parseInt(activityStartTime, 10);
+  
+    // On a récupéré un temps de lancement de l'activité, elle a démarré
+    if (!isNaN(parsedActivityStartTimeDB) && !isNaN(parsedAppStartTime)) {
+      // Both times are valid numbers
+      const initialElapsedTime = parsedAppStartTime - parsedActivityStartTimeDB;
+      return initialElapsedTime; // Calculated elapsed time
+    } else {
+      // Default value (e.g., 0) if calculation not possible
+      return 0;
+    }
+  });
+
   /**
    * Get or set User connexion time */
   const { getItem } = useLocalStorage("app_start_time");
@@ -45,26 +59,8 @@ const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
       appStartTimeStorage = Date.now().toString();
       setAppStartTime(appStartTimeStorage);
     }
-  }, []);
+  }, [getItem]);
 
-  const countElapsedTime = useCallback(() => {
-    const parsedAppStartTime = parseInt(appStartTime, 10);
-    const parsedActivityStartTimeDB = parseInt(activityStartTime, 10);
-
-    // On a récupéré un temps de lancement de l'activité, elle a démarré
-    if (!isNaN(parsedActivityStartTimeDB) && !isNaN(parsedAppStartTime)) {
-      // Both times are valid numbers
-
-      const initialElapsedTime = parsedAppStartTime - parsedActivityStartTimeDB;
-      setUserElapsedTime(initialElapsedTime); // Set the initial elapsed time
-
-      // Calculate the elapsed time if the user connected after the activity started
-      if (parsedAppStartTime > parsedActivityStartTimeDB) {
-        const elapsedTime = parsedAppStartTime - parsedActivityStartTimeDB;
-        setUserElapsedTime(elapsedTime);
-      }
-    }
-  }, [appStartTime, activityStartTime]);
 
   useEffect(() => {
     // Check if there is an activity
@@ -76,23 +72,23 @@ const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
         setActivityStatus(status);
       }
 
-      countElapsedTime();
     } else if (error) {
       console.error("Error fetching activity data:", error);
     } else {
       console.log("Pas de données d'activité ! ");
     }
-  }, [activityData, activityStartTime, countElapsedTime, error]);
+  }, [activityData, activityStartTime, error]);
 
   useEffect(() => {
     console.log("activityStatus : ", activityStatus);
     if (activityStatus == "ROTATING" || activityStatus == "IN_PROGRESS") {
       // Rotating
       setTimer((prev) => ({ ...prev, isActive: true, isPaused: false }));
-    }else if (activityStatus === "PAUSED"){
+    } else if (activityStatus === "PAUSED") {
       setTimer((prev) => ({
         ...prev,
-        isActive: true, isPaused: true
+        isActive: true,
+        isPaused: true,
       }));
     }
   }, [activityStatus]);
@@ -198,15 +194,17 @@ const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
       isActive: false,
       isPaused: true,
     });
+    setUserElapsedTime(0)
   }, [activityDuration]);
 
-  // Define a function 'tick' that will be called every second
   const parsedActivityStartTime = activityStartTime
     ? parseInt(activityStartTime, 10)
     : 0;
 
+  // Define a function 'tick' that will be called every second
   const tick = useCallback(async () => {
-    console.log("parsedActivityStartTime :", parsedActivityStartTime);
+
+    // console.log("parsedActivityStartTime :", parsedActivityStartTime);
 
     const now = Date.now(); // Get the current time
 
@@ -248,4 +246,4 @@ const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
   );
 };
 
-export default TimeProvider;
+export { TimeProvider };
