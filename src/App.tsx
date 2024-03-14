@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import Router from "./routes/router";
-import TimeProvider from "./context/TimeProvider";
+import {TimeProvider} from "./context/TimeProvider";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 // Hook responsible to ActivityData get
 
@@ -14,17 +14,15 @@ const App: React.FC = () => {
    * Verify if app_start_time exists in localStorage and create it if nedeed
    */
   useEffect(() => {
-
     setItem(Date.now().toString());
-
   }, [setItem]);
 
   return (
-    <TimeProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <TimeProvider>
         <Router />
-      </BrowserRouter>
-    </TimeProvider>
+      </TimeProvider>
+    </BrowserRouter>
   );
 };
 
