@@ -2,8 +2,9 @@
 import React, { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import Router from "./routes/router";
-import {TimeProvider} from "./context/TimeProvider";
+// import {TimeProvider} from "./context/TimeProvider";
 import { useLocalStorage } from "./hooks/useLocalStorage";
+import ActivityProvider from "./components/provider/ActivityProvider";
 // Hook responsible to ActivityData get
 
 const App: React.FC = () => {
@@ -19,9 +20,12 @@ const App: React.FC = () => {
 
   return (
     <BrowserRouter>
-      <TimeProvider>
-        <Router />
-      </TimeProvider>
+    <ActivityProvider>
+       <Router />
+    </ActivityProvider>
+      {/* <TimeProvider> */}
+       
+      {/* </TimeProvider> */}
     </BrowserRouter>
   );
 };
