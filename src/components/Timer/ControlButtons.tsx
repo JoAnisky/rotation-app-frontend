@@ -1,22 +1,33 @@
-import React from 'react';
-import { Button } from '@mui/material';
-import { useTime } from '../../context/TimeContext'; // Adjust the import path as necessary
+import React from "react";
+import { Button } from "@mui/material";
 
-const ControlButtons: React.FC = () => {
-  const { isActive, isPaused, start, pauseResume, stop } = useTime();
+interface ControlButtonsProps {
+  active: boolean;
+  isPaused: boolean;
+  handleStart: () => void;
+  handlePauseResume: () => void;
+  handleStop: () => void;
+}
 
+const ControlButtons: React.FC<ControlButtonsProps> = ({
+  active,
+  isPaused,
+  handleStart,
+  handlePauseResume,
+  handleStop,
+}) => {
   const StartButton = (
-    <Button variant="contained" color="primary" onClick={start}>
+    <Button variant="contained" color="primary" onClick={handleStart}>
       Démarrer l'activité
     </Button>
   );
 
   const ActiveButtons = (
     <div>
-      <Button variant="contained" color="error" onClick={stop}>
+      <Button variant="contained" color="error" onClick={handleStop}>
         Stop
       </Button>
-      <Button variant="contained" color="success" onClick={pauseResume}>
+      <Button variant="contained" color="success" onClick={handlePauseResume}>
         {isPaused ? "Reprendre" : "Pause"}
       </Button>
     </div>
@@ -24,7 +35,7 @@ const ControlButtons: React.FC = () => {
 
   return (
     <div className="Control-Buttons">
-      <div>{isActive ? ActiveButtons : StartButton}</div>
+      <div>{active ? ActiveButtons : StartButton}</div>
     </div>
   );
 };
