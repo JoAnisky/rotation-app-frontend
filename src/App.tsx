@@ -4,7 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import Router from "./routes/router";
 // import {TimeProvider} from "./context/TimeProvider";
 import { useLocalStorage } from "./hooks/useLocalStorage";
-import ActivityProvider from "./components/provider/ActivityProvider";
+import ActivityProvider from "./components/providers/ActivityProvider";
 // Hook responsible to ActivityData get
 
 const App: React.FC = () => {
