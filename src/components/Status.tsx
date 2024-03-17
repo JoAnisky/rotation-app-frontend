@@ -12,11 +12,18 @@ const Status = () => {
       const { status } = activityData;
       setActivityStatus(status);
     }
-  }, []);
+  }, [activityData]);
+
+  // Function to translate status code to string
+  // Function to translate status code to string
+  const getStatusString = (statusCode: string) => {
+    return (STATUS as Record<string, string>)[statusCode] || "";
+  };
+
   return (
-    <div style={{textAlign: "center"}}>
+    <div style={{ textAlign: "center" }}>
       <h2>Statut</h2>
-      <p>{activityStatus}</p>
+      <p>{getStatusString(activityStatus)}</p>
     </div>
   );
 };
