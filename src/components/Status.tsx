@@ -1,10 +1,22 @@
+import { useContext, useEffect, useState } from "react";
 import STATUS from "../utils/statusCode";
+import { ActivityContext } from "../contexts/ActivityContext";
 
-const Status: React.FC<{ status: STATUS }> = ({ status }) =>  {
+const Status = () => {
+  const [activityStatus, setActivityStatus] = useState<string>("NOT_STARTED");
+
+  const activityData = useContext(ActivityContext);
+
+  useEffect(() => {
+    if (activityData) {
+      const { status } = activityData;
+      setActivityStatus(status);
+    }
+  }, []);
   return (
-    <div>
+    <div style={{textAlign: "center"}}>
       <h2>Statut</h2>
-      <p>{status}</p>
+      <p>{activityStatus}</p>
     </div>
   );
 };
