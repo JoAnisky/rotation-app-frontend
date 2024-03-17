@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import Timer from "./Timer";
 import ControlButtons from "./ControlButtons";
 import { minsToMilliseconds } from "../../utils/timeUtils";
@@ -6,7 +6,11 @@ import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { ActivityContext } from "../../contexts/ActivityContext";
 import { ACTIVITY_API } from "../../api/routes/activityRoutes";
 
-const StopWatch = () => {
+interface StopWatchProps {
+  isAdmin: boolean;
+}
+
+const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
   // Duration of the Activity
   const activityDuration = minsToMilliseconds(10); // Change mins to ms
 
@@ -87,8 +91,7 @@ const StopWatch = () => {
         setTotalDuration((prevTime) => {
           if (prevTime <= 0) {
             clearInterval(interval!); // Stop the interval if time reaches 0
-            setIsActive(false); // Set isActive to false
-            setIsPaused(true); // Set isPaused to true
+
             handleStop();
             return 0;
           }
@@ -186,20 +189,23 @@ const StopWatch = () => {
     } catch (error) {
       console.error(`Failed to update activity status to COMPLETED : `, error);
     }
-    setIsActive(false);
+    setIsActive(false); // Set isActive to false
+    setIsPaused(true); // Set isPaused to true
     setTotalDuration(activityDuration);
   }, [activityDuration]);
 
   return (
     <div className="stop-watch">
       <Timer totalDuration={totalDuration} elapsedTime={elapsedTime} />
-      <ControlButtons
-        active={isActive}
-        isPaused={isPaused}
-        handleStart={handleStart}
-        handlePauseResume={handlePauseResume}
-        handleStop={handleStop}
-      />
+      {isAdmin && (
+        <ControlButtons
+          active={isActive}
+          isPaused={isPaused}
+          handleStart={handleStart}
+          handlePauseResume={handlePauseResume}
+          handleStop={handleStop}
+        />
+      )}
     </div>
   );
 };
