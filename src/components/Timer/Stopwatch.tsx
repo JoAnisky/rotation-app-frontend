@@ -12,28 +12,27 @@ const StopWatch = () => {
 
   const [isActive, setIsActive] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(true);
-  const [time, setTime] = useState<number>(activityDuration);
+  const [totalDuration, setTotalDuration] = useState<number>(activityDuration);
 
   // Activity start time from DB
   const [activityStartTime, setActivityStartTime] = useState<string>("");
-
+  const [activityStatus, setActivityStatus] = useState<string>("NOT_STARTED");
   // User start connexion time (LocalStorage app_start_time) */
   const [userAppStartTime, setUserAppStartTime] = useState<string>("");
 
   // State to store initial elapsed time
-  const [elapsedTime, setElapsedTime] = useState<number | null>(
-    null
-  );
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
 
   const { getItem } = useLocalStorage("app_start_time");
 
   // Launched only once at Stopwatch mount
   useEffect(() => {
     const userAppStartTimeStorage = getItem();
+    console.log("userAppStartTimeStorage : ", userAppStartTimeStorage);
     if (userAppStartTimeStorage !== null) {
       setUserAppStartTime(userAppStartTimeStorage);
     }
-  }, [getItem]); // Removed userAppStartTime from the dependency array
+  }, []); // Removed userAppStartTime from the dependency array
 
   // Access the context value using useContext hook
   const activityData = useContext(ActivityContext);
@@ -42,37 +41,50 @@ const StopWatch = () => {
   useEffect(() => {
     if (activityData) {
       console.log(activityData);
-      const { activity_start_time } = activityData;
-      if (activity_start_time !== null)
+      const { activity_start_time, status: activityStatus } = activityData;
+      if (activity_start_time !== null) {
         setActivityStartTime(activity_start_time);
+      }
+      setActivityStatus(activityStatus);
     } else {
       // still loading or null ??
     }
-    return () => {
-      //
-    };
   }, [activityData]);
 
   useEffect(() => {
-    let userElapsedTime = null
+    console.log("Status d'activité : ", activityStatus);
+    if (activityStatus === "ROTATING" || activityStatus === "IN_PROGRESS") {
+      console.log("activité démarrée !");
+      setIsActive(true);
+      setIsPaused(false);
+    } else if (activityStatus === "PAUSED") {
+      console.log("Activité en pause");
+      setIsPaused(true);
+      setIsActive(true);
+    } else if (activityStatus === "COMPLETED") {
+      console.log("Activité FINIE");
+      setIsActive(false);
+      setTotalDuration(activityDuration);
+    }
+  }, [activityStatus, activityDuration]);
+
+  useEffect(() => {
     const parsedActivityStartTimeDB = parseInt(activityStartTime, 10);
     const parsedAppStartTime = parseInt(userAppStartTime, 10);
 
     if (!isNaN(parsedActivityStartTimeDB) && !isNaN(parsedAppStartTime)) {
-      userElapsedTime = parsedAppStartTime - parsedActivityStartTimeDB;
-      setElapsedTime(userElapsedTime);
-      console.log("elapsedTime : ", elapsedTime);
+      setElapsedTime(parsedAppStartTime - parsedActivityStartTimeDB);
     } else {
-      console.log("Invalid start times");
+      console.log("No start time");
     }
-  }, [userAppStartTime, activityStartTime, elapsedTime]);
+  }, [activityStartTime, elapsedTime, userAppStartTime]);
 
   // Counter
   useEffect(() => {
     let interval: number | null = null;
     if (isActive && !isPaused) {
       interval = setInterval(() => {
-        setTime((prevTime) => {
+        setTotalDuration((prevTime) => {
           if (prevTime <= 0) {
             clearInterval(interval!); // Stop the interval if time reaches 0
             setIsActive(false); // Set isActive to false
@@ -132,6 +144,7 @@ const StopWatch = () => {
     setIsActive(true);
     setIsPaused(false);
     updateActivity("ROTATING", now);
+    setActivityStatus("ROTATING");
   }, [updateActivity]);
 
   const handlePauseResume = useCallback(() => {
@@ -140,16 +153,19 @@ const StopWatch = () => {
       // If the activity was paused and is now being resumed
       console.log("Activity In progress");
       updateActivity("IN_PROGRESS");
+      setActivityStatus("IN_PROGRESS");
     } else {
       // If the activity was running and is now being paused
       console.log("Activity Paused");
       updateActivity("PAUSED");
+      setActivityStatus("PAUSED");
     }
     setIsPaused(!isPaused);
   }, [isPaused, updateActivity]);
 
   const handleStop = useCallback(() => {
     // Initialize postData with status
+    setActivityStatus("COMPLETED");
     const postData: { status: string; activity_start_time?: null } = {
       status: "COMPLETED",
       activity_start_time: null,
@@ -171,12 +187,12 @@ const StopWatch = () => {
       console.error(`Failed to update activity status to COMPLETED : `, error);
     }
     setIsActive(false);
-    setTime(activityDuration);
-  }, []);
+    setTotalDuration(activityDuration);
+  }, [activityDuration]);
 
   return (
     <div className="stop-watch">
-      <Timer time={time} />
+      <Timer totalDuration={totalDuration} elapsedTime={elapsedTime} />
       <ControlButtons
         active={isActive}
         isPaused={isPaused}
