@@ -2,7 +2,6 @@ import React from "react";
 import PagesContainer from "../layouts/PageContainer";
 import Status from "../components/Status";
 import { Box } from "@mui/material";
-import Timer from "../components/Timer/Timer";
 import StopWatch from "../components/Timer/Stopwatch";
 
 const Participant: React.FC = () => {
