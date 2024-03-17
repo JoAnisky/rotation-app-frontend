@@ -13,9 +13,9 @@ const Gamemaster: React.FC = () => {
   return (
     <PageContainer role="Maître du jeu">
       <h1>Maître du jeu</h1>
-      <StopWatch />
-      {/* <ControlButtons />
-      <Timer /> */}
+      <StopWatch isAdmin={true}/>
+      {/* <ControlButtons /> */}
+      {/* <Timer /> */}
     </PageContainer>
   );
 };
