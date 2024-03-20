@@ -19,7 +19,7 @@ const ActivityProvider: React.FC<Props> = ({ children }) => {
     activityData: fetchedActivityData,
     error: fetchError,
     loading: fetchLoading,
-  } = useActivityData("1");
+  } = useActivityData("15");
 
   useEffect(() => {
     if (fetchedActivityData) {
