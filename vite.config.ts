@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'https://localhost:8000',
         changeOrigin: true,
         secure: false, // If your backend is HTTP, you might need to set secure to false
         rewrite: (path) => path.replace(/^\/api/, ''),
