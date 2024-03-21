@@ -7,10 +7,11 @@ import { ActivityContext } from "../../contexts/ActivityContext";
 import { ACTIVITY_API } from "../../api/routes/activityRoutes";
 
 interface StopWatchProps {
-  isAdmin: boolean;
+  isAdmin: boolean,
+  activityStatus: string
 }
 
-const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
+const StopWatch: React.FC<StopWatchProps> = ({ isAdmin, activityStatus }) => {
   // Duration of the Activity
   const activityDuration = minsToMilliseconds(10); // Change mins to ms
 
@@ -20,7 +21,8 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
 
   // Activity start time from DB
   const [activityStartTime, setActivityStartTime] = useState<string>("");
-  const [activityStatus, setActivityStatus] = useState<string>("NOT_STARTED");
+  const [internalActivityStatus, setActivityStatus] = useState<string>(activityStatus);
+
   // User start connexion time (LocalStorage app_start_time) */
   const [userAppStartTime, setUserAppStartTime] = useState<string>("");
 
@@ -32,7 +34,6 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
   // Launched only once at Stopwatch mount
   useEffect(() => {
     const userAppStartTimeStorage = getItem();
-    console.log("userAppStartTimeStorage : ", userAppStartTimeStorage);
     if (userAppStartTimeStorage !== null) {
       setUserAppStartTime(userAppStartTimeStorage);
     }
@@ -44,7 +45,6 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
   // Retrieve current activity data
   useEffect(() => {
     if (activityData) {
-      console.log(activityData);
       const { activity_start_time, status: activityStatus } = activityData;
       if (activity_start_time !== null) {
         setActivityStartTime(activity_start_time);
@@ -79,7 +79,7 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
     if (!isNaN(parsedActivityStartTimeDB) && !isNaN(parsedAppStartTime)) {
       setElapsedTime(parsedAppStartTime - parsedActivityStartTimeDB);
     } else {
-      console.log("No start time");
+      // console.log("No start time");
     }
   }, [activityStartTime, elapsedTime, userAppStartTime]);
 
