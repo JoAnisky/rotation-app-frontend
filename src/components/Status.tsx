@@ -2,17 +2,19 @@ import { useContext, useEffect, useState } from "react";
 import STATUS from "../utils/statusCode";
 import { ActivityContext } from "../contexts/ActivityContext";
 
-const Status = () => {
-  const [activityStatus, setActivityStatus] = useState<string>("NOT_STARTED");
+interface StatusProps {
+  activityStatus: string
+}
+
+const Status: React.FC<StatusProps> = ({ activityStatus }) => {
+  const [initialStatus, setActivityStatus] = useState<string>(activityStatus);
 
   const activityData = useContext(ActivityContext);
 
   useEffect(() => {
-    if (activityData) {
-      const { status } = activityData;
-      setActivityStatus(status);
-    }
-  }, [activityData]);
+      setActivityStatus(activityStatus);
+    
+  }, [initialStatus, activityStatus]);
 
   // Function to translate status code to string
   // Function to translate status code to string
@@ -22,8 +24,7 @@ const Status = () => {
 
   return (
     <div style={{ textAlign: "center" }}>
-      <h2>Statut</h2>
-      <p>{getStatusString(activityStatus)}</p>
+      <p>{getStatusString(initialStatus)}</p>
     </div>
   );
 };
