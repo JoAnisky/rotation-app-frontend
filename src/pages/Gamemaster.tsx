@@ -1,7 +1,8 @@
 import PageContainer from "../layouts/PageContainer";
 // import ControlButtons from "../components/Timer/ControlButtons";
 // import Timer from "../components/Timer/Timer";
-import StopWatch from "../components/Timer/Stopwatch";
+// import StopWatch from "../components/Timer/Stopwatch";
+import PollingComponent from "../components/Timer/PollingComponent";
 // import { ActivityContext } from "../contexts/ActivityContext";
 
 const Gamemaster: React.FC = () => {
@@ -13,7 +14,7 @@ const Gamemaster: React.FC = () => {
   return (
     <PageContainer role="Maître du jeu">
       <h1>Maître du jeu</h1>
-      <StopWatch isAdmin={true}/>
+      <PollingComponent isAdmin={true}/>
       {/* <ControlButtons /> */}
       {/* <Timer /> */}
     </PageContainer>

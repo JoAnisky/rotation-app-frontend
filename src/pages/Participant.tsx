@@ -2,7 +2,7 @@ import React from "react";
 import PagesContainer from "../layouts/PageContainer";
 import Status from "../components/Status";
 import { Box } from "@mui/material";
-import StopWatch from "../components/Timer/Stopwatch";
+import PollingComponent from "../components/Timer/PollingComponent";
 
 const Participant: React.FC = () => {
 
@@ -14,7 +14,7 @@ const Participant: React.FC = () => {
         <p>Equipe NOM</p>
         <p>Stand NOM</p>
       </div>
-      <StopWatch isAdmin={false} />
+      <PollingComponent isAdmin={false}/>
       </Box>
 
       <p>A la fin du temps, se rendre :</p>
