@@ -7,11 +7,10 @@ import { ActivityContext } from "../../contexts/ActivityContext";
 import { ACTIVITY_API } from "../../api/routes/activityRoutes";
 
 interface StopWatchProps {
-  isAdmin: boolean,
-  activityStatus: string
+  isAdmin: boolean;
 }
 
-const StopWatch: React.FC<StopWatchProps> = ({ isAdmin, activityStatus }) => {
+const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
   // Duration of the Activity
   const activityDuration = minsToMilliseconds(10); // Change mins to ms
 
@@ -21,7 +20,7 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin, activityStatus }) => {
 
   // Activity start time from DB
   const [activityStartTime, setActivityStartTime] = useState<string>("");
-  const [internalActivityStatus, setActivityStatus] = useState<string>(activityStatus);
+  const [activityStatus, setActivityStatus] = useState<string>("");
 
   // User start connexion time (LocalStorage app_start_time) */
   const [userAppStartTime, setUserAppStartTime] = useState<string>("");
@@ -37,7 +36,7 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin, activityStatus }) => {
     if (userAppStartTimeStorage !== null) {
       setUserAppStartTime(userAppStartTimeStorage);
     }
-  }, []); // Removed userAppStartTime from the dependency array
+  }, [getItem]); // Removed userAppStartTime from the dependency array
 
   // Access the context value using useContext hook
   const activityData = useContext(ActivityContext);
@@ -56,7 +55,7 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin, activityStatus }) => {
   }, [activityData]);
 
   useEffect(() => {
-    console.log("Status d'activité : ", activityStatus);
+    console.log("Status changed : ", activityStatus);
     if (activityStatus === "ROTATING" || activityStatus === "IN_PROGRESS") {
       console.log("activité démarrée !");
       setIsActive(true);
@@ -68,7 +67,6 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin, activityStatus }) => {
     } else if (activityStatus === "COMPLETED") {
       console.log("Activité FINIE");
       setIsActive(false);
-      setTotalDuration(activityDuration);
     }
   }, [activityStatus, activityDuration]);
 
@@ -130,7 +128,7 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin, activityStatus }) => {
       };
 
       try {
-        const response = await fetch(ACTIVITY_API.activityById("15"), options);
+        const response = await fetch(ACTIVITY_API.activityById("1"), options);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -147,7 +145,6 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin, activityStatus }) => {
     setIsActive(true);
     setIsPaused(false);
     updateActivity("ROTATING", now);
-    setActivityStatus("ROTATING");
   }, [updateActivity]);
 
   const handlePauseResume = useCallback(() => {
@@ -156,19 +153,16 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin, activityStatus }) => {
       // If the activity was paused and is now being resumed
       console.log("Activity In progress");
       updateActivity("IN_PROGRESS");
-      setActivityStatus("IN_PROGRESS");
     } else {
       // If the activity was running and is now being paused
       console.log("Activity Paused");
       updateActivity("PAUSED");
-      setActivityStatus("PAUSED");
     }
     setIsPaused(!isPaused);
   }, [isPaused, updateActivity]);
 
   const handleStop = useCallback(() => {
     // Initialize postData with status
-    setActivityStatus("COMPLETED");
     const postData: { status: string; activity_start_time?: null } = {
       status: "COMPLETED",
       activity_start_time: null,
@@ -181,7 +175,7 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin, activityStatus }) => {
     };
 
     try {
-      const response = fetch(ACTIVITY_API.activityById("15"), options);
+      const response = fetch(ACTIVITY_API.activityById("1"), options);
       if (!response) {
         throw new Error(`HTTP error! status: ${response}`);
       }
@@ -192,6 +186,7 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin, activityStatus }) => {
     setIsActive(false); // Set isActive to false
     setIsPaused(true); // Set isPaused to true
     setTotalDuration(activityDuration);
+    setElapsedTime(0)
   }, [activityDuration]);
 
   return (
