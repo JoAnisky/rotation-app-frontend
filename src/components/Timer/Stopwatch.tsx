@@ -73,7 +73,7 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
           // Count elapsed Time
           setElapsedTime(parsedAppStartTime - parsedActivityStartTimeDB);
           console.log(
-            "User connected AFTER activity Launch, calculate elapsed Time : ",
+            "User connected AFTER activity Launch, count elapsed Time : ",
             elapsedTime
           );
         } else {
