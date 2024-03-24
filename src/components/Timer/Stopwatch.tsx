@@ -22,21 +22,12 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
   const [activityStartTime, setActivityStartTime] = useState<string>("");
   const [activityStatus, setActivityStatus] = useState<string>("");
 
-  // User start connexion time (LocalStorage app_start_time) */
-  const [userAppStartTime, setUserAppStartTime] = useState<string>("");
-
   // State to store initial elapsed time
   const [elapsedTime, setElapsedTime] = useState<number>(0);
 
   const { getItem } = useLocalStorage("app_start_time");
-
-  // Launched only once at Stopwatch mount
-  useEffect(() => {
-    const userAppStartTimeStorage = getItem();
-    if (userAppStartTimeStorage !== null) {
-      setUserAppStartTime(userAppStartTimeStorage);
-    }
-  }, [getItem]); // Removed userAppStartTime from the dependency array
+  // App lauch time (User connection time)
+  const appLauchTime = getItem();
 
   // Access the context value using useContext hook
   const activityData = useContext(ActivityContext);
@@ -71,15 +62,30 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
   }, [activityStatus, activityDuration]);
 
   useEffect(() => {
-    const parsedActivityStartTimeDB = parseInt(activityStartTime, 10);
-    const parsedAppStartTime = parseInt(userAppStartTime, 10);
+    // Did activity started ?
+    if (activityStartTime) {
+      const parsedActivityStartTimeDB = parseInt(activityStartTime, 10);
+      const parsedAppStartTime = parseInt(appLauchTime, 10);
 
-    if (!isNaN(parsedActivityStartTimeDB) && !isNaN(parsedAppStartTime)) {
-      setElapsedTime(parsedAppStartTime - parsedActivityStartTimeDB);
+      if (!isNaN(parsedActivityStartTimeDB) && !isNaN(parsedAppStartTime)) {
+        // Did activity started before App launch (User connection) ?
+        if (activityStartTime < appLauchTime) {
+          // Count elapsed Time
+          setElapsedTime(parsedAppStartTime - parsedActivityStartTimeDB);
+          console.log(
+            "User connected AFTER activity Launch, calculate elapsed Time : ",
+            elapsedTime
+          );
+        } else {
+          console.log("User was connected BEFORE activity Launch");
+        }
+      } else {
+        console.log("Parsing times Error");
+      }
     } else {
-      // console.log("No start time");
+      console.log("Activity not started");
     }
-  }, [activityStartTime, elapsedTime, userAppStartTime]);
+  }, [activityStartTime, elapsedTime]);
 
   // Counter
   useEffect(() => {
@@ -103,6 +109,7 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
     return () => {
       if (interval !== null) clearInterval(interval);
     };
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive, isPaused]);
 
   /**
@@ -151,17 +158,15 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
     // Check the new state after toggling and update the activity status accordingly
     if (isPaused) {
       // If the activity was paused and is now being resumed
-      console.log("Activity In progress");
       updateActivity("IN_PROGRESS");
     } else {
       // If the activity was running and is now being paused
-      console.log("Activity Paused");
       updateActivity("PAUSED");
     }
     setIsPaused(!isPaused);
   }, [isPaused, updateActivity]);
 
-  const handleStop = useCallback(() => {
+  const handleStop = () => {
     // Initialize postData with status
     const postData: { status: string; activity_start_time?: null } = {
       status: "COMPLETED",
@@ -179,15 +184,14 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
       if (!response) {
         throw new Error(`HTTP error! status: ${response}`);
       }
-      // Handle the response, e.g., by updating local state or triggering a re-fetch of activity data
     } catch (error) {
       console.error(`Failed to update activity status to COMPLETED : `, error);
     }
     setIsActive(false); // Set isActive to false
     setIsPaused(true); // Set isPaused to true
     setTotalDuration(activityDuration);
-    setElapsedTime(0)
-  }, [activityDuration]);
+    setElapsedTime(0);
+  };
 
   return (
     <div className="stop-watch">
