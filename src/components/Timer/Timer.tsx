@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 
 interface TimerProps {
-  totalDuration: number;
+  counter: number;
   elapsedTime: number;
 }
 
-const Timer: React.FC<TimerProps> = ({ totalDuration, elapsedTime }) => {
+const Timer: React.FC<TimerProps> = ({ counter, elapsedTime }) => {
   const [timeLeft, setTimeLeft] = useState<number>(0);
 
   useEffect(() => {
-    const remainingTime = totalDuration - elapsedTime;
+    const remainingTime = counter - elapsedTime;
     setTimeLeft(remainingTime > 0 ? remainingTime : 0);
-  }, [totalDuration, elapsedTime]);
+  }, [counter, elapsedTime]);
 
   const minutes = Math.floor((timeLeft / 60000) % 60);
   const seconds = Math.floor((timeLeft / 1000) % 60);
