@@ -15,5 +15,7 @@ export interface IActivityData {
   stand_duration: number;
   status: string;
   team: TeamMember[];
+  pause_start_time: string | null;
+  pause_duration: string | null;
   // Add other fields as necessary
 }
