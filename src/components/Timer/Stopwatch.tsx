@@ -14,12 +14,17 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
   // Duration of the Activity
   const activityDuration = minsToMilliseconds(10); // Change mins to ms
 
+  // Activity local States 
   const [isActive, setIsActive] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(true);
-  const [totalDuration, setTotalDuration] = useState<number>(activityDuration);
+  const [counter, setCounter] = useState<number>(activityDuration);
 
-  // Activity start time from DB
-  const [activityStartTime, setActivityStartTime] = useState<string>("");
+  // Access the context value using useContext hook
+  const activityData = useContext(ActivityContext);
+  
+  // Activity data
+  const [activityStartTime, setActivityStartTime] = useState<string | null>(null); // (Used to calculate the elapsed time between the activity start time and the user's connection.)
+  const [pauseStartTime, setPauseStartTime] = useState<string | null>(null); // (Used to calculate the elapsed time between the pause start time and the activity's resume.)
   const [activityStatus, setActivityStatus] = useState<string>("");
 
   // State to store initial elapsed time
@@ -27,16 +32,25 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
 
   const { getItem } = useLocalStorage("app_start_time");
   // App lauch time (User connection time)
-  const appLauchTime = getItem();
+  const appLaunchTime = getItem();
 
-  // Access the context value using useContext hook
-  const activityData = useContext(ActivityContext);
+  const handleStop = useCallback(() =>  {
+    updateActivity({
+      status: "COMPLETED",
+      activity_start_time: null, // Assuming you want to clear this
+      pause_start_time: null, // Assuming you want to clear this
+    });
+    setIsActive(false); // Set isActive to false
+    setIsPaused(true); // Set isPaused to true
+    setCounter(activityDuration);
+    setElapsedTime(0);
+  }, []);
 
   // Retrieve current activity data
   useEffect(() => {
     if (activityData) {
       const { activity_start_time, status: activityStatus } = activityData;
-      if (activity_start_time !== null) {
+      if (activity_start_time) {
         setActivityStartTime(activity_start_time);
       }
       setActivityStatus(activityStatus);
@@ -45,18 +59,19 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
     }
   }, [activityData]);
 
+  // track activity Status
   useEffect(() => {
     console.log("Status changed : ", activityStatus);
     if (activityStatus === "ROTATING" || activityStatus === "IN_PROGRESS") {
-      console.log("activité démarrée !");
+      console.log("Activity status :  ROTATING or IN_PROGRESS !");
       setIsActive(true);
       setIsPaused(false);
     } else if (activityStatus === "PAUSED") {
-      console.log("Activité en pause");
+      console.log("Activity status : PAUSED");
       setIsPaused(true);
       setIsActive(true);
     } else if (activityStatus === "COMPLETED") {
-      console.log("Activité FINIE");
+      console.log("Activity status : COMPLETED");
       setIsActive(false);
     }
   }, [activityStatus, activityDuration]);
@@ -65,13 +80,15 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
     // Did activity started ?
     if (activityStartTime) {
       const parsedActivityStartTimeDB = parseInt(activityStartTime, 10);
-      const parsedAppStartTime = parseInt(appLauchTime, 10);
+      const parsedAppStartTime = parseInt(appLaunchTime, 10);
 
       if (!isNaN(parsedActivityStartTimeDB) && !isNaN(parsedAppStartTime)) {
         // Did activity started before App launch (User connection) ?
-        if (activityStartTime < appLauchTime) {
+        if (activityStartTime < appLaunchTime) {
           // Count elapsed Time
-          setElapsedTime(parsedAppStartTime - parsedActivityStartTimeDB);
+         
+            setElapsedTime(parsedAppStartTime - parsedActivityStartTimeDB);
+
           console.log(
             "User connected AFTER activity Launch, count elapsed Time : ",
             elapsedTime
@@ -85,16 +102,18 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
     } else {
       console.log("Activity not started");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activityStartTime, elapsedTime]);
 
   // Counter
   useEffect(() => {
-    let interval: number | null = null;
+    let interval: ReturnType<typeof setInterval> | null = null;
+
     if (isActive && !isPaused) {
       interval = setInterval(() => {
-        setTotalDuration((prevTime) => {
+        setCounter((prevTime) => {
           if (prevTime <= 0) {
-            clearInterval(interval!); // Stop the interval if time reaches 0
+            clearInterval(interval as ReturnType<typeof setInterval> ); // Stop the interval if time reaches 0
 
             handleStop();
             return 0;
@@ -103,45 +122,35 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
         });
       }, 10);
     } else {
-      if (interval !== null) clearInterval(interval);
+      if (interval) clearInterval(interval);
     }
 
     return () => {
-      if (interval !== null) clearInterval(interval);
+      if (interval) clearInterval(interval);
     };
     //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isActive, isPaused]);
+  }, [isActive, isPaused, handleStop]);
 
   /**
    * Update the activity status in Database
    *
    */
   const updateActivity = useCallback(
-    async (status: string, startTime?: number | null) => {
-      // Initialize postData with status
-      const postData: { status: string; activity_start_time?: string } = {
-        status,
-      };
-
-      // If startTime is provided and not null, add it to postData
-      if (startTime != undefined) {
-        postData.activity_start_time = startTime.toString();
-      }
-
+    async (updateData: { status: string; [key: string]: string | null }) => {
       const options = {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(postData),
+        body: JSON.stringify(updateData),
       };
-
+  
       try {
         const response = await fetch(ACTIVITY_API.activityById("15"), options);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        // Handle the response, e.g., by updating local state or triggering a re-fetch of activity data
+        // Handle the response...
       } catch (error) {
-        console.error(`Failed to update activity status to ${status}:`, error);
+        console.error(`Failed to update activity: `, error);
       }
     },
     []
@@ -151,51 +160,41 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
     const now = Date.now();
     setIsActive(true);
     setIsPaused(false);
-    updateActivity("ROTATING", now);
+    updateActivity({
+      status: "ROTATING",
+      activity_start_time: now.toString(),
+    });
   }, [updateActivity]);
 
   const handlePauseResume = useCallback(() => {
+    const now = Date.now();
     // Check the new state after toggling and update the activity status accordingly
     if (isPaused) {
-      // If the activity was paused and is now being resumed
-      updateActivity("IN_PROGRESS");
+      // ACTIVITY RESUME : activity was paused and is now being resumed
+      console.log("pauseStartTime " , pauseStartTime);
+      // Todo : 
+      
+      // Get pause_start_time
+      // calculate elapsed time between pause_start and now (pause_duration)
+      // Store pause_duration in DB
+      // remove pause_start_time for the next pause timestamp
+      updateActivity({ status: "IN_PROGRESS", pause_start_time: null });
+
     } else {
-      // If the activity was running and is now being paused
-      updateActivity("PAUSED");
+      // ACTIVITY PAUSED : activity was running and is now being paused
+      setPauseStartTime(now.toString());
+      updateActivity({
+        status: "PAUSED",
+        pause_start_time: now.toString(),
+      });
+
     }
     setIsPaused(!isPaused);
-  }, [isPaused, updateActivity]);
 
-  const handleStop = () => {
-    // Initialize postData with status
-    const postData: { status: string; activity_start_time?: null } = {
-      status: "COMPLETED",
-      activity_start_time: null,
-    };
-
-    const options = {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(postData),
-    };
-
-    try {
-      const response = fetch(ACTIVITY_API.activityById("15"), options);
-      if (!response) {
-        throw new Error(`HTTP error! status: ${response}`);
-      }
-    } catch (error) {
-      console.error(`Failed to update activity status to COMPLETED : `, error);
-    }
-    setIsActive(false); // Set isActive to false
-    setIsPaused(true); // Set isPaused to true
-    setTotalDuration(activityDuration);
-    setElapsedTime(0);
-  };
+  }, [isPaused, updateActivity, pauseStartTime]);
 
   return (
     <div className="stop-watch">
-      <Timer totalDuration={totalDuration} elapsedTime={elapsedTime} />
       {isAdmin && (
         <ControlButtons
           active={isActive}
@@ -205,6 +204,7 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
           handleStop={handleStop}
         />
       )}
+      <Timer counter={counter} elapsedTime={elapsedTime}/>
     </div>
   );
 };
