@@ -41,12 +41,13 @@ const ActivityProvider: React.FC<Props> = ({ children }) => {
         setError(true); // Set error state on any error during fetching
       } finally {
         setLoading(false); // Set loading state to false after fetching (success or failure)
-        setTimeout(fetchData, 1000); // Schedule next fetch after 1 second
+        setTimeout(fetchData, 2000); // Schedule next fetch after 1 second
       }
     };
   
     useEffect(() => {
       fetchData();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
   const contextValue: ActivityContextValue | undefined = activityData
