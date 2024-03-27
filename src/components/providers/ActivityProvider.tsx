@@ -27,7 +27,7 @@ const ActivityProvider: React.FC<Props> = ({ children }) => {
     const fetchData = async () => {
       try {
         setLoading(true); // Set loading state to true
-        const response = await fetch(ACTIVITY_API.activityById("1"), {
+        const response = await fetch(ACTIVITY_API.activityById("15"), {
           method: "GET",
         });
         if (response.ok) {
