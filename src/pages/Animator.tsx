@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PageContainer from "../layouts/PageContainer";
 import { Autocomplete, Button, TextField } from "@mui/material";
-import BasicSelect from "../components/BasicSelect";
+// import BasicSelect from "../components/BasicSelect";
 import useFetch from "../hooks/useFetch";
 import { ANIMATOR_API } from "../api/routes/animatorRoutes";
 import { STANDS_API } from "../api/routes/standRoutes";
@@ -66,13 +66,45 @@ const Animator: React.FC = () => {
     }
   }, [fetchedStandsData]);
 
+  useEffect(() => {
+    if (selectedStand) {
+      console.log(selectedStand.id);
+    }
+  }, [selectedStand]);
+
+  /**
+   * Update the activity status in Database
+   *
+   */
+  const updateStand = async (updateData: { standId: number; animator: number; }) => {
+    const options = {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ animator: updateData.animator }),
+    };
+  
+    console.log("stand id : ", updateData.standId);
+    try {
+      const response = await fetch(STANDS_API.standById(updateData.standId.toString()), options);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const responseData = await response.json(); // Assuming the server sends back some JSON data
+      console.log('Update successful:', responseData);
+      // Here, you might want to update your application state or display a success message
+    } catch (error) {
+      console.error(`Failed to update activity: `, error);
+      // Here, you might want to update your application state to reflect the error or display an error message
+    }
+  };
+
   return (
     <PageContainer role="Animateur">
       <h2>Animateur</h2>
 
       <Autocomplete
         disablePortal
-        id="combo-box-demo"
+        id="animator-autocomplete"
         options={animators}
         getOptionLabel={(option) => option.name}
         // returns the string to display for each option
@@ -96,24 +128,33 @@ const Animator: React.FC = () => {
 
       <Autocomplete
         disablePortal
-        id="combo-box-demo"
+        id="stand-autocomplete"
         options={stands}
         getOptionLabel={(option) => option.name}
         onChange={(event, value: IStand | null) => {
           setSelectedStand(value ? { id: value.id, name: value.name } : null); // Update the selectedStand state
-          console.log("Id stand : ", value?.id);
-          console.log("Nom stand : ", value?.name);
         }}
         loading={standsLoading} // Set the loading prop based on your loading state
         loadingText="Chargement..." // Customize the loading text
         noOptionsText="Aucune option"
         sx={{ width: 300 }}
-        renderInput={(params) => (
-          <TextField {...params} label="Quel stand ?" />
-        )}
+        renderInput={(params) => <TextField {...params} label="Quel stand ?" />}
       />
 
-      <Button variant="contained" sx={{ minWidth: 300 }}>
+      <Button
+        variant="contained"
+        sx={{ minWidth: 300 }}
+        onClick={() => {
+          if (selectedStand && selectedAnimator) {
+            updateStand({
+              standId: selectedStand.id,
+              animator: selectedAnimator.id,
+            });
+          } else {
+            console.log('Stand or Animator not selected');
+          }
+        }}
+      >
         C'est parti !
       </Button>
     </PageContainer>
