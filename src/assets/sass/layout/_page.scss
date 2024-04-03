@@ -3,4 +3,5 @@
 .content-wrapper{
     @include verticalCenterColumn;
     flex-grow: 1;
+    gap: 15px
 }
