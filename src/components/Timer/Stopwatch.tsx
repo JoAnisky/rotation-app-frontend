@@ -12,7 +12,7 @@ interface StopWatchProps {
 
 const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
   // Duration of the Activity
-  const activityDuration = minsToMilliseconds(10); // Change mins to ms
+  const activityDuration = minsToMilliseconds(0.1); // Change mins to ms
 
   // Activity local States 
   const [isActive, setIsActive] = useState<boolean>(false);
@@ -44,7 +44,7 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
     setIsPaused(true); // Set isPaused to true
     setCounter(activityDuration);
     setElapsedTime(0);
-  }, []);
+  }, [activityDuration]);
 
   // Retrieve current activity data
   useEffect(() => {
@@ -204,7 +204,7 @@ const StopWatch: React.FC<StopWatchProps> = ({ isAdmin }) => {
           handleStop={handleStop}
         />
       )}
-      <Timer counter={counter} elapsedTime={elapsedTime}/>
+      <Timer counter={counter} elapsedTime={elapsedTime} activityDuration={activityDuration}/>
     </div>
   );
 };
