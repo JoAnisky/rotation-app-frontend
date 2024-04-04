@@ -19,7 +19,6 @@ const NavbarUp: React.FC<INavbarUpProps> = ({
   handleChangeSelection,
   animatorStandSetted
 }) => {
-  console.log(animatorStandSetted)
   return (
     <Box>
       <AppBar position="static">
