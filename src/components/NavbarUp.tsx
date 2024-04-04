@@ -5,13 +5,21 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import HomeIcon from "@mui/icons-material/Home";
 import { Link } from "react-router-dom";
+import { Button } from "@mui/material";
 
 // Define a type for the props expected by NavbarUp
-type NavbarUpProps = {
-  role: string; // Add a role prop
-};
+interface INavbarUpProps {
+  role: string;
+  handleChangeSelection?: () => void;
+  animatorStandSetted: boolean
+}
 
-const NavbarUp: React.FC<NavbarUpProps> = ({ role }) => {
+const NavbarUp: React.FC<INavbarUpProps> = ({
+  role,
+  handleChangeSelection,
+  animatorStandSetted
+}) => {
+  console.log(animatorStandSetted)
   return (
     <Box>
       <AppBar position="static">
@@ -36,9 +44,17 @@ const NavbarUp: React.FC<NavbarUpProps> = ({ role }) => {
           >
             {role}
           </Typography>
-          {/* Invisible spacer to balance the IconButton and center the Typography */}
-          <Box sx={{ width: 48, height: 48 }} />{" "}
-          {/* Adjust size to match IconButton */}
+          
+          {role === "Animateur" && animatorStandSetted ? (
+            <Button
+              variant="contained"
+              onClick={() => handleChangeSelection?.()}
+            >
+              Changer
+            </Button>
+          ) : (
+            <Box sx={{ width: 48, height: 48 }} />
+          )}
         </Toolbar>
       </AppBar>
     </Box>
