@@ -56,35 +56,27 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
 
             {/* Grid wrapper for every elements */}
             <Grid container spacing={2}>
-              <Grid container>
-                <Grid item xs={12}>
-                  <StopWatch isAdmin={true} />
-                </Grid>
+              <Grid item xs={12}>
+                <StopWatch isAdmin={true} />
               </Grid>
 
-              <Grid container>
-                <Grid item xs={6} md={6}>
-                  <Typography>Nom de l'activité</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography>{activityName}</Typography>
-                </Grid>
+              <Grid display="flex" justifyContent="space-between" width="100%">
+                <Typography>Nom de l'activité</Typography>
+
+                <Typography>{activityName}</Typography>
               </Grid>
 
-              <Grid container>
-                <Grid item xs={6}>
-                  <Typography>Date de l'activité</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    sx={{ width: 160 }}
-                    fullWidth
-                    type="date"
-                    variant="outlined"
-                    placeholder="Filled"
-                    defaultValue={new Date().toISOString().slice(0, 10)}
-                  />
-                </Grid>
+              <Grid display="flex" justifyContent="space-between" width="100%">
+                <Typography>Date de l'activité</Typography>
+
+                <TextField
+                  sx={{width:145}}
+                  fullWidth
+                  type="date"
+                  variant="outlined"
+                  placeholder="Filled"
+                  defaultValue={new Date().toISOString().slice(0, 10)}
+                />
               </Grid>
 
               {/* Container for Time params */}
@@ -97,26 +89,13 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
                   Gestion du temps (mn)
                 </Typography>
 
-                <Box display="flex" justifyContent="space-between" width="100%">
-                  <Grid item xs={6}>
-                    <Typography>Durée de l'activité </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <TextField
-                      type="number"
-                      inputProps={{
-                        className: "input-number",
-                        min: "0", // Minimum value
-                        step: "1",
-                      }}
-                    />
-                  </Grid>
-                </Box>
+                <Grid
+                  display="flex"
+                  justifyContent="space-between"
+                  width="100%"
+                >
+                  <Typography>Durée de l'activité </Typography>
 
-                <Grid item xs={6}>
-                  <Typography>Durée de rotation </Typography>
-                </Grid>
-                <Grid item xs={6}>
                   <TextField
                     type="number"
                     inputProps={{
@@ -127,10 +106,30 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
                   />
                 </Grid>
 
-                <Grid item xs={6}>
-                  <Typography>Durée par stand</Typography>
+                <Grid
+                  display="flex"
+                  justifyContent="space-between"
+                  width="100%"
+                >
+                  <Typography>Durée de rotation </Typography>
+
+                  <TextField
+                    type="number"
+                    inputProps={{
+                      className: "input-number",
+                      min: "0", // Minimum value
+                      step: "1",
+                    }}
+                  />
                 </Grid>
-                <Grid item xs={6}>
+
+                <Grid
+                  display="flex"
+                  justifyContent="space-between"
+                  width="100%"
+                >
+                  <Typography>Durée par stand</Typography>
+
                   <TextField
                     type="number"
                     inputProps={{
@@ -179,10 +178,13 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
                 <Typography variant="h6" component="h2" gutterBottom>
                   Gestion des équipes
                 </Typography>
-                <Grid item xs={6}>
+                <Grid
+                  display="flex"
+                  justifyContent="space-between"
+                  width="100%"
+                >
                   <Typography>Nombre d'équipes</Typography>
-                </Grid>
-                <Grid item xs={6}>
+
                   <TextField
                     type="number"
                     inputProps={{
@@ -193,7 +195,12 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
                   />
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="center"
+                  width="100%"
+                >
                   <Autocomplete
                     disablePortal
                     id="stand-autocomplete"
@@ -221,9 +228,19 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
                   </Button>
                 </Grid>
                 <Grid item xs={12}>
-                  <Typography>Liste des équipes</Typography>
+                  <Typography>
+                    Liste des équipes (a générer dynamiquement)
+                  </Typography>
+                  <span>Equipe 1</span>
+                  <span>Equipe 2</span>
+                  <span>Equipe 3...</span>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="center"
+                  width="100%"
+                >
                   <Button
                     variant="outlined"
                     color="secondary"
@@ -236,7 +253,12 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
               {/* END Container for Teams params */}
 
               {/* Container for Params save */}
-              <Grid item xs={12}>
+              <Grid
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                width="100%"
+              >
                 <Button
                   variant="contained"
                   sx={{ minWidth: "auto", marginTop: 2 }}
