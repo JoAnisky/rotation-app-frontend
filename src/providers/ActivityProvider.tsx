@@ -26,7 +26,7 @@ const ActivityProvider: React.FC<Props> = ({ children }) => {
   const fetchData = async () => {
     try {
       setLoading(true); // Set loading state to true
-      const response = await fetch(ACTIVITY_API.activityById("15"), {
+      const response = await fetch(ACTIVITY_API.activityById("1"), {
         method: "GET",
       });
       if (response.ok) {
@@ -40,7 +40,7 @@ const ActivityProvider: React.FC<Props> = ({ children }) => {
       setError(true); // Set error state on any error during fetching
     } finally {
       setLoading(false); // Set loading state to false after fetching (success or failure)
-      setTimeout(fetchData, 2000); // Schedule next fetch after 1 second
+      setTimeout(fetchData, 1000); // Schedule next fetch after 1 second
     }
   };
 
