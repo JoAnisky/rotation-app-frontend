@@ -63,6 +63,15 @@ const Animator: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const storedStand = getSelectedStand();
+    if (storedStand) {
+      setSelectedStand(storedStand);
+      // If a stored stand is found, we assume that the animator-stand association has already been set
+      setAnimatorStandSetted(true);
+    }
+  }, [])
+  
   // Add a function to handle changing the selection
   const handleChangeSelection = () => {
     setAnimatorStandSetted(false);
@@ -123,12 +132,7 @@ const Animator: React.FC = () => {
       if (response.status == 204) {
         // For component Stand display
         setAnimatorStandSetted(true);
-        const storedStand = getSelectedStand();
-        if (storedStand) {
-          setSelectedStand(storedStand);
-          // If a stored stand is found, we assume that the animator-stand association has already been set
-          setAnimatorStandSetted(true);
-        }
+
       }
     } catch (error) {
       console.error(`Failed to update activity: `, error);
