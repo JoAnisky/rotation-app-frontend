@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { IActivityData } from "../types/activityTypes";
 import { ActivityContext } from "../contexts/ActivityContext";
-import { ACTIVITY_API } from "../api/routes/activityRoutes";
+import { ACTIVITY_API } from "../routes/api/activityRoutes";
 // import useActivityData from "../../hooks/useActivityData";
 
 interface ActivityContextValue extends IActivityData {

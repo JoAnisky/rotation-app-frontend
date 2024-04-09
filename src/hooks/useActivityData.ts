@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { ACTIVITY_API } from "../api/routes/activityRoutes";
+import { ACTIVITY_API } from "../routes/api/activityRoutes";
 import { IActivityData } from "../types/activityTypes";
 import useFetch from "./useFetch";
 

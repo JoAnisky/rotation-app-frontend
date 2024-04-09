@@ -1,7 +1,7 @@
 import React, { useState, useEffect, ReactNode, useCallback } from "react";
 import TimeContext from "../contexts/TimeContext";
 import { minsToMilliseconds } from "../utils/timeUtils";
-import { ACTIVITY_API } from "../api/routes/activityRoutes";
+import { ACTIVITY_API } from "../routes/api/activityRoutes";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import useActivityData from "../hooks/useActivityData";
 
