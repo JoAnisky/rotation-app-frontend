@@ -1,21 +1,13 @@
-import { useEffect, useState } from "react";
 
 interface TimerProps {
   counter: number;
-  elapsedTime: number;
-  activityDuration: number
 }
 
-const Timer: React.FC<TimerProps> = ({ counter, elapsedTime, activityDuration }) => {
-  const [timeLeft, setTimeLeft] = useState<number>(0);
+const Timer: React.FC<TimerProps> = ({ counter }) => {
 
-  useEffect(() => {
-    const remainingTime = counter - elapsedTime;
-    setTimeLeft(remainingTime === 0 ? activityDuration : remainingTime > 0 ? remainingTime : 0);
-  }, [counter, elapsedTime, activityDuration]);
 
-  const minutes = Math.floor((timeLeft / 60000) % 60);
-  const seconds = Math.floor((timeLeft / 1000) % 60);
+  const minutes = Math.floor((counter / 60000) % 60);
+  const seconds = Math.floor((counter / 1000) % 60);
 
   return (
     <div className="timer">
