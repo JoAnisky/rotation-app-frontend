@@ -5,6 +5,7 @@ import Router from "./routes/router";
 // import {TimeProvider} from "./context/TimeProvider";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import ActivityProvider from "./providers/ActivityProvider";
+import CounterProvider from "./providers/CounterProvider";
 // Hook responsible to ActivityData get
 
 const App: React.FC = () => {
@@ -21,7 +22,9 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       <ActivityProvider>
-        <Router />
+        <CounterProvider>
+          <Router />
+        </CounterProvider>
       </ActivityProvider>
       {/* <TimeProvider> */}
 
