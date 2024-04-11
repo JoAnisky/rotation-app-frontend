@@ -10,8 +10,9 @@ import {
 } from "@mui/material";
 import { ActivityContext } from "../contexts/ActivityContext";
 import { IActivityData } from "../types/activityTypes";
-import StopWatch from "../components/Timer/Stopwatch";
 import NavbarUp from "../components/NavbarUp";
+import ControlButtons from "../components/Timer/ControlButtons";
+import Stopwatch from "../components/Timer/Stopwatch";
 
 interface IPageContainerProps {
   role: string;
@@ -25,6 +26,7 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
   const [activityData, setActivityData] = useState<IActivityData | null>(null);
   const [activityName, setActivityName] = useState<string>("");
   const [value, setValue] = useState<number | null>(null);
+
   const stands: string[] = [];
 
   // Get ActivityData
@@ -57,7 +59,8 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
             {/* Grid wrapper for every elements */}
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <StopWatch isAdmin={true} />
+                <Stopwatch/> 
+                <ControlButtons />
               </Grid>
 
               <Grid display="flex" justifyContent="space-between" width="100%">
@@ -70,7 +73,7 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
                 <Typography>Date de l'activité</Typography>
 
                 <TextField
-                  sx={{width:145}}
+                  sx={{ width: 145 }}
                   fullWidth
                   type="date"
                   variant="outlined"
