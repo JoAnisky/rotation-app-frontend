@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ReactNode, useCallback } from "react";
-import TimeContext from "../contexts/TimeContext";
+import TimeContext from "../contexts/CounterContext";
 import { minsToMilliseconds } from "../utils/timeUtils";
 import { ACTIVITY_API } from "../routes/api/activityRoutes";
 import { useLocalStorage } from "../hooks/useLocalStorage";
