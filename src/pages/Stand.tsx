@@ -2,11 +2,11 @@ import React from "react";
 import PagesContainer from "../layouts/PageContainer";
 import Status from "../components/Status";
 import { Box } from "@mui/material";
-import StopWatch from "../components/Timer/Stopwatch";
+import Stopwatch from "../components/Timer/Stopwatch";
+
 
 interface StatusProps {
   role: string;
-  isAdmin: boolean;
   standName: string | undefined;
   handleChangeSelection?: () => void;
   animatorStandSetted: boolean;
@@ -14,7 +14,6 @@ interface StatusProps {
 
 const Stand: React.FC<StatusProps> = ({
   role,
-  isAdmin,
   standName,
   handleChangeSelection,
   animatorStandSetted,
@@ -31,7 +30,7 @@ const Stand: React.FC<StatusProps> = ({
         <div>
           <p>Equipe NOM</p>
         </div>
-        <StopWatch isAdmin={isAdmin} />
+        <Stopwatch/>
       </Box>
 
       <p>A la fin du temps, se rendre :</p>

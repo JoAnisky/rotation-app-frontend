@@ -147,7 +147,6 @@ const Animator: React.FC = () => {
         <>
           <Stand
             role="Animateur"
-            isAdmin={false}
             standName={selectedStand?.name}
             handleChangeSelection={handleChangeSelection}
             animatorStandSetted={animatorStandSetted}
