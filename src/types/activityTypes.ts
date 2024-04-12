@@ -8,11 +8,11 @@ export interface IActivityData {
   activity_date: Date | null;
   activity_start_time: string | null;
   createdAt: Date;
-  global_duration: number;
-  nb_participants: number;
-  nb_teams: number;
-  rotation_duration: number;
-  stand_duration: number;
+  global_duration: number | null;
+  nb_participants: number | null;
+  nb_teams: number | null;
+  rotation_duration: number | null;
+  stand_duration: number | null;
   status: string;
   team: TeamMember[];
   pause_start_time: string | null;
