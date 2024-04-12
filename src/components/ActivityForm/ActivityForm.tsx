@@ -21,6 +21,8 @@ const ActivityForm = () => {
   const [activityCreated, setActivityCreated] = useState<boolean>(false);
   const [userMessage, setUserMessage] = useState<string | null>(null);
 
+  const [activityId, setActivityId] = useState<number | null>(null)
+
   const textTitle = activityCreated
     ? "Paramètres d'activité"
     : "Création d'une activité";
@@ -113,6 +115,7 @@ const ActivityForm = () => {
           setUserMessage("Activité créée avec succès");
 
           console.log("Activité créée avec succès: ", responseData);
+          setActivityId(responseData.id)
         }
       } catch (error) {
         setActivityCreated(false);
@@ -275,7 +278,8 @@ const ActivityForm = () => {
             </Grid>
             {/* END Container for Time params */}
 
-            {activityCreated && <TeamsStandsParams />}
+            {/* {activityCreated && <TeamsStandsParams />} */}
+            {<TeamsStandsParams activityId={activityId}/>}
 
             {/* Container for Params save */}
             <Grid
