@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { IActivityData } from "../types/activityTypes";
+import { IActivityData } from "../types/ActivityInterface";
 import { ActivityContext } from "../contexts/ActivityContext";
 import { ACTIVITY_API } from "../routes/api/activityRoutes";
 // import useActivityData from "../../hooks/useActivityData";
@@ -40,7 +40,7 @@ const ActivityProvider: React.FC<Props> = ({ children }) => {
       setError(true); // Set error state on any error during fetching
     } finally {
       setLoading(false); // Set loading state to false after fetching (success or failure)
-      setTimeout(fetchData, 1000); // Schedule next fetch after 1 second
+      //setTimeout(fetchData, 1000); // Schedule next fetch after 1 second
     }
   };
 

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { ACTIVITY_API } from "../routes/api/activityRoutes";
-import { IActivityData } from "../types/activityTypes";
+import { IActivityData } from "../types/ActivityInterface";
 import useFetch from "./useFetch";
 
 const useActivityData = (id: string) => {
