@@ -1,5 +1,6 @@
 import NavbarUp from "../components/NavbarUp";
 import ActivityForm from "../components/ActivityForm/ActivityForm";
+import NavbarDown from "../components/NavbarDown";
 
 interface IPageContainerProps {
   role: string;
@@ -32,6 +33,7 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
         animatorStandSetted={false}
       />
       <ActivityForm/>
+      <NavbarDown />
     </>
   );
 };
