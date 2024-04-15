@@ -2,7 +2,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import {
   Alert,
-//   Autocomplete,
+  //   Autocomplete,
   Box,
   Button,
   Container,
@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 // import { ActivityContext } from "../../contexts/ActivityContext";
-import { IActivityData } from "../../types/activityTypes";
+import { IActivityData } from "../../types/ActivityInterface";
 import TeamsStandsParams from "./TeamsStandsParams";
 import { ACTIVITY_API } from "../../routes/api/activityRoutes";
 
@@ -21,7 +21,7 @@ const ActivityForm = () => {
   const [activityCreated, setActivityCreated] = useState<boolean>(false);
   const [userMessage, setUserMessage] = useState<string | null>(null);
 
-  const [activityId, setActivityId] = useState<number | null>(null)
+  const [activityId, setActivityId] = useState<number | null>(null);
 
   const textTitle = activityCreated
     ? "Paramètres d'activité"
@@ -76,7 +76,7 @@ const ActivityForm = () => {
 
     if (activityData) {
       // User ID comes from the Gamemaster
-      const userId = 3;
+      const userId = 7;
 
       // Reformater les dates
       const formattedActivityData = {
@@ -103,7 +103,7 @@ const ActivityForm = () => {
         if (!response.ok) {
           setActivityCreated(false);
           setError(true);
-          setUserMessage("Activité non créé: " + responseData.message);
+          setUserMessage("Activité non créée: " + responseData.message);
           throw new Error(
             `HTTP error! status: ${response.status}, ${responseData.message}`
           );
@@ -115,7 +115,7 @@ const ActivityForm = () => {
           setUserMessage("Activité créée avec succès");
 
           console.log("Activité créée avec succès: ", responseData);
-          setActivityId(responseData.id)
+          setActivityId(responseData.id);
         }
       } catch (error) {
         setActivityCreated(false);
@@ -278,8 +278,8 @@ const ActivityForm = () => {
             </Grid>
             {/* END Container for Time params */}
 
-            {/* {activityCreated && <TeamsStandsParams />} */}
-            {<TeamsStandsParams activityId={activityId}/>}
+            {/* {activityCreated && <TeamsStandsParams activityId={activityId} />} */}
+            {<TeamsStandsParams activityId={activityId} />}
 
             {/* Container for Params save */}
             <Grid
