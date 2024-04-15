@@ -191,7 +191,7 @@ const themedTeamsNames: Record<string, string[]> = {
     "Belgique",
     "Pays-Bas",
   ],
-  Pierre_Précieuses: [
+  Pierres_Précieuses: [
     "Diamant",
     "Rubis",
     "Saphir",
@@ -287,7 +287,7 @@ const themedTeamsNames: Record<string, string[]> = {
     "Beatle juice",
     "Interstellar",
   ],
-  Héros: [
+  Super_Héros: [
     "Batman",
     "Superman",
     "Spider-Man",
