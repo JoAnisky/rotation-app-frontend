@@ -103,9 +103,6 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
       // Get the stand to toggle
       const standToToggle = selectedStands[standToToggleIndex];
 
-      console.log("Toggling stand:", standToToggle);
-      console.log("Stand ID:", standToToggle.id);
-
       // Create a new copy of the stand with the updated isCompetitive property
       const updatedStand = {
         ...standToToggle,
@@ -272,11 +269,34 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
     setUserMessageTeams(null);
   };
 
+  const handleGetScenario = () => {
+    // here verify teams and stands params
+    // If params are ok, set to generateScenario method
+    generateScenario();
+  };
+
+  const generateScenario = async () => {
+    try {
+      const response = await fetch(
+        `${ACTIVITY_API.activities}/${27}/generate_scenario`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (!response.ok) throw new Error("Failed to generate scenario");
+
+      // Additional UI update logic can go here
+    } catch (error) {
+      console.error("Error submitting data:", error);
+    }
+  };
+
   return (
     <>
       {/* Container for Stands params */}
       <Grid container>
-        <Typography variant="h6" component="h2" gutterBottom  sx={{ mb: 2 }}>
+        <Typography variant="h6" component="h2" gutterBottom sx={{ mb: 2 }}>
           Gestion des stands
         </Typography>
         <Grid
@@ -401,7 +421,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
           </Typography>
           {/* Display Team list if teamList is not empty*/}
           {teamList.length > 0 && (
-            <Box display="flex" flexWrap="wrap" gap={2}  sx={{ mb: 2 }}>
+            <Box display="flex" flexWrap="wrap" gap={2} sx={{ mb: 2 }}>
               {teamList.map((team, index) => (
                 <Box
                   key={index}
@@ -429,7 +449,12 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
           justifyContent="center"
           width="100%"
         >
-          <Button variant="outlined" color="secondary" sx={{ minWidth: 300 }}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            sx={{ minWidth: 300 }}
+            onClick={handleGetScenario}
+          >
             Attribuer les équipes au stands
           </Button>
         </Grid>
