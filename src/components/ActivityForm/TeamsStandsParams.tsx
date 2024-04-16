@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Autocomplete,
@@ -8,6 +8,7 @@ import {
   IconButton,
   TextField,
   Typography,
+  Switch,
 } from "@mui/material";
 import { STANDS_API } from "../../routes/api/standRoutes";
 import useFetch from "../../hooks/useFetch";
@@ -24,15 +25,21 @@ interface IStand {
     id: number;
   };
 }
+interface ToggleStates {
+  [key: number]: boolean;
+}
 
 interface ISelectedValue {
   id: number;
   name: string;
+  isCompetitive?: boolean;
 }
 
 interface ITeamsStandsParamsProps {
   activityId: number | null;
 }
+type FieldType = "stands" | "teams"; // This is now a type alias for use directly as a type
+
 const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
   activityId,
 }) => {
@@ -41,18 +48,34 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
   // Theme for teams name
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   // teams list
-  const [teamList, setTeamList] = useState<string[]>([]);
+  const [teamList, setTeamList] = useState<ISelectedValue[]>([]);
 
+  // Prevent PUT request with empty teams and stands array on component mount
+  const hasStandsBeenSent = useRef(false); // Tracks if stands data has been sent at least once after mount
+  const hasTeamsBeenSent = useRef(false); // Tracks if teams data has been sent at least once after mount
+
+  // User message
   const [userMessageTeams, setUserMessageTeams] = useState<string | null>(null);
 
   const [stands, setStands] = useState<IStand[]>([]);
   const [selectedStands, setSelectedStands] = useState<ISelectedValue[]>([]);
+  const [toggleStates, setToggleStates] = useState<ToggleStates>({});
+
+  // Stands for user selection fetched from : All Stand entries
   const [fetchedStandsData, standsLoading] = useFetch<IStand[]>(
     STANDS_API.stands
   );
 
+  // Get all themedTeamsNames indexes
   const categories = Object.keys(themedTeamsNames);
+  // Replace all "_" in categories names with empty space and sort category by name
+  const formattedCategories = categories
+    .map(
+      (category) => category.replace(/_/g, " ") // This replaces all underscores in the string
+    )
+    .sort();
 
+  // Sets Stands for user selection
   useEffect(() => {
     if (Array.isArray(fetchedStandsData)) {
       setStands(fetchedStandsData);
@@ -66,59 +89,145 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
     setTeamList(newTeamList);
   };
 
-  const handleChange = (
+  // Handler to update toggle state
+  const handleToggleCompetitive = (id: number, checked: boolean): void => {
+    setToggleStates((prev) => ({
+      ...prev,
+      [id]: checked,
+    }));
+    const standToToggleIndex = selectedStands.findIndex(
+      (stand) => stand.id === id
+    );
+    // Perform a safety check to ensure the stand was found
+    if (standToToggleIndex !== -1) {
+      // Get the stand to toggle
+      const standToToggle = selectedStands[standToToggleIndex];
+
+      console.log("Toggling stand:", standToToggle);
+      console.log("Stand ID:", standToToggle.id);
+
+      // Create a new copy of the stand with the updated isCompetitive property
+      const updatedStand = {
+        ...standToToggle,
+        isCompetitive: checked,
+      };
+
+      // Create a new array for the stands that includes this updated stand
+      const updatedStands = [
+        ...selectedStands.slice(0, standToToggleIndex),
+        updatedStand,
+        ...selectedStands.slice(standToToggleIndex + 1),
+      ];
+
+      // Set the updated stands array back to the state
+      setSelectedStands(updatedStands);
+    } else {
+      console.error("Stand not found with ID:", id);
+    }
+  };
+
+  // Make sure to update the toggle state when a stand is removed
+  const handleRemoveStand = (idToRemove: number, indexToRemove: number) => {
+    const removedStandIndex = selectedStands.findIndex(
+      (stand) => stand.id === idToRemove
+    );
+    if (removedStandIndex !== -1) {
+      const removedStand = selectedStands[removedStandIndex];
+
+      const newStandList = selectedStands.filter(
+        (_, index) => index !== removedStandIndex
+      );
+
+      setSelectedStands(newStandList);
+
+      const newToggleStates = { ...toggleStates };
+      delete newToggleStates[removedStand.id];
+      setToggleStates(newToggleStates);
+    } else {
+      console.error("Invalid index to remove:", indexToRemove);
+    }
+  };
+
+  const handleStandSelection = (
     event: React.SyntheticEvent<Element, Event>,
-    value: IStand[] | null
+    value: ISelectedValue[] | ISelectedValue | null
   ) => {
-    const newStands = value
-      ? value.map((stand) => ({ id: stand.id, name: stand.name }))
-      : [];
+    let newStands: ISelectedValue[] = [];
+
+    if (Array.isArray(value)) {
+      newStands = value.map((stand) => ({
+        id: stand.id,
+        name: stand.name,
+        isCompetitive: stand.isCompetitive ?? false,
+      }));
+    } else if (value) {
+      // Check if value is not null or undefined
+      newStands = [
+        {
+          id: value.id,
+          name: value.name,
+          isCompetitive: value.isCompetitive ?? false,
+        },
+      ]; // Wrap single object into an array
+    } else {
+      newStands = [];
+    }
+
     setSelectedStands(newStands);
   };
 
-  useEffect(() => {
-    console.log(teamList)
-
-  }, [teamList])
-  
-  // Use useEffect to react to changes in selectedStands
-  useEffect(() => {
-    if (selectedStands.length > 0) {
-      prepareDataForDB(selectedStands);
-    }
-  }, [selectedStands]);
-
-  // Assuming ISelectedValue is correctly defined to match the structure you need
-  const prepareDataForDB = (stands: ISelectedValue[]) => {
-    // This conversion might be redundant if it's already in the correct format
-    const dataToSave = stands.map((stand) => ({
-      id: stand.id,
-      name: stand.name,
+  // General method to prepare and send data to the DB
+  const prepareAndSendData = (dataList: ISelectedValue[], type: FieldType) => {
+    const dataToSave = dataList.map((data) => ({
+      id: data.id,
+      name: data.name,
+      isCompetitive: data.isCompetitive,
     }));
-
     const jsonData = JSON.stringify(dataToSave);
-    // console.log(jsonData);
-    handleSubmit(jsonData);
+
+    const hasBeenSentRef =
+      type === "stands" ? hasStandsBeenSent : hasTeamsBeenSent;
+
+    // Condition to send data: Non-empty data or previously sent data now empty
+    if (jsonData !== "[]" || (jsonData === "[]" && hasBeenSentRef.current)) {
+      sendDataToDB(jsonData, type);
+      hasBeenSentRef.current = true; // Mark that data has been sent
+    }
   };
 
-  const handleSubmit = async (jsonData: string) => {
+  // React to changes in selectedStands
+  useEffect(() => {
+    prepareAndSendData(selectedStands, "stands");
+  }, [selectedStands]);
+
+  // React to changes in teamList
+  useEffect(() => {
+    prepareAndSendData(teamList, "teams");
+  }, [teamList]);
+
+  const sendDataToDB = async (jsonData: string, dataField: FieldType) => {
     try {
+      // Construct payload dynamically based on the dataField
       const payload = {
-        stands: JSON.parse(jsonData), // parse it back into an array to fit the expected structure
+        [dataField]: JSON.parse(jsonData),
       };
-      const response = await fetch(`${ACTIVITY_API.activities}/${activityId}`, {
+      const response = await fetch(`${ACTIVITY_API.activities}/${27}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error("Failed to submit data");
-      console.log("Data submitted successfully");
+      console.log("Data submitted successfully for", dataField);
       // Additional UI update logic can go here
     } catch (error) {
       console.error("Error submitting data:", error);
     }
   };
 
+  /**
+   * Generate random teams name using ThemeList "utils/themedTeamsNames.ts"
+   * @returns void
+   */
   const generateTeamNames = () => {
     if (!selectedTheme) {
       setUserMessageTeams("Merci de choisir un thème");
@@ -130,11 +239,31 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
       return;
     }
     setUserMessageTeams(null);
+
+    // Retrieve the list of potential team names based on the selected theme
     const names = themedTeamsNames[selectedTheme || ""];
+
+    // Shuffle the names to randomize team assignments
     const shuffledNames = names.sort(() => 0.5 - Math.random());
-    numberOfTeams && setTeamList(shuffledNames.slice(0, numberOfTeams));
+
+    // Slice the array to get only the number of teams needed
+    const selectedNames = shuffledNames.slice(0, numberOfTeams);
+
+    // Create an array of objects with id and name for each team
+    const teamObjects = selectedNames.map((name, index) => ({
+      id: index, // Assigning a temporary ID based on the index
+      name: name,
+    }));
+
+    // Update the team list state with the new team objects
+    setTeamList(teamObjects);
   };
 
+  /**
+   * Gets selected theme for teams name
+   * @param event
+   * @param value
+   */
   const handleThemeChange = (
     event: React.SyntheticEvent<Element, Event>,
     value: string | null
@@ -147,7 +276,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
     <>
       {/* Container for Stands params */}
       <Grid container>
-        <Typography variant="h6" component="h2" gutterBottom>
+        <Typography variant="h6" component="h2" gutterBottom  sx={{ mb: 2 }}>
           Gestion des stands
         </Typography>
         <Grid
@@ -155,23 +284,62 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
           flexDirection="column"
           justifyContent="center"
           width="100%"
+          sx={{ mb: 2 }}
         >
           <Autocomplete
+            multiple
             disablePortal
+            value={selectedStands}
             id="stand-autocomplete"
             options={stands}
             fullWidth
-            multiple
+            sx={{ mb: 2 }}
             getOptionLabel={(option) => option.name}
-            onChange={handleChange}
+            onChange={handleStandSelection}
             loading={standsLoading}
             loadingText="Chargement..."
             noOptionsText="Aucune option"
-
             renderInput={(params) => (
               <TextField {...params} label="Choisir ou créer des stands " />
             )}
           />
+          {/* Display selected stands if not empty*/}
+          {selectedStands.length > 0 && ""}
+          <Box display="flex" flexWrap="wrap" gap={2}>
+            {selectedStands.map((stand, index) => (
+              <Box
+                key={stand.id}
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                bgcolor="primary.main"
+                color="primary.contrastText"
+                p={1}
+                borderRadius={1}
+                width={1}
+              >
+                Stand {stand.name}
+                <div style={{ marginLeft: "auto" }}>
+                  Competitif
+                  <Switch
+                    checked={toggleStates[stand.id] || false}
+                    onChange={(e) =>
+                      handleToggleCompetitive(stand.id, e.target.checked)
+                    }
+                    name="isCompetitive"
+                    color="default"
+                  />
+                  <IconButton
+                    onClick={() => handleRemoveStand(stand.id, index)}
+                    size="small"
+                    sx={{ color: "grey.200" }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </div>
+              </Box>
+            ))}
+          </Box>
         </Grid>
       </Grid>
       {/* END Container for Stands params */}
@@ -182,7 +350,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
           Gestion des équipes
         </Typography>
         <Grid display="flex" justifyContent="space-between" width="100%">
-          <Typography sx={{ mb: 2 }}>Nombre d'équipes</Typography>
+          <Typography sx={{ mb: 4 }}>Nombre d'équipes</Typography>
           <TextField
             type="number"
             inputProps={{
@@ -205,7 +373,8 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
           <Autocomplete
             disablePortal
             id="theme-autocomplete"
-            options={categories}
+            options={formattedCategories}
+            sx={{ mb: 2 }}
             getOptionLabel={(option) => option}
             onChange={handleThemeChange}
             renderInput={(params) => (
@@ -230,26 +399,29 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
           <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
             Liste des équipes
           </Typography>
-          <Box display="flex" flexWrap="wrap" gap={2}>
-            {teamList.map((team, index) => (
-              <Box
-                key={index}
-                bgcolor="primary.main"
-                color="primary.contrastText"
-                p={1}
-                borderRadius={1}
-              >
-                Équipe {team}
-                <IconButton
-                  onClick={() => handleRemoveTeam(index)}
-                  size="small"
-                  sx={{ color: "grey.200" }}
+          {/* Display Team list if teamList is not empty*/}
+          {teamList.length > 0 && (
+            <Box display="flex" flexWrap="wrap" gap={2}  sx={{ mb: 2 }}>
+              {teamList.map((team, index) => (
+                <Box
+                  key={index}
+                  bgcolor="primary.main"
+                  color="primary.contrastText"
+                  p={1}
+                  borderRadius={1}
                 >
-                  <CloseIcon />
-                </IconButton>
-              </Box>
-            ))}
-          </Box>
+                  Équipe {team.name}
+                  <IconButton
+                    onClick={() => handleRemoveTeam(index)}
+                    size="small"
+                    sx={{ color: "grey.200" }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+              ))}
+            </Box>
+          )}
         </Grid>
         <Grid
           display="flex"
