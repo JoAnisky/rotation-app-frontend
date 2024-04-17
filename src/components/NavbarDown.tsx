@@ -22,7 +22,7 @@ const NavbarDown: React.FC<NavbarDownProps> = ({
   };
 
   return (
-    <BottomNavigation sx={{ width: 500 }} value={value} onChange={handleChange}>
+    <BottomNavigation value={value} onChange={handleChange}>
       {isAdmin ? (
         <BottomNavigationAction
           label="Paramètres"
