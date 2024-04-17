@@ -52,10 +52,11 @@ const Scenario = () => {
               <Typography variant="h6">Tour n°{idx + 1}</Typography>
               {Object.entries(scenario).map(([key, entries]) => (
                 <div key={key}>
-                  <Typography>{key}:</Typography>
+                  <Typography>Stand {key}:
                   {entries.map((entry: ScenarioEntry) => (
-                    <Typography key={entry.id}>{entry.name}</Typography>
+                    <span key={entry.id}>{entry.name}</span>
                   ))}
+                  </Typography>
                 </div>
               ))}
             </Box>
