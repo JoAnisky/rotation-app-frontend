@@ -1,10 +1,21 @@
-import * as React from 'react';
-import BottomNavigation from '@mui/material/BottomNavigation';
-import BottomNavigationAction from '@mui/material/BottomNavigationAction';
-import StorefrontIcon from '@mui/icons-material/Storefront';
-import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
- const NavbarDown = () => {
-  const [value, setValue] = React.useState('recents');
+import * as React from "react";
+import BottomNavigation from "@mui/material/BottomNavigation";
+import BottomNavigationAction from "@mui/material/BottomNavigationAction";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import SettingsSuggestIcon from "@mui/icons-material/SettingsSuggest";
+
+interface NavbarDownProps {
+  setActiveComponent: (componentKey: string) => void;
+  isAdmin: boolean;
+}
+
+const NavbarDown: React.FC<NavbarDownProps> = ({
+  setActiveComponent,
+  isAdmin,
+}) => {
+  const [value, setValue] = React.useState("recents");
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -12,14 +23,38 @@ import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
 
   return (
     <BottomNavigation sx={{ width: 500 }} value={value} onChange={handleChange}>
+      {isAdmin ? (
+        <BottomNavigationAction
+          label="Paramètres"
+          value="paramètres"
+          onClick={() => setActiveComponent("ActivityForm")}
+          icon={<SettingsSuggestIcon />}
+        />
+      ) : (
+        <BottomNavigationAction
+          label="Stand"
+          value="stand"
+          onClick={() => setActiveComponent("Stand")}
+          icon={<StorefrontIcon />}
+        />
+      )}
+      {isAdmin && (
+        <BottomNavigationAction
+          label="Scenario"
+          value="scenario"
+          onClick={() => setActiveComponent("Scenario")}
+          icon={<ReceiptLongIcon />}
+        />
+      )}
+
       <BottomNavigationAction
-        label="Stand"
-        value="stand"
-        icon={<StorefrontIcon />}
+        label="Vue générale"
+        value="vue générale"
+        onClick={() => setActiveComponent("GeneralView")}
+        icon={<MapOutlinedIcon />}
       />
-      <BottomNavigationAction label="Vue générale" value="vue générale" icon={<MapOutlinedIcon />} />
     </BottomNavigation>
   );
-}
+};
 
 export default NavbarDown;
