@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   Autocomplete,
   Box,
   Button,
@@ -16,6 +15,12 @@ import { ACTIVITY_API } from "../../routes/api/activityRoutes";
 import themedTeamsNames from "../../utils/themedTeamsNames";
 import CloseIcon from "@mui/icons-material/Close";
 import { SCENARIO_API } from "../../routes/api/scenarioRoutes";
+import CustomSnackbar from "../CustomSnackbar";
+
+interface SnackMessage {
+  message: string;
+  severity?: "error" | "warning" | "info" | "success";
+}
 
 interface IStand {
   id: number;
@@ -44,6 +49,16 @@ type FieldType = "stands" | "teams"; // This is now a type alias for use directl
 const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
   activityId,
 }) => {
+
+  // State for open custom snackbar message
+  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
+
+  // State for manage SnackBar message and color (severity)
+  const [snackMessageSeverity, setSnackMessageSeverity] = useState<SnackMessage>({
+    message: "",
+    severity: "success"  // Default severity is 'success'
+  });
+
   // Number of teams selected
   const [numberOfTeams, setNumberOfTeams] = useState<number | null>(null);
   // Theme for teams name
@@ -55,8 +70,6 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
   const hasStandsBeenSent = useRef(false); // Tracks if stands data has been sent at least once after mount
   const hasTeamsBeenSent = useRef(false); // Tracks if teams data has been sent at least once after mount
 
-  // User message
-  const [userMessageTeams, setUserMessageTeams] = useState<string | null>(null);
 
   const [stands, setStands] = useState<IStand[]>([]);
   const [selectedStands, setSelectedStands] = useState<ISelectedValue[]>([]);
@@ -228,15 +241,17 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
    */
   const generateTeamNames = () => {
     if (!selectedTheme) {
-      setUserMessageTeams("Merci de choisir un thème");
+      // setUserMessageTeams("Merci de choisir un thème");
+      setSnackbarOpen(true);
+      setSnackMessageSeverity({message: 'Merci de choisir un thème', severity: 'warning'})
       return;
     }
 
     if (!numberOfTeams) {
-      setUserMessageTeams("Merci de choisir un nombre d'équipes");
+      setSnackbarOpen(true);
+      setSnackMessageSeverity({message: "Merci de choisir un nombre d'équipes", severity: 'warning'})
       return;
     }
-    setUserMessageTeams(null);
 
     // Retrieve the list of potential team names based on the selected theme
     const names = themedTeamsNames[selectedTheme || ""];
@@ -267,7 +282,6 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
     value: string | null
   ) => {
     setSelectedTheme(value);
-    setUserMessageTeams(null);
   };
 
   const handleGetScenario = () => {
@@ -278,18 +292,26 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
 
   const generateScenario = async () => {
     try {
-      const response = await fetch(`${SCENARIO_API.scenarioByActivityId("27")}/generate`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await fetch(
+        `${SCENARIO_API.scenarioByActivityId("27")}/generate`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       if (!response.ok) throw new Error("Failed to generate scenario");
-
+      setSnackbarOpen(true);
+      setSnackMessageSeverity({message: 'Scénario généré !'})
       // Additional UI update logic can go here
     } catch (error) {
       console.error("Error submitting data:", error);
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
+  };
+  
   return (
     <>
       {/* Container for Stands params */}
@@ -399,11 +421,6 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
               <TextField {...params} label="Choisir un thème" />
             )}
           />
-          {userMessageTeams && (
-            <Alert severity="warning" sx={{ mt: 2 }}>
-              {userMessageTeams}
-            </Alert>
-          )}
           <Button
             variant="outlined"
             color="secondary"
@@ -456,6 +473,12 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
             Générer les rotations
           </Button>
         </Grid>
+        <CustomSnackbar
+          open={snackbarOpen}
+          handleClose={handleCloseSnackbar}
+          message={snackMessageSeverity.message}
+          severity={snackMessageSeverity.severity} // Optional: error, warning, info, success
+        />
       </Grid>
       {/* END Container for Teams params */}
     </>
