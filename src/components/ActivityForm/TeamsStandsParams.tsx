@@ -243,13 +243,13 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
     if (!selectedTheme) {
       // setUserMessageTeams("Merci de choisir un thème");
       setSnackbarOpen(true);
-      setSnackMessageSeverity({message: 'Merci de choisir un thème', severity: 'warning'})
+      setSnackMessageSeverity({message: 'Il faudrait choisir un thème', severity: 'warning'})
       return;
     }
 
     if (!numberOfTeams) {
       setSnackbarOpen(true);
-      setSnackMessageSeverity({message: "Merci de choisir un nombre d'équipes", severity: 'warning'})
+      setSnackMessageSeverity({message: "Il faudrait choisir un nombre d'équipes", severity: 'warning'})
       return;
     }
 
@@ -311,7 +311,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
   };
-  
+
   return (
     <>
       {/* Container for Stands params */}
