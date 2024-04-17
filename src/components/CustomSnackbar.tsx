@@ -27,14 +27,23 @@ const CustomSnackbar: React.FC<CustomSnackbarProps> = ({
   severity = "info",
 }) => {
   return (
-    <Box sx={{ width: 500 }}>
+    <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
+      {" "}
+      {/* This Box centers its contents horizontally */}
       <Snackbar
         open={open}
         autoHideDuration={6000}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }} // Corrected anchorOrigin syntax
         onClose={handleClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }} // This positions the Snackbar at the bottom-center of its container
+        sx={{ width: "auto", maxWidth: "100%" }} // Ensures Snackbar doesn't exceed the width of its contents or screen
       >
-        <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
+        <Alert
+          onClose={handleClose}
+          severity={severity}
+          sx={{ width: "auto", minWidth: "fit-content" }}
+        >
+          {" "}
+          {/* Alert takes width as per content */}
           {message}
           <IconButton
             size="small"
