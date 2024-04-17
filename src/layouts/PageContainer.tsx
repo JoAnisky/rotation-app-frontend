@@ -3,6 +3,9 @@ import React from "react";
 import { Box, CssBaseline } from "@mui/material";
 import NavbarUp from "../components/NavbarUp";
 import NavbarDown from "../components/NavbarDown";
+import useActiveComponent from "../hooks/useActiveComponent";
+import Stand from "../pages/Stand";
+import GeneralView from "../pages/GeneralView";
 
 type PageContainerProps = {
   children: React.ReactNode; // To accept any valid React component or HTML element
@@ -12,6 +15,13 @@ type PageContainerProps = {
 };
 
 const PageContainer: React.FC<PageContainerProps> = ({ children, role, handleChangeSelection, animatorStandSetted }) => {
+  const { setActiveComponent, renderActiveComponent } = useActiveComponent({
+    defaultComponent: "ActivityForm",
+    components: {
+      Stand: <Stand />,
+      GeneralVieuw: <GeneralView />,
+    },
+  });
   return (
     <React.Fragment>
       <CssBaseline />
@@ -25,7 +35,7 @@ const PageContainer: React.FC<PageContainerProps> = ({ children, role, handleCha
           alignItems="center"
           width="100%"
         >
-          <NavbarDown />
+          <NavbarDown setActiveComponent={setActiveComponent} isAdmin={false} />
         </Box>
       </Box>
     </React.Fragment>

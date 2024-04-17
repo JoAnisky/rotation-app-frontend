@@ -1,6 +1,9 @@
 import NavbarUp from "../components/NavbarUp";
 import ActivityForm from "../components/ActivityForm/ActivityForm";
 import NavbarDown from "../components/NavbarDown";
+import Scenario from "./Scenario";
+import GeneralView from "./GeneralView";
+import useActiveComponent from "../hooks/useActiveComponent";
 
 interface IPageContainerProps {
   role: string;
@@ -11,7 +14,14 @@ interface IPageContainerProps {
 const Gamemaster: React.FC<IPageContainerProps> = ({
   handleChangeSelection,
 }) => {
-
+  const { setActiveComponent, renderActiveComponent } = useActiveComponent({
+    defaultComponent: "ActivityForm",
+    components: {
+      ActivityForm: <ActivityForm />,
+      Scenario: <Scenario />,
+      GeneralView: <GeneralView />,
+    },
+  });
 
   // Get ActivityData
   // const activityDataProvider = useContext(ActivityContext);
@@ -32,8 +42,8 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
         handleChangeSelection={() => handleChangeSelection?.()}
         animatorStandSetted={false}
       />
-      <ActivityForm/>
-      <NavbarDown />
+      {renderActiveComponent()}
+      <NavbarDown setActiveComponent={setActiveComponent} isAdmin={true} />
     </>
   );
 };
