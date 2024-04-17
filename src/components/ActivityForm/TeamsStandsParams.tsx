@@ -15,6 +15,7 @@ import useFetch from "../../hooks/useFetch";
 import { ACTIVITY_API } from "../../routes/api/activityRoutes";
 import themedTeamsNames from "../../utils/themedTeamsNames";
 import CloseIcon from "@mui/icons-material/Close";
+import { SCENARIO_API } from "../../routes/api/scenarioRoutes";
 
 interface IStand {
   id: number;
@@ -277,13 +278,10 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
 
   const generateScenario = async () => {
     try {
-      const response = await fetch(
-        `${ACTIVITY_API.activities}/${27}/generate_scenario`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const response = await fetch(`${SCENARIO_API.scenarioByActivityId("27")}/generate`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
       if (!response.ok) throw new Error("Failed to generate scenario");
 
       // Additional UI update logic can go here
@@ -455,7 +453,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
             sx={{ minWidth: 300 }}
             onClick={handleGetScenario}
           >
-            Attribuer les équipes au stands
+            Générer les rotations
           </Button>
         </Grid>
       </Grid>
