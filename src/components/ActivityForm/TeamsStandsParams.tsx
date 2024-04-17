@@ -49,18 +49,18 @@ type FieldType = "stands" | "teams"; // This is now a type alias for use directl
 const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
   activityId,
 }) => {
-
   // State for open custom snackbar message
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
 
   // State for manage SnackBar message and color (severity)
-  const [snackMessageSeverity, setSnackMessageSeverity] = useState<SnackMessage>({
-    message: "",
-    severity: "success"  // Default severity is 'success'
-  });
+  const [snackMessageSeverity, setSnackMessageSeverity] =
+    useState<SnackMessage>({
+      message: "",
+      severity: "success", // Default severity is 'success'
+    });
 
   // Number of teams selected
-  const [numberOfTeams, setNumberOfTeams] = useState<number | null>(null);
+  const [numberOfTeams, setNumberOfTeams] = useState<number>(0);
   // Theme for teams name
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   // teams list
@@ -69,7 +69,6 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
   // Prevent PUT request with empty teams and stands array on component mount
   const hasStandsBeenSent = useRef(false); // Tracks if stands data has been sent at least once after mount
   const hasTeamsBeenSent = useRef(false); // Tracks if teams data has been sent at least once after mount
-
 
   const [stands, setStands] = useState<IStand[]>([]);
   const [selectedStands, setSelectedStands] = useState<ISelectedValue[]>([]);
@@ -101,6 +100,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
   const handleRemoveTeam = (indexToRemove: number) => {
     const newTeamList = teamList.filter((_, index) => index !== indexToRemove);
     setTeamList(newTeamList);
+    setNumberOfTeams((prev) => prev - 1);
   };
 
   // Handler to update toggle state
@@ -216,6 +216,11 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
     prepareAndSendData(teamList, "teams");
   }, [teamList]);
 
+  useEffect(() => {
+    generateTeamNames(numberOfTeams, selectedTheme);
+  }, [selectedTheme]);
+
+  // This effect re-runs when `selectedTheme` changes.
   const sendDataToDB = async (jsonData: string, dataField: FieldType) => {
     try {
       // Construct payload dynamically based on the dataField
@@ -239,36 +244,49 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
    * Generate random teams name using ThemeList "utils/themedTeamsNames.ts"
    * @returns void
    */
-  const generateTeamNames = () => {
-    if (!selectedTheme) {
-      // setUserMessageTeams("Merci de choisir un thème");
-      setSnackbarOpen(true);
-      setSnackMessageSeverity({message: 'Il faudrait choisir un thème', severity: 'warning'})
+  const generateTeamNames = (numberOfTeams: number, theme: string) => {
+    console.log(theme);
+
+    // Immediate return if the theme or number of teams is not initialized properly
+    if (!theme || numberOfTeams === null) {
+      console.log("Initialization check - Skipping execution");
       return;
     }
 
-    if (!numberOfTeams) {
+    if (numberOfTeams > 0 && !theme) {
       setSnackbarOpen(true);
-      setSnackMessageSeverity({message: "Il faudrait choisir un nombre d'équipes", severity: 'warning'})
+      setSnackMessageSeverity({
+        message: "Il faudrait choisir un thème",
+        severity: "warning",
+      });
+      return;
+    }
+
+    if (!numberOfTeams && theme) {
+      // Check to avoid triggering this message on mount:
+      if (theme !== "") {
+        setTeamList([]);
+        setSnackbarOpen(true);
+        setSnackMessageSeverity({
+          message: "Il faudrait choisir un nombre d'équipes",
+          severity: "warning",
+        });
+      }
       return;
     }
 
     // Retrieve the list of potential team names based on the selected theme
-    const names = themedTeamsNames[selectedTheme || ""];
+    const names = themedTeamsNames[theme] || []; // Safe fallback to prevent errors if theme is undefined
 
-    // Shuffle the names to randomize team assignments
+    // Shuffle and slice the array as before
     const shuffledNames = names.sort(() => 0.5 - Math.random());
-
-    // Slice the array to get only the number of teams needed
     const selectedNames = shuffledNames.slice(0, numberOfTeams);
 
-    // Create an array of objects with id and name for each team
     const teamObjects = selectedNames.map((name, index) => ({
-      id: index, // Assigning a temporary ID based on the index
-      name: name,
+      id: index,
+      name,
     }));
 
-    // Update the team list state with the new team objects
     setTeamList(teamObjects);
   };
 
@@ -284,9 +302,32 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
     setSelectedTheme(value);
   };
 
+  /**
+   * Perform basic checks before sending request to generate Scenario
+   * @returns 
+   */
   const handleGetScenario = () => {
-    // here verify teams and stands params
-    // If params are ok, set to generateScenario method
+    // Check if no teams have been selected (numberOfTeams should be greater than 0)
+    // Check if no stands have been selected (selectedStands.length should be greater than 0)
+    if (numberOfTeams <= 0 || selectedStands.length === 0) {
+      let errorMessage = "Il faudrait choisir ";
+      if (numberOfTeams <= 0 && selectedStands.length === 0) {
+        errorMessage += "les stands et les équipes.";
+      } else if (numberOfTeams <= 0) {
+        errorMessage += "un nombre d'équipes.";
+      } else if (selectedStands.length === 0) {
+        errorMessage += "au moins un stand.";
+      }
+  
+      setSnackbarOpen(true);
+      setSnackMessageSeverity({
+        message: errorMessage,
+        severity: "error",
+      });
+      return; // Stop execution if the condition is not met
+    }
+  
+    // If the conditions are met, proceed to generate the scenario
     generateScenario();
   };
 
@@ -301,7 +342,10 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
       );
       if (!response.ok) throw new Error("Failed to generate scenario");
       setSnackbarOpen(true);
-      setSnackMessageSeverity({message: 'Scénario généré !'})
+      setSnackMessageSeverity({
+        message: "Scénario généré !",
+        severity: "success",
+      });
       // Additional UI update logic can go here
     } catch (error) {
       console.error("Error submitting data:", error);
@@ -393,14 +437,20 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
           <Typography sx={{ mb: 4 }}>Nombre d'équipes</Typography>
           <TextField
             type="number"
+            value={numberOfTeams}
             inputProps={{
               className: "input-number",
               min: "0", // Minimum value
+              max: "30",
               step: "1",
             }}
-            onChange={(event) =>
-              setNumberOfTeams(parseInt(event.target.value, 10))
-            }
+            onChange={(event) => {
+              const numTeams = parseInt(event.target.value, 10);
+              if (!isNaN(numTeams)) {
+                setNumberOfTeams(numTeams);
+                selectedTheme && generateTeamNames(numTeams, selectedTheme); // Now we pass `numTeams` directly
+              }
+            }}
           />
         </Grid>
 
@@ -421,14 +471,14 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
               <TextField {...params} label="Choisir un thème" />
             )}
           />
-          <Button
+          {/* <Button
             variant="outlined"
             color="secondary"
             sx={{ minWidth: 300 }}
             onClick={generateTeamNames}
           >
             Générer la liste des équipes
-          </Button>
+          </Button> */}
         </Grid>
         <Grid item xs={12}>
           <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
