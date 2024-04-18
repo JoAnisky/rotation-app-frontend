@@ -1,71 +1,125 @@
 import { useEffect, useState } from "react";
-import { Box, CssBaseline, Typography, Card, CardContent, CardHeader, List, ListItem } from "@mui/material";
+import {
+  Box,
+  CssBaseline,
+  Typography,
+  Card,
+  CardContent,
+  CardHeader,
+  List,
+  ListItem,
+} from "@mui/material";
 import useFetch from "../hooks/useFetch";
 import { SCENARIO_API } from "../routes/api/scenarioRoutes";
 
-// Define the type for the individual scenario entries under each key like "Codage intensif"
-interface ScenarioEntry {
+type Competitor = {
   id: number;
   name: string;
-}
+};
 
-// This maps the dynamic key to the list of scenario entries
-interface DynamicScenario {
-  [key: string]: ScenarioEntry[];
-}
+// Using an index signature to allow any string as a key and Competitor[] as its value
+type ScenarioData = {
+  [key: string]: Competitor[];
+};
 
-// The top-level structure for each item in the base scenario array
-interface BaseScenarioItem {
-  [key: string]: DynamicScenario;
-}
+type BaseScenario = {
+  data: ScenarioData[];
+  success: boolean;
+};
+
+type Activity = {
+  id: number;
+};
+
+type ApiResponse = {
+  id: number;
+  base_scenario: BaseScenario;
+  current_scenario: null; // Adjust this as needed if it can be other types
+  activity: Activity;
+}[];
 
 const Scenario = () => {
-  const [scenarios, setScenarios] = useState<BaseScenarioItem[]>([]);
-  const [data, loading, error] = useFetch<
-    Array<{ base_scenario: BaseScenarioItem[] }>
-  >(SCENARIO_API.scenarioByActivityId("27"));
+  const [scenario, setScenario] = useState<ScenarioData[]>([]);
+  const [data, loading, error] = useFetch<ApiResponse>(
+    SCENARIO_API.scenarioByActivityId("2")
+  );
 
   useEffect(() => {
     if (data && data.length > 0) {
-      setScenarios(data[0].base_scenario);
+      setScenario(data[0].base_scenario.data);
     }
   }, [data]);
 
   useEffect(() => {
-    console.log(scenarios);
-  }, [scenarios]); // To log the updated state
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+    // console.log(scenario);
+  }, [scenario]); // To log the updated state
 
   return (
-    <>
+    <Box sx={{ flexGrow: 1, overflowY: 'auto', padding: 3 }}>
       <CssBaseline />
-      <Box height="100%" display="flex" flexDirection="column">
-        <Typography component="h1" variant="h5" align="center" sx={{ mb: 2 }}>
-          Affichage du scenario :
-        </Typography>
-        <Box display="flex" flexDirection="column" alignItems="center" sx={{ width: '100%' }}>
-          {scenarios.map((scenario, idx) => (
-            <Card key={idx} sx={{ mb: 1, width: '90%', maxWidth: 700, padding :0 }}>
-              <CardHeader title={`Tour n°${idx + 1}`} />
-              <CardContent>
-                {Object.entries(scenario).map(([key, entries]) => (
-                  <Box key={key} sx={{ mb: 1 }}>
-                    <Typography variant="subtitle1">Stand {key}</Typography>
-                    <List>
-                      {entries.map((entry: ScenarioEntry) => (
-                        <ListItem key={entry.id} sx={{ py: 0.5 }}>{entry.name}</ListItem>
-                      ))}
-                    </List>
-                  </Box>
-                ))}
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
+      {/* Content Area */}
+      <Box
+        flexGrow={1}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 2,  // Adding some padding inside the box
+          overflow: 'auto'  // Allows scrolling inside this box if content overflows
+        }}
+      >
+        {loading && (
+          <Typography component="h1" variant="h5" align="center" sx={{ mb: 2 }}>
+            Loading...
+          </Typography>
+        )}
+        {error && (
+          <Box>
+            <Typography
+              component="h1"
+              variant="h5"
+              align="center"
+              sx={{ mb: 2 }}
+            >
+              Oups :(
+            </Typography>
+            {error.message}
+          </Box>
+        )}
+        {!loading && !error && (
+          <>
+            <Typography>Affichage du scenario :</Typography>
+            {scenario.length > 0 ? (
+              scenario.map((scenario, index) => (
+                <Card
+                  key={index}
+                  sx={{ mb: 1, width: "90%", maxWidth: 700, padding: 0 }}
+                >
+                  <CardHeader title={`Tour n°${index + 1}`} />
+                  <CardContent>
+                    {Object.entries(scenario).map(([key, entries]) => (
+                      <Box key={key} sx={{ mb: 1 }}>
+                        <Typography variant="subtitle1">Stand {key}</Typography>
+                        <List>
+                          {entries.map((entry: Competitor) => (
+                            <ListItem key={entry.id} sx={{ py: 0.5 }}>
+                              {entry.name}
+                            </ListItem>
+                          ))}
+                        </List>
+                      </Box>
+                    ))}
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Typography>Pas de scénario créé pour cette activité</Typography>
+            )}
+          </>
+        )}
       </Box>
-    </>
+    </Box>
   );
 };
 
