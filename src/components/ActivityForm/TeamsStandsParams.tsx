@@ -17,9 +17,11 @@ import CloseIcon from "@mui/icons-material/Close";
 import { SCENARIO_API } from "../../routes/api/scenarioRoutes";
 import CustomSnackbar from "../CustomSnackbar";
 
+type Severity = "error" | "warning" | "info" | "success";
+
 interface SnackMessage {
   message: string;
-  severity?: "error" | "warning" | "info" | "success";
+  severity?: Severity;
 }
 
 interface IStand {
@@ -217,7 +219,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
   }, [teamList]);
 
   useEffect(() => {
-    generateTeamNames(numberOfTeams, selectedTheme);
+    selectedTheme && generateTeamNames(numberOfTeams, selectedTheme);
   }, [selectedTheme]);
 
   // This effect re-runs when `selectedTheme` changes.
@@ -304,7 +306,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
 
   /**
    * Perform basic checks before sending request to generate Scenario
-   * @returns 
+   * @returns
    */
   const handleGetScenario = () => {
     // Check if no teams have been selected (numberOfTeams should be greater than 0)
@@ -318,7 +320,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
       } else if (selectedStands.length === 0) {
         errorMessage += "au moins un stand.";
       }
-  
+
       setSnackbarOpen(true);
       setSnackMessageSeverity({
         message: errorMessage,
@@ -326,12 +328,15 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
       });
       return; // Stop execution if the condition is not met
     }
-  
+
     // If the conditions are met, proceed to generate the scenario
     generateScenario();
   };
 
   const generateScenario = async () => {
+    let severity: Severity = "success";
+    let message = "Scenario généré avec succès"; // Default success message
+    let details = " ";
     try {
       const response = await fetch(
         `${SCENARIO_API.scenarioByActivityId("27")}/generate`,
@@ -340,16 +345,31 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
           headers: { "Content-Type": "application/json" },
         }
       );
-      if (!response.ok) throw new Error("Failed to generate scenario");
-      setSnackbarOpen(true);
-      setSnackMessageSeverity({
-        message: "Scénario généré !",
-        severity: "success",
-      });
-      // Additional UI update logic can go here
+      const data = await response.json(); // Assuming the server responds with JSON
+      details = data.details;
+      if (!response.ok) {
+        throw new Error(data.message || "Unknown error occurred");
+      }
+
+      console.log(data);
+      // Optionally check the 'success' flag if it's included in the response
+      if (data.success === false) {
+        severity = "warning"; // Use 'warning' or 'error' based on your business logic
+        message = data.message || "Il y'a un problème coté serveur.";
+        
+      } else {
+        message = data.message || message; // Use the server-provided message or default message
+        details = data.details;
+      }
     } catch (error) {
+      console.log(typeof error);
+      severity = "error";
+      message = error.message + ' : \n' + details || "An error occurred while processing your request.";
       console.error("Error submitting data:", error);
     }
+    // Set the snackbar message and severity
+    setSnackbarOpen(true);
+    setSnackMessageSeverity({ message, severity });
   };
 
   const handleCloseSnackbar = () => {
