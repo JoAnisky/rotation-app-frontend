@@ -35,7 +35,7 @@ const CustomSnackbar: React.FC<CustomSnackbarProps> = ({
         autoHideDuration={6000}
         onClose={handleClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }} // This positions the Snackbar at the bottom-center of its container
-        sx={{ width: "auto", maxWidth: "100%" }} // Ensures Snackbar doesn't exceed the width of its contents or screen
+        sx={{ width: "auto", maxWidth: "100%", mb:5 }} // Ensures Snackbar doesn't exceed the width of its contents or screen
       >
         <Alert
           onClose={handleClose}
