@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Box, CssBaseline, Typography } from "@mui/material";
+import { Box, CssBaseline, Typography, Card, CardContent, CardHeader, List, ListItem } from "@mui/material";
 import useFetch from "../hooks/useFetch";
 import { SCENARIO_API } from "../routes/api/scenarioRoutes";
 
@@ -41,25 +41,27 @@ const Scenario = () => {
   return (
     <>
       <CssBaseline />
-
       <Box height="100%" display="flex" flexDirection="column">
         <Typography component="h1" variant="h5" align="center" sx={{ mb: 2 }}>
           Affichage du scenario :
         </Typography>
-        <Box display="flex" flexDirection="column" alignItems="center">
+        <Box display="flex" flexDirection="column" alignItems="center" sx={{ width: '100%' }}>
           {scenarios.map((scenario, idx) => (
-            <Box key={idx}>
-              <Typography variant="h6">Tour n°{idx + 1}</Typography>
-              {Object.entries(scenario).map(([key, entries]) => (
-                <div key={key}>
-                  <Typography>Stand {key}:
-                  {entries.map((entry: ScenarioEntry) => (
-                    <span key={entry.id}>{entry.name}</span>
-                  ))}
-                  </Typography>
-                </div>
-              ))}
-            </Box>
+            <Card key={idx} sx={{ mb: 1, width: '90%', maxWidth: 700, padding :0 }}>
+              <CardHeader title={`Tour n°${idx + 1}`} />
+              <CardContent>
+                {Object.entries(scenario).map(([key, entries]) => (
+                  <Box key={key} sx={{ mb: 1 }}>
+                    <Typography variant="subtitle1">Stand {key}</Typography>
+                    <List>
+                      {entries.map((entry: ScenarioEntry) => (
+                        <ListItem key={entry.id} sx={{ py: 0.5 }}>{entry.name}</ListItem>
+                      ))}
+                    </List>
+                  </Box>
+                ))}
+              </CardContent>
+            </Card>
           ))}
         </Box>
       </Box>
