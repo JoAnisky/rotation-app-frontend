@@ -8,7 +8,7 @@ interface UseFetchOptions {
 
 interface FetchError {
   message: string;
-  // Here status code, etc.
+  status?: number;  // Including status could help handle errors based on response status codes
 }
 
 const useFetch = <T>(url: string, options?: UseFetchOptions): [T | null, boolean, FetchError | null] => {
@@ -25,10 +25,10 @@ const useFetch = <T>(url: string, options?: UseFetchOptions): [T | null, boolean
           headers: options?.headers,
           body: options?.body,
         });
-        if (!response.ok) {
-          throw new Error(`Network response was not ok, status: ${response.status}`);
-        }
         const json = await response.json();
+        if (!response.ok) {
+          throw new Error(json.message || `Network response was not ok, status: ${response.status}`);
+        }
         setData(json);
       } catch (err) {
         // Ensure that any caught error conforms to the FetchError interface
