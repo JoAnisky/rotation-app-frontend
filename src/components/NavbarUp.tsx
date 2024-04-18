@@ -20,8 +20,8 @@ const NavbarUp: React.FC<INavbarUpProps> = ({
   animatorStandSetted
 }) => {
   return (
-    <Box>
-      <AppBar position="static">
+    <Box sx={{ display:'flex' }}>
+      <AppBar position="sticky" component="nav">
         <Toolbar>
           {/* IconButton with HomeIcon and Link */}
           <IconButton

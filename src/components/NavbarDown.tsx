@@ -5,6 +5,7 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import SettingsSuggestIcon from "@mui/icons-material/SettingsSuggest";
+import { Paper } from "@mui/material";
 
 interface NavbarDownProps {
   setActiveComponent: (componentKey: string) => void;
@@ -22,38 +23,40 @@ const NavbarDown: React.FC<NavbarDownProps> = ({
   };
 
   return (
-    <BottomNavigation value={value} onChange={handleChange} showLabels>
-      {isAdmin ? (
-        <BottomNavigationAction
-          label="Paramètres"
-          value="paramètres"
-          onClick={() => setActiveComponent("ActivityForm")}
-          icon={<SettingsSuggestIcon />}
-        />
-      ) : (
-        <BottomNavigationAction
-          label="Stand"
-          value="stand"
-          onClick={() => setActiveComponent("Stand")}
-          icon={<StorefrontIcon />}
-        />
-      )}
-      {isAdmin && (
-        <BottomNavigationAction
-          label="Scenario"
-          value="scenario"
-          onClick={() => setActiveComponent("Scenario")}
-          icon={<ReceiptLongIcon />}
-        />
-      )}
+    <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
+      <BottomNavigation value={value} onChange={handleChange} showLabels>
+        {isAdmin ? (
+          <BottomNavigationAction
+            label="Paramètres"
+            value="paramètres"
+            onClick={() => setActiveComponent("ActivityForm")}
+            icon={<SettingsSuggestIcon />}
+          />
+        ) : (
+          <BottomNavigationAction
+            label="Stand"
+            value="stand"
+            onClick={() => setActiveComponent("Stand")}
+            icon={<StorefrontIcon />}
+          />
+        )}
+        {isAdmin && (
+          <BottomNavigationAction
+            label="Scenario"
+            value="scenario"
+            onClick={() => setActiveComponent("Scenario")}
+            icon={<ReceiptLongIcon />}
+          />
+        )}
 
-      <BottomNavigationAction
-        label="Vue générale"
-        value="vue générale"
-        onClick={() => setActiveComponent("GeneralView")}
-        icon={<MapOutlinedIcon />}
-      />
-    </BottomNavigation>
+        <BottomNavigationAction
+          label="Vue générale"
+          value="vue générale"
+          onClick={() => setActiveComponent("GeneralView")}
+          icon={<MapOutlinedIcon />}
+        />
+      </BottomNavigation>
+    </Paper>
   );
 };
 
