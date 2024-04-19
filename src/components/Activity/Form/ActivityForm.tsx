@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import {
   Alert,
@@ -15,7 +15,12 @@ import { IActivityData } from "../../../types/ActivityInterface";
 import TeamsStandsParams from "./TeamsStandsParams";
 import { ACTIVITY_API } from "../../../routes/api/activityRoutes";
 
-const ActivityForm = () => {
+interface ActivityFormProps {
+  chosenActivity: number | null;
+}
+
+const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivity }) => {
+
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [activityCreated, setActivityCreated] = useState<boolean>(false);
@@ -45,6 +50,10 @@ const ActivityForm = () => {
     pause_start_time: null,
     pause_duration: null,
   };
+
+  useEffect(() => {
+    console.log("Activité ID récupéré : ", chosenActivity);
+  }, []);
 
   const [activityData, setActivityData] =
     useState<IActivityData>(initialActivityData);
@@ -131,7 +140,7 @@ const ActivityForm = () => {
       <Container
         component="main"
         maxWidth="sm"
-        sx={{ display: "flex", flexDirection: "column", height: "100%%" }}
+        sx={{ display: "flex", flexDirection: "column", height: "100%" }}
       >
         <Box sx={{ p: 2 }}>
           <Typography component="h1" variant="h5" align="center" sx={{ mb: 2 }}>
