@@ -24,7 +24,7 @@ const ActivitySelection: React.FC<ActivitySelectionProps> = ({
   useEffect(() => {
     if (Array.isArray(fetchedActivities)) {
       setActivities(fetchedActivities);
-      console.log(fetchedActivities);
+      // console.log(fetchedActivities);
     } else {
       setActivities([]);
     }
