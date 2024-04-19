@@ -1,17 +1,12 @@
-import { useEffect, useState } from "react";
-import {
-  Button,
-  Container,
-  Grid,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Button, Container, Grid, TextField, Typography } from "@mui/material";
+import { useState } from "react";
 import ActivitySelection from "../components/Activity/ActivitySelection";
 import CustomSnackbar from "../components/CustomSnackbar";
 import { SnackMessage } from "../types/SnackbarTypes";
+import { ACTIVITY_API } from "../routes/api/activityRoutes";
 
 interface ActivityChoiceProps {
-  setChosenActivity: (activityId: number | null) => void;
+  setChosenActivityId: (activityId: number | null) => void;
 }
 
 interface IActivities {
@@ -20,7 +15,7 @@ interface IActivities {
 }
 
 const ActivityChoice: React.FC<ActivityChoiceProps> = ({
-  setChosenActivity,
+  setChosenActivityId,
 }) => {
   // State for open custom snackbar message
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
@@ -39,18 +34,11 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
   const [selectedActivity, setSelectedActivity] = useState<IActivities | null>(
     null
   );
-
   const [newActivityName, setNewActivityName] = useState<string>("");
 
-  // Join button
-  const [isJoinable, setIsJoinable] = useState(false);
-
-  // Create Button
-  const [isCreatable, setIsCreatable] = useState<boolean>(false);
 
   const handleActivityNameChange = (name: string) => {
     setNewActivityName(name);
-    setIsCreatable(newActivityName !== "");
   };
 
   const handleCreateActivity = () => {
@@ -65,13 +53,36 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
     createActivity(newActivityName);
   };
 
-  const createActivity = (name) => {
-    console.log(name);
-  }
+  const createActivity = async (activityName: string) => {
+    // User ID comes from the Gamemaster
+    const userId = 7;
+    const options = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: activityName, user: userId }),
+    };
+
+    try {
+      const response = await fetch(`${ACTIVITY_API.activities}/`, options);
+      const responseData = await response.json(); // Parse the JSON response
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      // Activity is created
+      setChosenActivityId(responseData.activity_id);
+    } catch (error) {
+      setSnackbarOpen(true);
+      setSnackMessageSeverity({
+        message: "Echec lors de la création de l'activité : " + error,
+        severity: "warning",
+      });
+      console.error(`Failed to create activity: `, error);
+    }
+  };
 
   const handleActivitySelect = (activity: IActivities | null) => {
     setSelectedActivity(activity); // Temporarily store the selected activity
-    setIsJoinable(activity !== null);
   };
 
   const handleJoinActivity = () => {
@@ -83,14 +94,8 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
       });
       return;
     }
-    setChosenActivity(selectedActivity.id); // Only set on button click
+    setChosenActivityId(selectedActivity.id); // Only set on button click
   };
-
-  useEffect(() => {
-    if (newActivityName === "") {
-      setIsCreatable(false);
-    }
-  }, [newActivityName]);
 
   return (
     <Container
