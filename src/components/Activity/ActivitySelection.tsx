@@ -24,6 +24,7 @@ const ActivitySelection: React.FC<ActivitySelectionProps> = ({
   useEffect(() => {
     if (Array.isArray(fetchedActivities)) {
       setActivities(fetchedActivities);
+      console.log(fetchedActivities);
     } else {
       setActivities([]);
     }
@@ -35,13 +36,16 @@ const ActivitySelection: React.FC<ActivitySelectionProps> = ({
         disablePortal
         id="activity-choice"
         options={activities}
+        renderOption={(props, option) => (
+          <li {...props} key={option.id}>
+            {option.name}
+          </li>
+        )}
         getOptionLabel={(option) => option.name}
-        onChange={(event, value: IActivites | null) => {
-          onActivitySelect(value); // propagate the selected activity upwards
-        }}
-        loading={activitiesLoading} // Set the loading prop based loading state
-        loadingText="Chargement..." // loading text
-        noOptionsText="Aucune option" // text displayed when there are no options
+        onChange={(event, value) => onActivitySelect(value)}
+        loading={activitiesLoading}
+        loadingText="Chargement..."
+        noOptionsText="Aucune option"
         sx={{ width: "100%" }}
         renderInput={(params) => (
           <TextField {...params} label="Quelle activité insolite ?" />
