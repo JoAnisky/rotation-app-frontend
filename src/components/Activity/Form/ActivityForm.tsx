@@ -14,67 +14,69 @@ import {
 import { IActivityData } from "../../../types/ActivityInterface";
 import TeamsStandsParams from "./TeamsStandsParams";
 import { ACTIVITY_API } from "../../../routes/api/activityRoutes";
+import useFetch from "../../../hooks/useFetch";
 
 interface ActivityFormProps {
-  chosenActivityId: number | null;
+  chosenActivityId: number | string | null;
 }
 
 const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
-  const [activityCreated, setActivityCreated] = useState<boolean>(false);
-  const [userMessage, setUserMessage] = useState<string | null>(null);
 
-  const [activityId, setActivityId] = useState<number | null>(null);
-
-  const textTitle = activityCreated
-    ? "Paramètres d'activité"
-    : "Création d'une activité";
-  const btnTextDisplay = activityCreated
-    ? "Sauvegarder les paramètres"
-    : "Créer l'activité";
-
-  const initialActivityData: IActivityData = {
+  const [activityData, setActivityData] = useState<IActivityData>({
     name: "",
     activity_date: new Date(),
-    activity_start_time: null,
-    createdAt: new Date(), // Set to current date or another appropriate value
+    createdAt: new Date(),
+    status: "NOT_STARTED",
     global_duration: null,
-    nb_participants: null,
-    nb_teams: null,
     rotation_duration: null,
     stand_duration: null,
-    status: "NOT_STARTED", // Default status, adjust as necessary
-    team: [], // Initialize as an empty array or appropriate value
+    nb_teams: null,
+    nb_participants: null,
+    team: [],
+    activity_start_time: null,
     pause_start_time: null,
     pause_duration: null,
-  };
+  });
+
+  // Get activity params
+  const [
+    fetchedActivityData,
+    fetchedActivityDataLoading,
+    fetchedActivityError,
+  ] = useFetch<IActivityData>(ACTIVITY_API.activityById(chosenActivityId));
 
   useEffect(() => {
-    console.log("Activité ID récupéré : ", chosenActivityId);
-  }, []);
+    if (fetchedActivityData) {
+      setActivityData((prev) => ({
+        ...prev,
+        ...fetchedActivityData,
+        activity_date: fetchedActivityData.activity_date ? new Date(fetchedActivityData.activity_date) : null,
+      }));
+    }
+    console.log(fetchedActivityData);
+  }, [fetchedActivityData]);
 
-  const [activityData, setActivityData] =
-    useState<IActivityData>(initialActivityData);
-
-  const validateForm = () => {
-    const isValid =
-      activityData.name.trim() !== "" && activityData.activity_date !== null;
-    setIsFormValid(isValid);
-  };
+  const [userMessage, setUserMessage] = useState<string | null>(null);
 
   const handleInputChange = <T extends keyof IActivityData>(
     field: T,
     value: IActivityData[T]
   ) => {
-    setError(false);
-    setUserMessage(null);
-    setActivityData((prev) => {
-      const updatedData = { ...prev, [field]: value };
-      validateForm();
-      return updatedData;
-    });
+    setActivityData((prev) => ({ ...prev, [field]: value }));
   };
+
+  useEffect(() => {
+    const isValid =
+      activityData.name.trim() !== "" && Boolean(activityData.activity_date);
+    setIsFormValid(isValid);
+    if (!isValid) {
+      setUserMessage("Please ensure all fields are correctly filled.");
+    } else {
+      setUserMessage(null);
+    }
+  }, [activityData.name, activityData.activity_date]);
 
   const handleSubmit = async () => {
     if (!isFormValid) {
@@ -83,13 +85,9 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
     }
 
     if (activityData) {
-      // User ID comes from the Gamemaster
-      const userId = 7;
-
       // Reformater les dates
       const formattedActivityData = {
         ...activityData,
-        user: userId,
         activity_date: activityData.activity_date
           ? format(new Date(activityData.activity_date), "yyyy-MM-dd HH:mm:ss")
           : null,
@@ -99,34 +97,31 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
       };
 
       const options = {
-        method: "POST",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formattedActivityData),
       };
 
       try {
-        const response = await fetch(`${ACTIVITY_API.activities}/`, options);
+        const response = await fetch(
+          ACTIVITY_API.activityById(chosenActivityId),
+          options
+        );
         const responseData = await response.json(); // Parse the JSON response
 
         if (!response.ok) {
-          setActivityCreated(false);
           setError(true);
-          setUserMessage("Activité non créée: " + responseData.message);
+          setUserMessage("Activité non mise à jour : " + responseData.message);
           throw new Error(
             `HTTP error! status: ${response.status}, ${responseData.message}`
           );
         }
 
-        if (response.status === 201) {
-          setError(false);
-          setActivityCreated(true);
-          setUserMessage("Activité créée avec succès");
+        setError(false);
+        setUserMessage("Activité mise à jour avec succès");
 
-          console.log("Activité créée avec succès: ", responseData);
-          setActivityId(responseData.id);
-        }
+        console.log("Activité mise à jour avec succès: ", responseData);
       } catch (error) {
-        setActivityCreated(false);
         console.error(`Failed to update activity: `, error);
         setUserMessage("Erreur lors de la requête: " + error);
         setError(true);
@@ -135,23 +130,77 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
   };
 
   return (
-    <form>
-      <Container
-        component="main"
-        maxWidth="sm"
-        sx={{ display: "flex", flexDirection: "column", height: "100%" }}
-      >
-        <Box sx={{ p: 2 }}>
-          <Typography component="h1" variant="h5" align="center" sx={{ mb: 2 }}>
-            {textTitle}
-          </Typography>
+    <Container
+      component="main"
+      maxWidth="sm"
+      sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+    >
+      <Box sx={{ p: 2 }}>
+        <Typography component="h1" variant="h5" align="center" sx={{ mb: 2 }}>
+          Paramètres d'activité
+        </Typography>
 
-          {/* Grid wrapper for every elements */}
-          <Grid container spacing={1}>
-            <Grid item xs={12}>
-              {/* <Stopwatch/> 
+        {/* Grid wrapper for every elements */}
+        <Grid container spacing={1}>
+          <Grid item xs={12}>
+            {/* <Stopwatch/> 
                 <ControlButtons /> */}
-            </Grid>
+          </Grid>
+
+          <Grid
+            display="flex"
+            justifyContent="space-between"
+            width="100%"
+            sx={{ mb: 2 }}
+          >
+            <Typography>Nom de l'activité</Typography>
+
+            <TextField
+              sx={{ width: 210 }}
+              fullWidth
+              value={activityData.name || ""}
+              variant="outlined"
+              required
+              placeholder="Nom de l'activité"
+              onChange={(event) =>
+                handleInputChange("name", event.target.value)
+              }
+            />
+          </Grid>
+
+          <Grid
+            display="flex"
+            justifyContent="space-between"
+            width="100%"
+            sx={{ mb: 2 }}
+          >
+            <Typography>Date de l'activité</Typography>
+
+            <TextField
+              sx={{ width: 210 }}
+              fullWidth
+              type="date"
+              variant="outlined"
+              required
+              value={
+                activityData.activity_date
+                  ? format(activityData.activity_date, "yyyy-MM-dd")
+                  : ""
+              }
+              onChange={(event) => {
+                const dateValue = event.target.value
+                  ? new Date(event.target.value)
+                  : null;
+                handleInputChange("activity_date", dateValue);
+              }}
+            />
+          </Grid>
+
+          {/* Container for Time params */}
+          <Grid container alignItems="center" justifyContent="space-between">
+            <Typography variant="h6" component="h2" gutterBottom sx={{ mb: 2 }}>
+              Gestion du temps (mn)
+            </Typography>
 
             <Grid
               display="flex"
@@ -159,163 +208,100 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
               width="100%"
               sx={{ mb: 2 }}
             >
-              <Typography>Nom de l'activité</Typography>
+              <Typography>Durée de l'activité </Typography>
 
               <TextField
-                sx={{ width: 170 }}
-                fullWidth
-                value={activityData.name || ""}
-                variant="outlined"
-                required
-                placeholder="Nom de l'activité"
-                onChange={(event) =>
-                  handleInputChange("name", event.target.value)
-                }
-              />
-            </Grid>
-
-            <Grid
-              display="flex"
-              justifyContent="space-between"
-              width="100%"
-              sx={{ mb: 2 }}
-            >
-              <Typography>Date de l'activité</Typography>
-
-              <TextField
-                sx={{ width: 170 }}
-                fullWidth
-                type="date"
-                variant="outlined"
-                placeholder="Filled"
-                required
-                value={
-                  activityData.activity_date
-                    ? activityData.activity_date.toISOString().substring(0, 10)
-                    : ""
-                }
+                type="number"
+                value={activityData?.global_duration || ""}
                 onChange={(event) =>
                   handleInputChange(
-                    "activity_date",
-                    event.target.value ? new Date(event.target.value) : null
+                    "global_duration",
+                    parseInt(event.target.value) || null
                   )
                 }
+                inputProps={{
+                  className: "input-number",
+                  min: "0", // Minimum value
+                  step: "1",
+                }}
               />
             </Grid>
 
-            {/* Container for Time params */}
-            <Grid container alignItems="center" justifyContent="space-between">
-              <Typography
-                variant="h6"
-                component="h2"
-                gutterBottom
-                sx={{ mb: 2 }}
-              >
-                Gestion du temps (mn)
-              </Typography>
-
-              <Grid
-                display="flex"
-                justifyContent="space-between"
-                width="100%"
-                sx={{ mb: 2 }}
-              >
-                <Typography>Durée de l'activité </Typography>
-
-                <TextField
-                  type="number"
-                  value={activityData?.global_duration || ""}
-                  onChange={(event) =>
-                    handleInputChange(
-                      "global_duration",
-                      parseInt(event.target.value) || null
-                    )
-                  }
-                  inputProps={{
-                    className: "input-number",
-                    min: "0", // Minimum value
-                    step: "1",
-                  }}
-                />
-              </Grid>
-
-              <Grid
-                display="flex"
-                justifyContent="space-between"
-                width="100%"
-                sx={{ mb: 2 }}
-              >
-                <Typography>Durée de rotation </Typography>
-
-                <TextField
-                  type="number"
-                  value={activityData?.rotation_duration || ""}
-                  onChange={(event) =>
-                    handleInputChange(
-                      "rotation_duration",
-                      parseInt(event.target.value) || null
-                    )
-                  }
-                  inputProps={{
-                    className: "input-number",
-                    min: "0", // Minimum value
-                    step: "1",
-                  }}
-                />
-              </Grid>
-
-              <Grid display="flex" justifyContent="space-between" width="100%">
-                <Typography>Durée par stand</Typography>
-
-                <TextField
-                  type="number"
-                  value={activityData?.stand_duration || ""}
-                  onChange={(event) =>
-                    handleInputChange(
-                      "stand_duration",
-                      parseInt(event.target.value) || null
-                    )
-                  }
-                  inputProps={{
-                    className: "input-number",
-                    min: "0", // Minimum value
-                    step: "1",
-                  }}
-                />
-              </Grid>
-            </Grid>
-            {/* END Container for Time params */}
-
-            {/* {activityCreated && <TeamsStandsParams activityId={activityId} />} */}
-            {<TeamsStandsParams activityId={activityId} />}
-
-            {/* Container for Params save */}
             <Grid
               display="flex"
-              flexDirection="column"
-              justifyContent="center"
+              justifyContent="space-between"
               width="100%"
+              sx={{ mb: 2 }}
             >
-              {userMessage && (
-                <Alert severity={error ? "error" : "success"} sx={{ mt: 2 }}>
-                  {userMessage}
-                </Alert>
-              )}
-              <Button
-                variant="contained"
-                sx={{ minWidth: "auto", marginTop: 2 }}
-                onClick={handleSubmit}
-                disabled={!isFormValid}
-              >
-                {btnTextDisplay}
-              </Button>
+              <Typography>Durée de rotation </Typography>
+
+              <TextField
+                type="number"
+                value={activityData?.rotation_duration || ""}
+                onChange={(event) =>
+                  handleInputChange(
+                    "rotation_duration",
+                    parseInt(event.target.value) || null
+                  )
+                }
+                inputProps={{
+                  className: "input-number",
+                  min: "0", // Minimum value
+                  step: "1",
+                }}
+              />
             </Grid>
 
-            {/* END Grid wrapper for every elements */}
+            <Grid display="flex" justifyContent="space-between" width="100%">
+              <Typography>Durée par stand</Typography>
+
+              <TextField
+                type="number"
+                value={activityData?.stand_duration || ""}
+                onChange={(event) =>
+                  handleInputChange(
+                    "stand_duration",
+                    parseInt(event.target.value) || null
+                  )
+                }
+                inputProps={{
+                  className: "input-number",
+                  min: "0", // Minimum value
+                  step: "1",
+                }}
+              />
+            </Grid>
           </Grid>
-        </Box>
-      </Container>
-    </form>
+          {/* END Container for Time params */}
+
+          {<TeamsStandsParams activityId={chosenActivityId} />}
+
+          {/* Container for Params save */}
+          <Grid
+            display="flex"
+            flexDirection="column"
+            justifyContent="center"
+            width="100%"
+          >
+            {userMessage && (
+              <Alert severity={error ? "error" : "success"} sx={{ mt: 2 }}>
+                {userMessage}
+              </Alert>
+            )}
+            <Button
+              variant="contained"
+              sx={{ minWidth: "auto", marginTop: 2 }}
+              onClick={handleSubmit}
+              disabled={!isFormValid}
+            >
+              Sauvegarder les paramètres
+            </Button>
+          </Grid>
+
+          {/* END Grid wrapper for every elements */}
+        </Grid>
+      </Box>
+    </Container>
   );
 };
 
