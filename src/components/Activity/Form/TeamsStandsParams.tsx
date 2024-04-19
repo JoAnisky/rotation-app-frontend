@@ -9,13 +9,13 @@ import {
   Typography,
   Switch,
 } from "@mui/material";
-import { STANDS_API } from "../../routes/api/standRoutes";
-import useFetch from "../../hooks/useFetch";
-import { ACTIVITY_API } from "../../routes/api/activityRoutes";
-import themedTeamsNames from "../../utils/themedTeamsNames";
+import { STANDS_API } from "../../../routes/api/standRoutes";
+import useFetch from "../../../hooks/useFetch";
+import { ACTIVITY_API } from "../../../routes/api/activityRoutes";
+import themedTeamsNames from "../../../utils/themedTeamsNames";
 import CloseIcon from "@mui/icons-material/Close";
-import { SCENARIO_API } from "../../routes/api/scenarioRoutes";
-import CustomSnackbar from "../CustomSnackbar";
+import { SCENARIO_API } from "../../../routes/api/scenarioRoutes";
+import CustomSnackbar from "../../CustomSnackbar";
 
 type Severity = "error" | "warning" | "info" | "success";
 
@@ -356,7 +356,6 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
       if (data.success === false) {
         severity = "warning"; // Use 'warning' or 'error' based on your business logic
         message = data.message || "Il y'a un problème coté serveur.";
-        
       } else {
         message = data.message || message; // Use the server-provided message or default message
         details = data.details;
@@ -364,7 +363,9 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
     } catch (error) {
       console.log(typeof error);
       severity = "error";
-      message = error.message + ' : \n' + details || "An error occurred while processing your request.";
+      message =
+        error.message + " : \n" + details ||
+        "An error occurred while processing your request.";
       console.error("Error submitting data:", error);
     }
     // Set the snackbar message and severity
