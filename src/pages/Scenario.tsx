@@ -41,7 +41,7 @@ type ApiResponse = {
 const Scenario = () => {
   const [scenario, setScenario] = useState<ScenarioData[]>([]);
   const [data, loading, error] = useFetch<ApiResponse>(
-    SCENARIO_API.scenarioByActivityId("2")
+    SCENARIO_API.scenarioByActivityId("27")
   );
 
   useEffect(() => {
