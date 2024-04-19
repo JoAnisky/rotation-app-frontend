@@ -1,9 +1,11 @@
+import { useState } from "react";
+import useActiveComponent from "../hooks/useActiveComponent";
 import NavbarUp from "../components/NavbarUp";
-import ActivityForm from "../components/ActivityForm/ActivityForm";
+import ActivityForm from "../components/Activity/Form/ActivityForm";
 import NavbarDown from "../components/NavbarDown";
 import Scenario from "./Scenario";
 import GeneralView from "./GeneralView";
-import useActiveComponent from "../hooks/useActiveComponent";
+import ActivityChoice from "./ActivityChoice";
 
 interface IPageContainerProps {
   role: string;
@@ -14,26 +16,16 @@ interface IPageContainerProps {
 const Gamemaster: React.FC<IPageContainerProps> = ({
   handleChangeSelection,
 }) => {
+  const [chosenActivity, setChosenActivity] = useState<number | null>(null);
+
   const { setActiveComponent, renderActiveComponent } = useActiveComponent({
     defaultComponent: "ActivityForm",
     components: {
-      ActivityForm: <ActivityForm />,
+      ActivityForm: <ActivityForm chosenActivity={chosenActivity} />,
       Scenario: <Scenario />,
       GeneralView: <GeneralView />,
     },
   });
-
-  // Get ActivityData
-  // const activityDataProvider = useContext(ActivityContext);
-
-  // // Retrieve current activity data
-  // useEffect(() => {
-  //   if (activityDataProvider) {
-  //     setActivityData(activityDataProvider);
-  //   } else {
-  //     // still loading or null ??
-  //   }
-  // }, [activityDataProvider]);
 
   return (
     <>
@@ -42,8 +34,16 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
         handleChangeSelection={() => handleChangeSelection?.()}
         animatorStandSetted={false}
       />
-      {renderActiveComponent()}
-      <NavbarDown setActiveComponent={setActiveComponent} isAdmin={true} />
+
+      {/* If activity is not yet selected, choice ou create activity */}
+      {!chosenActivity ? (
+        <ActivityChoice setChosenActivity={setChosenActivity} />
+      ) : (
+        <>
+          {renderActiveComponent()}
+          <NavbarDown setActiveComponent={setActiveComponent} isAdmin={true} />
+        </>
+      )}
     </>
   );
 };
