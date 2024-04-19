@@ -38,7 +38,7 @@ interface ISelectedValue {
 }
 
 interface ITeamsStandsParamsProps {
-  activityId: number | null;
+  activityId: number | string;
 }
 type FieldType = "stands" | "teams"; // This is now a type alias for use directly as a type
 

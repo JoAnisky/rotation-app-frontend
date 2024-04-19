@@ -16,7 +16,7 @@ interface IPageContainerProps {
 const Gamemaster: React.FC<IPageContainerProps> = ({
   handleChangeSelection,
 }) => {
-  const [chosenActivityId, setChosenActivityId] = useState<number | null>(null);
+  const [chosenActivityId, setChosenActivityId] = useState<number | string | null>(null);
 
   const { setActiveComponent, renderActiveComponent } = useActiveComponent({
     defaultComponent: "ActivityForm",

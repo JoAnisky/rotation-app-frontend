@@ -6,6 +6,6 @@ export const ACTIVITY_API = {
   activities: `${ACTIVITY_ENDPOINT}`,
 
   // Get, Update, or Delete a single activity by ID (GET, PUT/PATCH, DELETE methods)
-  activityById: (activityId: string): string =>
+  activityById: (activityId: number | string | null): string =>
     `${ACTIVITY_ENDPOINT}/${activityId}`,
 };
