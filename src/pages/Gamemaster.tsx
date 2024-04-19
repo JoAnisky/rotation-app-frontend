@@ -16,12 +16,12 @@ interface IPageContainerProps {
 const Gamemaster: React.FC<IPageContainerProps> = ({
   handleChangeSelection,
 }) => {
-  const [chosenActivity, setChosenActivity] = useState<number | null>(null);
+  const [chosenActivityId, setChosenActivityId] = useState<number | null>(null);
 
   const { setActiveComponent, renderActiveComponent } = useActiveComponent({
     defaultComponent: "ActivityForm",
     components: {
-      ActivityForm: <ActivityForm chosenActivity={chosenActivity} />,
+      ActivityForm: <ActivityForm chosenActivityId={chosenActivityId} />,
       Scenario: <Scenario />,
       GeneralView: <GeneralView />,
     },
@@ -36,8 +36,8 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
       />
 
       {/* If activity is not yet selected, choice ou create activity */}
-      {!chosenActivity ? (
-        <ActivityChoice setChosenActivity={setChosenActivity} />
+      {!chosenActivityId ? (
+        <ActivityChoice setChosenActivityId={setChosenActivityId} />
       ) : (
         <>
           {renderActiveComponent()}

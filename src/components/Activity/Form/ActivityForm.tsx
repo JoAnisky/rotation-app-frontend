@@ -16,11 +16,10 @@ import TeamsStandsParams from "./TeamsStandsParams";
 import { ACTIVITY_API } from "../../../routes/api/activityRoutes";
 
 interface ActivityFormProps {
-  chosenActivity: number | null;
+  chosenActivityId: number | null;
 }
 
-const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivity }) => {
-
+const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [activityCreated, setActivityCreated] = useState<boolean>(false);
@@ -52,7 +51,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivity }) => {
   };
 
   useEffect(() => {
-    console.log("Activité ID récupéré : ", chosenActivity);
+    console.log("Activité ID récupéré : ", chosenActivityId);
   }, []);
 
   const [activityData, setActivityData] =
