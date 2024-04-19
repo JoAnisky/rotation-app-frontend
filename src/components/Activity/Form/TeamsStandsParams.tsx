@@ -16,13 +16,7 @@ import themedTeamsNames from "../../../utils/themedTeamsNames";
 import CloseIcon from "@mui/icons-material/Close";
 import { SCENARIO_API } from "../../../routes/api/scenarioRoutes";
 import CustomSnackbar from "../../CustomSnackbar";
-
-type Severity = "error" | "warning" | "info" | "success";
-
-interface SnackMessage {
-  message: string;
-  severity?: Severity;
-}
+import { Severity, SnackMessage } from "../../../types/SnackbarTypes";
 
 interface IStand {
   id: number;
