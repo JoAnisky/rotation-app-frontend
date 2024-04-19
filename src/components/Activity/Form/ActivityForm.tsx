@@ -15,6 +15,8 @@ import { IActivityData } from "../../../types/ActivityInterface";
 import TeamsStandsParams from "./TeamsStandsParams";
 import { ACTIVITY_API } from "../../../routes/api/activityRoutes";
 import useFetch from "../../../hooks/useFetch";
+import { SnackMessage } from "../../../types/SnackbarTypes";
+import CustomSnackbar from "../../CustomSnackbar";
 
 interface ActivityFormProps {
   chosenActivityId: number | string | null;
@@ -23,6 +25,20 @@ interface ActivityFormProps {
 const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
+
+  // State for open custom snackbar message
+  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
+
+  // State for manage SnackBar message and color (severity)
+  const [snackMessageSeverity, setSnackMessageSeverity] =
+    useState<SnackMessage>({
+      message: "",
+      severity: "success", // Default severity is 'success'
+    });
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
+  };
 
   const [activityData, setActivityData] = useState<IActivityData>({
     name: "",
@@ -52,13 +68,13 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
       setActivityData((prev) => ({
         ...prev,
         ...fetchedActivityData,
-        activity_date: fetchedActivityData.activity_date ? new Date(fetchedActivityData.activity_date) : null,
+        activity_date: fetchedActivityData.activity_date
+          ? new Date(fetchedActivityData.activity_date)
+          : null,
       }));
     }
     console.log(fetchedActivityData);
   }, [fetchedActivityData]);
-
-  const [userMessage, setUserMessage] = useState<string | null>(null);
 
   const handleInputChange = <T extends keyof IActivityData>(
     field: T,
@@ -71,16 +87,15 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
     const isValid =
       activityData.name.trim() !== "" && Boolean(activityData.activity_date);
     setIsFormValid(isValid);
-    if (!isValid) {
-      setUserMessage("Please ensure all fields are correctly filled.");
-    } else {
-      setUserMessage(null);
-    }
   }, [activityData.name, activityData.activity_date]);
 
   const handleSubmit = async () => {
     if (!isFormValid) {
-      setUserMessage("Veuillez remplir tous les champs requis.");
+      setSnackbarOpen(true);
+      setSnackMessageSeverity({
+        message: "Veuillez remplir les champs Nom et Date d'activité",
+        severity: "error",
+      });
       return;
     }
 
@@ -107,24 +122,31 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
           ACTIVITY_API.activityById(chosenActivityId),
           options
         );
-        const responseData = await response.json(); // Parse the JSON response
-
         if (!response.ok) {
-          setError(true);
-          setUserMessage("Activité non mise à jour : " + responseData.message);
+          const errorText = await response.text(); // Safely read the raw text
+          setSnackbarOpen(true);
+          setSnackMessageSeverity({
+            message: errorText,
+            severity: "error",
+          });
           throw new Error(
-            `HTTP error! status: ${response.status}, ${responseData.message}`
+            `HTTP error! status: ${response.status}, ${errorText}`
           );
         }
 
-        setError(false);
-        setUserMessage("Activité mise à jour avec succès");
-
-        console.log("Activité mise à jour avec succès: ", responseData);
+        setSnackbarOpen(true);
+        setSnackMessageSeverity({
+          message: "Activité mise à jour avec succès",
+          severity: "success",
+        });
       } catch (error) {
         console.error(`Failed to update activity: `, error);
-        setUserMessage("Erreur lors de la requête: " + error);
-        setError(true);
+        setSnackbarOpen(true);
+        setSnackMessageSeverity({
+          message: "Erreur lors de la mise a jour : ",
+          error,
+          severity: "error",
+        });
       }
     }
   };
@@ -283,11 +305,6 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
             justifyContent="center"
             width="100%"
           >
-            {userMessage && (
-              <Alert severity={error ? "error" : "success"} sx={{ mt: 2 }}>
-                {userMessage}
-              </Alert>
-            )}
             <Button
               variant="contained"
               sx={{ minWidth: "auto", marginTop: 2 }}
@@ -300,6 +317,12 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
 
           {/* END Grid wrapper for every elements */}
         </Grid>
+        <CustomSnackbar
+          open={snackbarOpen}
+          handleClose={handleCloseSnackbar}
+          message={snackMessageSeverity.message}
+          severity={snackMessageSeverity.severity} // Optional: error, warning, info, success
+        />
       </Box>
     </Container>
   );
