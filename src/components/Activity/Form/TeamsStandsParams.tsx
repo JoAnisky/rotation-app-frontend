@@ -18,32 +18,33 @@ import { SCENARIO_API } from "../../../routes/api/scenarioRoutes";
 import CustomSnackbar from "../../CustomSnackbar";
 import { Severity, SnackMessage } from "../../../types/SnackbarTypes";
 
-interface IStand {
+interface ICommon {
   id: number;
   name: string;
-  is_competitive: boolean;
-  animator: string | null;
-  activity: {
-    id: number;
-  };
 }
+interface IStands extends ICommon {
+  isCompetitive: boolean;
+}
+
+interface ITeams extends ICommon {
+  isCompetitive?: boolean; // Assuming isCompetitive might be optional for teams
+}
+
 interface ToggleStates {
   [key: number]: boolean;
 }
 
-interface ISelectedValue {
-  id: number;
-  name: string;
-  isCompetitive?: boolean;
-}
-
 interface ITeamsStandsParamsProps {
   activityId?: number;
+  standsList: IStands[] | null;
+  teamsList: ITeams[] | null;
 }
 type FieldType = "stands" | "teams"; // This is now a type alias for use directly as a type
 
 const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
   activityId,
+  standsList,
+  teamsList,
 }) => {
   // State for open custom snackbar message
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
@@ -60,18 +61,18 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
   // Theme for teams name
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   // teams list
-  const [teamList, setTeamList] = useState<ISelectedValue[]>([]);
+  const [teamList, setTeamList] = useState<ITeams[]>([]);
 
   // Prevent PUT request with empty teams and stands array on component mount
   const hasStandsBeenSent = useRef(false); // Tracks if stands data has been sent at least once after mount
   const hasTeamsBeenSent = useRef(false); // Tracks if teams data has been sent at least once after mount
 
-  const [stands, setStands] = useState<IStand[]>([]);
-  const [selectedStands, setSelectedStands] = useState<ISelectedValue[]>([]);
+  const [stands, setStands] = useState<IStands[]>([]);
+  const [selectedStands, setSelectedStands] = useState<IStands[]>([]);
   const [toggleStates, setToggleStates] = useState<ToggleStates>({});
 
   // Stands for user selection fetched from : All Stand entries
-  const [fetchedStandsData, standsLoading] = useFetch<IStand[]>(
+  const [fetchedStandsData, standsLoading] = useFetch<IStands[]>(
     STANDS_API.stands
   );
 
@@ -157,9 +158,9 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
 
   const handleStandSelection = (
     event: React.SyntheticEvent<Element, Event>,
-    value: ISelectedValue[] | ISelectedValue | null
+    value: IStands[] | IStands | null
   ) => {
-    let newStands: ISelectedValue[] = [];
+    let newStands: IStands[] = [];
 
     if (Array.isArray(value)) {
       newStands = value.map((stand) => ({
@@ -184,11 +185,14 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
   };
 
   // General method to prepare and send data to the DB
-  const prepareAndSendData = (dataList: ISelectedValue[], type: FieldType) => {
-    const dataToSave = dataList.map((data) => ({
-      id: data.id,
-      name: data.name,
-      isCompetitive: data.isCompetitive,
+  const prepareAndSendData = (
+    dataList: IStands[] | ITeams[],
+    type: FieldType
+  ) => {
+    const dataToSave = dataList.map(({ id, name, isCompetitive }) => ({
+      id,
+      name,
+      isCompetitive: isCompetitive ?? false, // Safely fallback to false if undefined
     }));
     const jsonData = JSON.stringify(dataToSave);
 
@@ -202,19 +206,35 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
     }
   };
 
-  // React to changes in selectedStands
-  useEffect(() => {
-    prepareAndSendData(selectedStands, "stands");
-  }, [selectedStands]);
-
-  // React to changes in teamList
-  useEffect(() => {
-    prepareAndSendData(teamList, "teams");
-  }, [teamList]);
-
   useEffect(() => {
     selectedTheme && generateTeamNames(numberOfTeams, selectedTheme);
   }, [selectedTheme]);
+
+  // useEffect for managing the stands data
+  useEffect(() => {
+    // Check if the standsList prop is available
+    if (standsList) {
+      // If standsList is provided, update the local state 'selectedStands' with this data.
+      // stands data is fetched from the database and passed to this component
+      setSelectedStands(standsList);
+    } else {
+      // If no standsList is provided
+      // call 'prepareAndSendData' to update or handle the data differently.
+      prepareAndSendData(selectedStands, "stands");
+    }
+  }, [standsList, selectedStands]);
+
+  // useEffect for managing the stands data
+  useEffect(() => {
+    // Check if the teamsList prop is available
+    if (teamsList) {
+      // If teamsList is provided, update the local state 'setTeamList' with this data.
+      // teams data is fetched from the database and passed to this component
+      setTeamList(teamsList);
+    } else {
+      prepareAndSendData(teamList, "teams");
+    }
+  }, [teamsList, teamList]);
 
   // This effect re-runs when `selectedTheme` changes.
   const sendDataToDB = async (jsonData: string, dataField: FieldType) => {
