@@ -46,7 +46,12 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
     stands: null,
     teams: null
   });
-
+  
+  const inputPropsNumber = {
+    className: "input-number",
+    min: "0", // Minimum value
+    step: "1"
+  };
   // Get activity params
   const [fetchedActivityData, fetchedActivityDataLoading, fetchedActivityError] = useFetch<IActivityData>(
     ACTIVITY_API.activityById(chosenActivityId)
@@ -60,7 +65,6 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
         activity_date: fetchedActivityData.activity_date ? new Date(fetchedActivityData.activity_date) : null
       }));
     }
-    console.log(fetchedActivityData);
   }, [fetchedActivityData]);
 
   const handleInputChange = <T extends keyof IActivityData>(field: T, value: IActivityData[T]) => {
@@ -142,11 +146,11 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
                 <ControlButtons /> */}
           </Grid>
 
-          <Grid display="flex" justifyContent="space-between" width="100%" sx={{ mb: 2 }}>
+          <Grid display="flex" flexDirection="column" justifyContent="space-between" width="100%" sx={{ mb: 2 }}>
             <Typography>Nom de l'activité</Typography>
 
             <TextField
-              sx={{ width: 210 }}
+              sx={{ width: "100%" }}
               fullWidth
               value={activityData.name || ""}
               variant="outlined"
@@ -186,11 +190,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
                 type="number"
                 value={activityData?.global_duration || ""}
                 onChange={event => handleInputChange("global_duration", parseInt(event.target.value) || null)}
-                inputProps={{
-                  className: "input-number",
-                  min: "0", // Minimum value
-                  step: "1"
-                }}
+                inputProps={inputPropsNumber}
               />
             </Grid>
 
@@ -201,11 +201,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
                 type="number"
                 value={activityData?.rotation_duration || ""}
                 onChange={event => handleInputChange("rotation_duration", parseInt(event.target.value) || null)}
-                inputProps={{
-                  className: "input-number",
-                  min: "0", // Minimum value
-                  step: "1"
-                }}
+                inputProps={inputPropsNumber}
               />
             </Grid>
 
@@ -216,11 +212,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
                 type="number"
                 value={activityData?.stand_duration || ""}
                 onChange={event => handleInputChange("stand_duration", parseInt(event.target.value) || null)}
-                inputProps={{
-                  className: "input-number",
-                  min: "0", // Minimum value
-                  step: "1"
-                }}
+                inputProps={inputPropsNumber}
               />
             </Grid>
           </Grid>
