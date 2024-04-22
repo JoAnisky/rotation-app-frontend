@@ -19,12 +19,11 @@ import { SnackMessage } from "../../../types/SnackbarTypes";
 import CustomSnackbar from "../../CustomSnackbar";
 
 interface ActivityFormProps {
-  chosenActivityId: number | string | null;
+  chosenActivityId?: number;
 }
 
 const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
-  const [error, setError] = useState<boolean>(false);
 
   // State for open custom snackbar message
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
@@ -143,8 +142,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
         console.error(`Failed to update activity: `, error);
         setSnackbarOpen(true);
         setSnackMessageSeverity({
-          message: "Erreur lors de la mise a jour : ",
-          error,
+          message: "Erreur lors de la mise a jour : " + error,
           severity: "error",
         });
       }

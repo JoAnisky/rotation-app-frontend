@@ -6,7 +6,7 @@ import { SnackMessage } from "../types/SnackbarTypes";
 import { ACTIVITY_API } from "../routes/api/activityRoutes";
 
 interface ActivityChoiceProps {
-  setChosenActivityId: (activityId: number | string | null) => void;
+  setChosenActivityId: (activityId?: number) => void;
 }
 
 interface IActivities {

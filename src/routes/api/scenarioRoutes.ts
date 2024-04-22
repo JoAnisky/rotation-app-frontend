@@ -6,6 +6,6 @@ export const SCENARIO_API = {
   scenarios: `${SCENARIO_ENDPOINT}`,
 
   // Get, Update, or Delete a single activity by ID (GET, PUT/PATCH, DELETE methods)
-  scenarioByActivityId: (activityId: string): string =>
+  scenarioByActivityId: (activityId: number | undefined): string =>
     `${SCENARIO_ENDPOINT}/${activityId}`,
 };
