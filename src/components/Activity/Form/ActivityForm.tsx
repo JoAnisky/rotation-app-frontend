@@ -11,7 +11,7 @@ import {
 // import { ActivityContext } from "../../contexts/ActivityContext";
 import { IActivityData } from "../../../types/ActivityInterface";
 import TeamsStandsParams from "./TeamsStandsParams";
-import { ACTIVITY_API } from "../../../routes/api/activityRoutes";
+import { ACTIVITY_API } from "../../../routes/api/";
 import useFetch from "../../../hooks/useFetch";
 import { SnackMessage } from "../../../types/SnackbarTypes";
 import CustomSnackbar from "../../CustomSnackbar";

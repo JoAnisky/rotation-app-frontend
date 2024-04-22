@@ -3,9 +3,8 @@ import { Autocomplete, Button, TextField } from "@mui/material";
 import PageContainer from "../layouts/PageContainer";
 import Stand from "./Stand";
 import useFetch from "../hooks/useFetch";
-import { ANIMATOR_API } from "../routes/api/animatorRoutes";
-import { STANDS_API } from "../routes/api/standRoutes";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import { STANDS_API , ANIMATOR_API } from "../routes/api/";
 
 interface IAnimator {
   id: number;

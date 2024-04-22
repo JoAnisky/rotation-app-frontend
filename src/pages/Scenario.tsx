@@ -10,7 +10,7 @@ import {
   ListItem,
 } from "@mui/material";
 import useFetch from "../hooks/useFetch";
-import { SCENARIO_API } from "../routes/api/scenarioRoutes";
+import { SCENARIO_API } from "../routes/api/";
 
 type Competitor = {
   id: number;

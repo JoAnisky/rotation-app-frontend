@@ -11,10 +11,9 @@ import {
 } from "@mui/material";
 import { STANDS_API } from "../../../routes/api/standRoutes";
 import useFetch from "../../../hooks/useFetch";
-import { ACTIVITY_API } from "../../../routes/api/activityRoutes";
+import { ACTIVITY_API, SCENARIO_API } from "../../../routes/api/"
 import themedTeamsNames from "../../../utils/themedTeamsNames";
 import CloseIcon from "@mui/icons-material/Close";
-import { SCENARIO_API } from "../../../routes/api/scenarioRoutes";
 import CustomSnackbar from "../../CustomSnackbar";
 import { Severity, SnackMessage } from "../../../types/SnackbarTypes";
 

@@ -3,7 +3,7 @@ import { useState } from "react";
 import ActivitySelection from "../components/Activity/ActivitySelection";
 import CustomSnackbar from "../components/CustomSnackbar";
 import { SnackMessage } from "../types/SnackbarTypes";
-import { ACTIVITY_API } from "../routes/api/activityRoutes";
+import { ACTIVITY_API } from "../routes/api/";
 
 interface ActivityChoiceProps {
   setChosenActivityId: (activityId?: number) => void;
