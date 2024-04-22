@@ -1,9 +1,9 @@
-import { Button, Container, Grid, TextField, Typography } from "@mui/material";
 import { useState } from "react";
-import ActivitySelection from "../components/Activity/ActivitySelection";
-import CustomSnackbar from "../components/CustomSnackbar";
-import { SnackMessage } from "../types/SnackbarTypes";
-import { ACTIVITY_API } from "../routes/api/";
+import { Button, Container, Grid, TextField, Typography } from "@mui/material";
+import ActivitySelection from "@/components/Activity/ActivitySelection";
+import CustomSnackbar from "@/components/CustomSnackbar";
+import { SnackMessage } from "@/types/SnackbarTypes";
+import { ACTIVITY_API } from "@/routes/api/";
 
 interface ActivityChoiceProps {
   setChosenActivityId: (activityId?: number) => void;
@@ -55,7 +55,7 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
 
   const createActivity = async (activityName: string) => {
     // User ID comes from the Gamemaster
-    const userId = 7;
+    const userId = 3;
     const options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
