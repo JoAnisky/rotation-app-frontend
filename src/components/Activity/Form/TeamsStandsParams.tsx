@@ -1,32 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  Autocomplete,
-  Box,
-  Button,
-  Grid,
-  IconButton,
-  TextField,
-  Typography,
-  Switch,
-} from "@mui/material";
-import { STANDS_API } from "../../../routes/api/standRoutes";
-import useFetch from "../../../hooks/useFetch";
-import { ACTIVITY_API, SCENARIO_API } from "../../../routes/api/"
-import themedTeamsNames from "../../../utils/themedTeamsNames";
+import { Autocomplete, Box, Button, Grid, IconButton, TextField, Typography, Switch } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import CustomSnackbar from "../../CustomSnackbar";
-import { Severity, SnackMessage } from "../../../types/SnackbarTypes";
+import useFetch from "@/hooks/useFetch";
+import themedTeamsNames from "@/utils/themedTeamsNames";
+import CustomSnackbar from "@/components/CustomSnackbar";
+import { ACTIVITY_API, SCENARIO_API, STANDS_API } from "@/routes/api/";
+import { Severity, SnackMessage } from "@/types/SnackbarTypes";
 
-interface ICommon {
+interface ITeams {
   id: number;
   name: string;
 }
-interface IStands extends ICommon {
+interface IStands extends ITeams {
   isCompetitive: boolean;
-}
-
-interface ITeams extends ICommon {
-  isCompetitive?: boolean; // Assuming isCompetitive might be optional for teams
 }
 
 interface ToggleStates {
@@ -40,20 +26,15 @@ interface ITeamsStandsParamsProps {
 }
 type FieldType = "stands" | "teams"; // This is now a type alias for use directly as a type
 
-const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
-  activityId,
-  standsList,
-  teamsList,
-}) => {
+const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, standsList, teamsList }) => {
   // State for open custom snackbar message
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
 
   // State for manage SnackBar message and color (severity)
-  const [snackMessageSeverity, setSnackMessageSeverity] =
-    useState<SnackMessage>({
-      message: "",
-      severity: "success", // Default severity is 'success'
-    });
+  const [snackMessageSeverity, setSnackMessageSeverity] = useState<SnackMessage>({
+    message: "",
+    severity: "success" // Default severity is 'success'
+  });
 
   // Number of teams selected
   const [numberOfTeams, setNumberOfTeams] = useState<number>(0);
@@ -71,16 +52,14 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
   const [toggleStates, setToggleStates] = useState<ToggleStates>({});
 
   // Stands for user selection fetched from : All Stand entries
-  const [fetchedStandsData, standsLoading] = useFetch<IStands[]>(
-    STANDS_API.stands
-  );
+  const [fetchedStandsData, standsLoading] = useFetch<IStands[]>(STANDS_API.stands);
 
   // Get all themedTeamsNames indexes
   const categories = Object.keys(themedTeamsNames);
   // Replace all "_" in categories names with empty space and sort category by name
   const formattedCategories = categories
     .map(
-      (category) => category.replace(/_/g, " ") // This replaces all underscores in the string
+      category => category.replace(/_/g, " ") // This replaces all underscores in the string
     )
     .sort();
 
@@ -96,18 +75,16 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
   const handleRemoveTeam = (indexToRemove: number) => {
     const newTeamList = teamList.filter((_, index) => index !== indexToRemove);
     setTeamList(newTeamList);
-    setNumberOfTeams((prev) => prev - 1);
+    setNumberOfTeams(prev => prev - 1);
   };
 
   // Handler to update toggle state
   const handleToggleCompetitive = (id: number, checked: boolean): void => {
-    setToggleStates((prev) => ({
+    setToggleStates(prev => ({
       ...prev,
-      [id]: checked,
+      [id]: checked
     }));
-    const standToToggleIndex = selectedStands.findIndex(
-      (stand) => stand.id === id
-    );
+    const standToToggleIndex = selectedStands.findIndex(stand => stand.id === id);
     // Perform a safety check to ensure the stand was found
     if (standToToggleIndex !== -1) {
       // Get the stand to toggle
@@ -116,14 +93,14 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
       // Create a new copy of the stand with the updated isCompetitive property
       const updatedStand = {
         ...standToToggle,
-        isCompetitive: checked,
+        isCompetitive: checked
       };
 
       // Create a new array for the stands that includes this updated stand
       const updatedStands = [
         ...selectedStands.slice(0, standToToggleIndex),
         updatedStand,
-        ...selectedStands.slice(standToToggleIndex + 1),
+        ...selectedStands.slice(standToToggleIndex + 1)
       ];
 
       // Set the updated stands array back to the state
@@ -135,15 +112,11 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
 
   // Make sure to update the toggle state when a stand is removed
   const handleRemoveStand = (idToRemove: number, indexToRemove: number) => {
-    const removedStandIndex = selectedStands.findIndex(
-      (stand) => stand.id === idToRemove
-    );
+    const removedStandIndex = selectedStands.findIndex(stand => stand.id === idToRemove);
     if (removedStandIndex !== -1) {
       const removedStand = selectedStands[removedStandIndex];
 
-      const newStandList = selectedStands.filter(
-        (_, index) => index !== removedStandIndex
-      );
+      const newStandList = selectedStands.filter((_, index) => index !== removedStandIndex);
 
       setSelectedStands(newStandList);
 
@@ -155,17 +128,14 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
     }
   };
 
-  const handleStandSelection = (
-    event: React.SyntheticEvent<Element, Event>,
-    value: IStands[] | IStands | null
-  ) => {
+  const handleStandSelection = (event: React.SyntheticEvent<Element, Event>, value: IStands[] | IStands | null) => {
     let newStands: IStands[] = [];
 
     if (Array.isArray(value)) {
-      newStands = value.map((stand) => ({
+      newStands = value.map(stand => ({
         id: stand.id,
         name: stand.name,
-        isCompetitive: stand.isCompetitive ?? false,
+        isCompetitive: stand.isCompetitive ?? false
       }));
     } else if (value) {
       // Check if value is not null or undefined
@@ -173,8 +143,8 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
         {
           id: value.id,
           name: value.name,
-          isCompetitive: value.isCompetitive ?? false,
-        },
+          isCompetitive: value.isCompetitive ?? false
+        }
       ]; // Wrap single object into an array
     } else {
       newStands = [];
@@ -184,21 +154,38 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
   };
 
   // General method to prepare and send data to the DB
-  const prepareAndSendData = (
-    dataList: IStands[] | ITeams[],
-    type: FieldType
-  ) => {
-    const dataToSave = dataList.map(({ id, name, isCompetitive }) => ({
-      id,
-      name,
-      isCompetitive: isCompetitive ?? false, // Safely fallback to false if undefined
-    }));
+  const prepareAndSendData = (dataList: (IStands | ITeams)[], type: FieldType) => {
+    let dataToSave;
+    if (type === "teams") {
+      // Pour les équipes, ne pas inclure `isCompetitive`
+      dataToSave = dataList.map(({ id, name }) => ({
+        id,
+        name
+      }));
+    } else {
+      dataToSave = dataList.map(item => {
+        if ("isCompetitive" in item) {
+          // Type guard to check if the item is an IStands
+          // Item is treated as IStands
+          return {
+            id: item.id,
+            name: item.name,
+            isCompetitive: item.isCompetitive
+          };
+        } else {
+          // This case should theoretically never happen if your data handling is correct
+          console.error("Trying to process ITeams as IStands", item);
+          return {
+            id: item.id,
+            name: item.name,
+            isCompetitive: false // Default value or handle error
+          };
+        }
+      });
+    }
     const jsonData = JSON.stringify(dataToSave);
+    const hasBeenSentRef = type === "stands" ? hasStandsBeenSent : hasTeamsBeenSent;
 
-    const hasBeenSentRef =
-      type === "stands" ? hasStandsBeenSent : hasTeamsBeenSent;
-
-    // Condition to send data: Non-empty data or previously sent data now empty
     if (jsonData !== "[]" || (jsonData === "[]" && hasBeenSentRef.current)) {
       sendDataToDB(jsonData, type);
       hasBeenSentRef.current = true; // Mark that data has been sent
@@ -211,41 +198,45 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
 
   // useEffect for managing the stands data
   useEffect(() => {
+    prepareAndSendData(selectedStands, "stands");
+  }, [selectedStands]);
+
+  // useEffect for managing the stands data
+  useEffect(() => {
+    prepareAndSendData(teamList, "teams");
+  }, [teamList]);
+
+  // useEffect for managing the stands data
+  useEffect(() => {
     // Check if the standsList prop is available
     if (standsList) {
       // If standsList is provided, update the local state 'selectedStands' with this data.
       // stands data is fetched from the database and passed to this component
       setSelectedStands(standsList);
-    } else {
-      // If no standsList is provided
-      // call 'prepareAndSendData' to update or handle the data differently.
-      prepareAndSendData(selectedStands, "stands");
     }
-  }, [standsList, selectedStands]);
+  }, [standsList]);
 
-  // useEffect for managing the stands data
+  // useEffect for managing the teams data
   useEffect(() => {
     // Check if the teamsList prop is available
     if (teamsList) {
       // If teamsList is provided, update the local state 'setTeamList' with this data.
       // teams data is fetched from the database and passed to this component
       setTeamList(teamsList);
-    } else {
-      prepareAndSendData(teamList, "teams");
     }
-  }, [teamsList, teamList]);
+  }, [teamsList]);
 
   // This effect re-runs when `selectedTheme` changes.
   const sendDataToDB = async (jsonData: string, dataField: FieldType) => {
     try {
       // Construct payload dynamically based on the dataField
       const payload = {
-        [dataField]: JSON.parse(jsonData),
+        [dataField]: JSON.parse(jsonData)
       };
       const response = await fetch(`${ACTIVITY_API.activityById(activityId)}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload)
       });
       if (!response.ok) throw new Error("Failed to submit data");
       console.log("Data submitted successfully for", dataField);
@@ -272,7 +263,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
       setSnackbarOpen(true);
       setSnackMessageSeverity({
         message: "Il faudrait choisir un thème",
-        severity: "warning",
+        severity: "warning"
       });
       return;
     }
@@ -284,7 +275,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
         setSnackbarOpen(true);
         setSnackMessageSeverity({
           message: "Il faudrait choisir un nombre d'équipes",
-          severity: "warning",
+          severity: "warning"
         });
       }
       return;
@@ -299,7 +290,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
 
     const teamObjects = selectedNames.map((name, index) => ({
       id: index,
-      name,
+      name
     }));
 
     setTeamList(teamObjects);
@@ -310,10 +301,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
    * @param event
    * @param value
    */
-  const handleThemeChange = (
-    event: React.SyntheticEvent<Element, Event>,
-    value: string | null
-  ) => {
+  const handleThemeChange = (event: React.SyntheticEvent<Element, Event>, value: string | null) => {
     setSelectedTheme(value);
   };
 
@@ -337,7 +325,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
       setSnackbarOpen(true);
       setSnackMessageSeverity({
         message: errorMessage,
-        severity: "error",
+        severity: "error"
       });
       return; // Stop execution if the condition is not met
     }
@@ -351,13 +339,10 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
     let message = "Scenario généré avec succès"; // Default success message
     let details = " ";
     try {
-      const response = await fetch(
-        `${SCENARIO_API.scenarioByActivityId(activityId)}/generate`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const response = await fetch(`${SCENARIO_API.scenarioByActivityId(activityId)}/generate`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" }
+      });
       const data = await response.json(); // Assuming the server responds with JSON
       details = data.details;
       if (!response.ok) {
@@ -374,9 +359,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
       }
     } catch (error) {
       severity = "error";
-      message =
-        error.message + " : \n" + details ||
-        "An error occurred while processing your request.";
+      message = error.message + " : \n" + details || "An error occurred while processing your request.";
       console.error("Error submitting data:", error);
     }
     // Set the snackbar message and severity
@@ -395,13 +378,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
         <Typography variant="h6" component="h2" gutterBottom sx={{ mb: 2 }}>
           Gestion des stands
         </Typography>
-        <Grid
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          width="100%"
-          sx={{ mb: 2 }}
-        >
+        <Grid display="flex" flexDirection="column" justifyContent="center" width="100%" sx={{ mb: 2 }}>
           <Autocomplete
             multiple
             disablePortal
@@ -410,14 +387,12 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
             options={stands}
             fullWidth
             sx={{ mb: 2 }}
-            getOptionLabel={(option) => option.name}
+            getOptionLabel={option => option.name}
             onChange={handleStandSelection}
             loading={standsLoading}
             loadingText="Chargement..."
             noOptionsText="Aucune option"
-            renderInput={(params) => (
-              <TextField {...params} label="Choisir ou créer des stands " />
-            )}
+            renderInput={params => <TextField {...params} label="Choisir ou créer des stands " />}
           />
           {/* Display selected stands if not empty*/}
           {selectedStands.length > 0 && ""}
@@ -439,9 +414,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
                   Competitif
                   <Switch
                     checked={toggleStates[stand.id] || false}
-                    onChange={(e) =>
-                      handleToggleCompetitive(stand.id, e.target.checked)
-                    }
+                    onChange={e => handleToggleCompetitive(stand.id, e.target.checked)}
                     name="isCompetitive"
                     color="default"
                   />
@@ -474,9 +447,9 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
               className: "input-number",
               min: "0", // Minimum value
               max: "30",
-              step: "1",
+              step: "1"
             }}
-            onChange={(event) => {
+            onChange={event => {
               const numTeams = parseInt(event.target.value, 10);
               if (!isNaN(numTeams)) {
                 setNumberOfTeams(numTeams);
@@ -486,22 +459,15 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
           />
         </Grid>
 
-        <Grid
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          width="100%"
-        >
+        <Grid display="flex" flexDirection="column" justifyContent="center" width="100%">
           <Autocomplete
             disablePortal
             id="theme-autocomplete"
             options={formattedCategories}
             sx={{ mb: 2 }}
-            getOptionLabel={(option) => option}
+            getOptionLabel={option => option}
             onChange={handleThemeChange}
-            renderInput={(params) => (
-              <TextField {...params} label="Choisir un thème" />
-            )}
+            renderInput={params => <TextField {...params} label="Choisir un thème" />}
           />
           {/* <Button
             variant="outlined"
@@ -520,19 +486,9 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
           {teamList.length > 0 && (
             <Box display="flex" flexWrap="wrap" gap={2} sx={{ mb: 2 }}>
               {teamList.map((team, index) => (
-                <Box
-                  key={index}
-                  bgcolor="primary.main"
-                  color="primary.contrastText"
-                  p={1}
-                  borderRadius={1}
-                >
+                <Box key={index} bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1}>
                   Équipe {team.name}
-                  <IconButton
-                    onClick={() => handleRemoveTeam(index)}
-                    size="small"
-                    sx={{ color: "grey.200" }}
-                  >
+                  <IconButton onClick={() => handleRemoveTeam(index)} size="small" sx={{ color: "grey.200" }}>
                     <CloseIcon />
                   </IconButton>
                 </Box>
@@ -540,18 +496,8 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
             </Box>
           )}
         </Grid>
-        <Grid
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          width="100%"
-        >
-          <Button
-            variant="outlined"
-            color="secondary"
-            sx={{ minWidth: 300 }}
-            onClick={handleGetScenario}
-          >
+        <Grid display="flex" flexDirection="column" justifyContent="center" width="100%">
+          <Button variant="outlined" color="secondary" sx={{ minWidth: 300 }} onClick={handleGetScenario}>
             Générer les rotations
           </Button>
         </Grid>

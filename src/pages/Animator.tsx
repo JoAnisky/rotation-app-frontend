@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Autocomplete, Button, TextField } from "@mui/material";
-import PageContainer from "../layouts/PageContainer";
+import PageContainer from "@/layouts/PageContainer";
 import Stand from "./Stand";
-import useFetch from "../hooks/useFetch";
-import { useLocalStorage } from "../hooks/useLocalStorage";
-import { STANDS_API , ANIMATOR_API } from "../routes/api/";
+import useFetch from "@/hooks/useFetch";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { STANDS_API , ANIMATOR_API } from "@/routes/api/";
 
 interface IAnimator {
   id: number;

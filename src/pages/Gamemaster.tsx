@@ -1,8 +1,8 @@
 import { useState } from "react";
-import useActiveComponent from "../hooks/useActiveComponent";
-import NavbarUp from "../components/NavbarUp";
-import ActivityForm from "../components/Activity/Form/ActivityForm";
-import NavbarDown from "../components/NavbarDown";
+import useActiveComponent from "@/hooks/useActiveComponent";
+import NavbarUp from "@/components/NavbarUp";
+import ActivityForm from "@/components/Activity/Form/ActivityForm";
+import NavbarDown from "@/components/NavbarDown";
 import Scenario from "./Scenario";
 import GeneralView from "./GeneralView";
 import ActivityChoice from "./ActivityChoice";

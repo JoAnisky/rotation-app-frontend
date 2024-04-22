@@ -1,8 +1,8 @@
 import React, { useCallback, useContext, useEffect } from "react";
 import { Button } from "@mui/material";
-import { ACTIVITY_API } from "../../routes/api/activityRoutes";
-import { STOPWATCH_API } from "../../routes/api/stopwatchRoutes";
-import CounterContext from "../../contexts/CounterContext";
+import { ACTIVITY_API } from "@/routes/api/activityRoutes";
+import { STOPWATCH_API } from "@/routes/api/stopwatchRoutes";
+import CounterContext from "@/contexts/CounterContext";
 
 const ControlButtons: React.FC = () => {
   

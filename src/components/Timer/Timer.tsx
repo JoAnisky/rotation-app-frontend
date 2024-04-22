@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect } from "react";
-import CounterContext from "../../contexts/CounterContext";
-import { STOPWATCH_API } from "../../routes/api/stopwatchRoutes";
+import CounterContext from "@/contexts/CounterContext";
+import { STOPWATCH_API } from "@/routes/api/";
 
 const Timer: React.FC = () => {
   const { counter, isActive, isPaused, setCounter } =

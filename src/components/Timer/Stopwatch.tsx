@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import Timer from "./Timer";
-import { ActivityContext } from "../../contexts/ActivityContext";
-import CounterContext from "../../contexts/CounterContext";
+import { ActivityContext } from "@/contexts/ActivityContext";
+import CounterContext from "@/contexts/CounterContext";
 
 const Stopwatch: React.FC = () => {
 

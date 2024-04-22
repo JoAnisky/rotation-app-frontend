@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
-import STATUS from "../utils/statusCode";
-import { ActivityContext } from "../contexts/ActivityContext";
+import STATUS from "@/utils/statusCode";
+import { ActivityContext } from "@/contexts/ActivityContext";
 
 const Status: React.FC = () => {
   const [initialStatus, setActivityStatus] = useState<string>("");

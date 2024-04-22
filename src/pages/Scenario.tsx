@@ -1,16 +1,7 @@
 import { useEffect, useState } from "react";
-import {
-  Box,
-  CssBaseline,
-  Typography,
-  Card,
-  CardContent,
-  CardHeader,
-  List,
-  ListItem,
-} from "@mui/material";
-import useFetch from "../hooks/useFetch";
-import { SCENARIO_API } from "../routes/api/";
+import { Box, CssBaseline, Typography, Card, CardContent, CardHeader, List, ListItem } from "@mui/material";
+import useFetch from "@/hooks/useFetch";
+import { SCENARIO_API } from "@/routes/api/";
 
 type Competitor = {
   id: number;
@@ -40,11 +31,9 @@ type ApiResponse = {
 interface ScenarioProps {
   chosenActivityId?: number;
 }
-const Scenario: React.FC<ScenarioProps> = ({chosenActivityId}) => {
+const Scenario: React.FC<ScenarioProps> = ({ chosenActivityId }) => {
   const [scenario, setScenario] = useState<ScenarioData[]>([]);
-  const [data, loading, error] = useFetch<ApiResponse>(
-    SCENARIO_API.scenarioByActivityId(chosenActivityId)
-  );
+  const [data, loading, error] = useFetch<ApiResponse>(SCENARIO_API.scenarioByActivityId(chosenActivityId));
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -55,20 +44,20 @@ const Scenario: React.FC<ScenarioProps> = ({chosenActivityId}) => {
   useEffect(() => {
     // console.log(scenario);
   }, [scenario]); // To log the updated state
-  
+
   return (
-    <Box sx={{ flexGrow: 1, overflowY: 'auto', padding: 3 }}>
+    <Box sx={{ flexGrow: 1, overflowY: "auto", padding: 3 }}>
       <CssBaseline />
       {/* Content Area */}
       <Box
         flexGrow={1}
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 2,  // Adding some padding inside the box
-          overflow: 'auto'  // Allows scrolling inside this box if content overflows
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          p: 2, // Adding some padding inside the box
+          overflow: "auto" // Allows scrolling inside this box if content overflows
         }}
       >
         {loading && (
@@ -78,12 +67,7 @@ const Scenario: React.FC<ScenarioProps> = ({chosenActivityId}) => {
         )}
         {error && (
           <Box>
-            <Typography
-              component="h1"
-              variant="h5"
-              align="center"
-              sx={{ mb: 2 }}
-            >
+            <Typography component="h1" variant="h5" align="center" sx={{ mb: 2 }}>
               Oups :(
             </Typography>
             {error.message}
@@ -94,10 +78,7 @@ const Scenario: React.FC<ScenarioProps> = ({chosenActivityId}) => {
             <Typography>Affichage du scenario :</Typography>
             {scenario.length > 0 ? (
               scenario.map((scenario, index) => (
-                <Card
-                  key={index}
-                  sx={{ mb: 1, width: "90%", maxWidth: 700, padding: 0 }}
-                >
+                <Card key={index} sx={{ mb: 1, width: "90%", maxWidth: 700, padding: 0 }}>
                   <CardHeader title={`Tour n°${index + 1}`} />
                   <CardContent>
                     {Object.entries(scenario).map(([key, entries]) => (

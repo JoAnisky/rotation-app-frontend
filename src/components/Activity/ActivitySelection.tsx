@@ -1,7 +1,7 @@
 import { Autocomplete, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import useFetch from "../../hooks/useFetch";
-import { ACTIVITY_API } from "../../routes/api/";
+import useFetch from "@/hooks/useFetch";
+import { ACTIVITY_API } from "@/routes/api/";
 
 interface IActivites {
   id: number;

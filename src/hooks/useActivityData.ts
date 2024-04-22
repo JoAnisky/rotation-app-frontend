@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { ACTIVITY_API } from "../routes/api/activityRoutes";
-import { IActivityData } from "../types/ActivityInterface";
+import { ACTIVITY_API } from "@/routes/api/activityRoutes";
+import { IActivityData } from "@/types/ActivityInterface";
 import useFetch from "./useFetch";
 
-const useActivityData = (id: string) => {
+const useActivityData = (id: number) => {
   const [activityData, setActivityData] = useState<IActivityData | null>(null);
   const [data, loading, error] = useFetch<IActivityData>(
     ACTIVITY_API.activityById(id)
