@@ -37,11 +37,13 @@ type ApiResponse = {
   current_scenario: null; // Adjust this as needed if it can be other types
   activity: Activity;
 }[];
-
-const Scenario = () => {
+interface ScenarioProps {
+  chosenActivityId?: number;
+}
+const Scenario: React.FC<ScenarioProps> = ({chosenActivityId}) => {
   const [scenario, setScenario] = useState<ScenarioData[]>([]);
   const [data, loading, error] = useFetch<ApiResponse>(
-    SCENARIO_API.scenarioByActivityId("27")
+    SCENARIO_API.scenarioByActivityId(chosenActivityId)
   );
 
   useEffect(() => {
@@ -53,7 +55,7 @@ const Scenario = () => {
   useEffect(() => {
     // console.log(scenario);
   }, [scenario]); // To log the updated state
-
+  
   return (
     <Box sx={{ flexGrow: 1, overflowY: 'auto', padding: 3 }}>
       <CssBaseline />

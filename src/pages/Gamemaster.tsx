@@ -16,13 +16,13 @@ interface IPageContainerProps {
 const Gamemaster: React.FC<IPageContainerProps> = ({
   handleChangeSelection,
 }) => {
-  const [chosenActivityId, setChosenActivityId] = useState<number | string | null>(null);
+  const [chosenActivityId, setChosenActivityId] = useState<number | undefined>(undefined);
 
   const { setActiveComponent, renderActiveComponent } = useActiveComponent({
     defaultComponent: "ActivityForm",
     components: {
       ActivityForm: <ActivityForm chosenActivityId={chosenActivityId} />,
-      Scenario: <Scenario />,
+      Scenario: <Scenario chosenActivityId={chosenActivityId}/>,
       GeneralView: <GeneralView />,
     },
   });

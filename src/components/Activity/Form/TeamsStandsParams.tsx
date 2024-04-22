@@ -38,7 +38,7 @@ interface ISelectedValue {
 }
 
 interface ITeamsStandsParamsProps {
-  activityId: number | string | null;
+  activityId?: number;
 }
 type FieldType = "stands" | "teams"; // This is now a type alias for use directly as a type
 
@@ -223,7 +223,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
       const payload = {
         [dataField]: JSON.parse(jsonData),
       };
-      const response = await fetch(`${ACTIVITY_API.activities}/${27}`, {
+      const response = await fetch(`${ACTIVITY_API.activityById(activityId)}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -333,7 +333,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
     let details = " ";
     try {
       const response = await fetch(
-        `${SCENARIO_API.scenarioByActivityId("27")}/generate`,
+        `${SCENARIO_API.scenarioByActivityId(activityId)}/generate`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -345,7 +345,6 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
         throw new Error(data.message || "Unknown error occurred");
       }
 
-      console.log(data);
       // Optionally check the 'success' flag if it's included in the response
       if (data.success === false) {
         severity = "warning"; // Use 'warning' or 'error' based on your business logic
@@ -355,7 +354,6 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({
         details = data.details;
       }
     } catch (error) {
-      console.log(typeof error);
       severity = "error";
       message =
         error.message + " : \n" + details ||
