@@ -194,16 +194,19 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
 
   useEffect(() => {
     selectedTheme && generateTeamNames(numberOfTeams, selectedTheme);
+    // eslint-disable-next-line
   }, [selectedTheme]);
 
   // useEffect for managing the stands data
   useEffect(() => {
     prepareAndSendData(selectedStands, "stands");
+    // eslint-disable-next-line
   }, [selectedStands]);
 
   // useEffect for managing the stands data
   useEffect(() => {
     prepareAndSendData(teamList, "teams");
+    // eslint-disable-next-line
   }, [teamList]);
 
   // useEffect for managing the stands data
@@ -251,7 +254,6 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
    * @returns void
    */
   const generateTeamNames = (numberOfTeams: number, theme: string) => {
-    console.log(theme);
 
     // Immediate return if the theme or number of teams is not initialized properly
     if (!theme || numberOfTeams === null) {
@@ -310,8 +312,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
    * @returns
    */
   const handleGetScenario = () => {
-    // Check if no teams have been selected (numberOfTeams should be greater than 0)
-    // Check if no stands have been selected (selectedStands.length should be greater than 0)
+    // Check if no teams/Stands have been selected (numberOfTeams/selectedStands.length should be greater than 0)
     if (numberOfTeams <= 0 || selectedStands.length === 0) {
       let errorMessage = "Il faudrait choisir ";
       if (numberOfTeams <= 0 && selectedStands.length === 0) {
@@ -358,9 +359,15 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
         details = data.details;
       }
     } catch (error) {
-      severity = "error";
-      message = error.message + " : \n" + details || "An error occurred while processing your request.";
+      if (error instanceof Error) {
+        // Now TypeScript knows `error` is an Error object, hence `message` property can be safely accessed.
+        message = error.message + " : \n" + details || "An error occurred while processing your request.";
+      } else {
+        // If it's not an Error object, handle it differently or throw again
+        message = "An unknown error occurred and it's not an instance of Error.";
+      }
       console.error("Error submitting data:", error);
+      severity = "error";
     }
     // Set the snackbar message and severity
     setSnackbarOpen(true);
@@ -469,14 +476,6 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
             onChange={handleThemeChange}
             renderInput={params => <TextField {...params} label="Choisir un thème" />}
           />
-          {/* <Button
-            variant="outlined"
-            color="secondary"
-            sx={{ minWidth: 300 }}
-            onClick={generateTeamNames}
-          >
-            Générer la liste des équipes
-          </Button> */}
         </Grid>
         <Grid item xs={12}>
           <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
