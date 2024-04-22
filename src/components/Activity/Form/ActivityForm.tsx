@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import {
-  Alert,
-  //   Autocomplete,
   Box,
   Button,
   Container,
@@ -53,6 +51,8 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
     activity_start_time: null,
     pause_start_time: null,
     pause_duration: null,
+    stands : null,
+    teams: null
   });
 
   // Get activity params
@@ -294,7 +294,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
           </Grid>
           {/* END Container for Time params */}
 
-          {<TeamsStandsParams activityId={chosenActivityId} />}
+          {<TeamsStandsParams activityId={chosenActivityId} standsList={activityData.stands} teamsList={activityData.teams} />}
 
           {/* Container for Params save */}
           <Grid
