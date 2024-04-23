@@ -23,10 +23,11 @@ interface ITeamsStandsParamsProps {
   activityId?: number;
   standsList: IStands[] | null;
   teamsList: ITeams[] | null;
+  numberOfTeamsStored: number | null;
 }
-type FieldType = "stands" | "teams"; // This is now a type alias for use directly as a type
+type FieldType = "stands" | "teams" | "nb_teams"; // Datatype corresponding to DB fields to update
 
-const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, standsList, teamsList }) => {
+const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, standsList, teamsList, numberOfTeamsStored }) => {
   // State for open custom snackbar message
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
 
@@ -38,6 +39,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
 
   // Number of teams selected
   const [numberOfTeams, setNumberOfTeams] = useState<number>(0);
+
   // Theme for teams name
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   // teams list
@@ -57,21 +59,67 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
   // Get all themedTeamsNames indexes
   const categories = Object.keys(themedTeamsNames);
   // Replace all "_" in categories names with empty space and sort category by name
-  const formattedCategories = categories
-    .map(
-      category => category.replace(/_/g, " ") // This replaces all underscores in the string
-    )
-    .sort();
+  const formattedCategories = categories.map(category => category.replace(/_/g, " ")).sort();// This replaces all underscores in the string
+
+   // Ajout de useRef pour contrôler l'initialisation des appels API
+  const initialRender = useRef(true);
 
   // Sets Stands for user selection
   useEffect(() => {
     if (Array.isArray(fetchedStandsData)) {
       setStands(fetchedStandsData);
-    } else {
-      setStands([]);
     }
   }, [fetchedStandsData]);
+  
+  useEffect(() => {
+    selectedTheme && generateTeamNames(numberOfTeams, selectedTheme);
+    // eslint-disable-next-line
+  }, [selectedTheme]);
 
+  // useEffect for managing the stands data
+  useEffect(() => {
+    prepareAndSendData(selectedStands, "stands");
+    // eslint-disable-next-line
+  }, [selectedStands]);
+
+  // useEffect for managing the stands data
+  useEffect(() => {
+    prepareAndSendData(teamList, "teams");
+    // eslint-disable-next-line
+  }, [teamList]);
+
+  // useEffect for managing the stands data
+  useEffect(() => {
+    // Check if the standsList prop is available
+    if (standsList) {
+      // If standsList is provided, update the local state 'selectedStands' with this data.
+      // stands data is fetched from the database and passed to this component
+      setSelectedStands(standsList);
+    }
+  }, [standsList]);
+
+  // useEffect for managing the teams data
+  useEffect(() => {
+    // Check if the teamsList prop is available
+    if (teamsList) {
+      // If teamsList is provided, update the local state 'setTeamList' with this data.
+      // teams data is fetched from the database and passed to this component
+      setTeamList(teamsList);
+    }
+  }, [teamsList]);
+
+  // useEffect for managing the numberOfTeams data
+  useEffect(() => {
+    // Check if the numberOfTeamsStored prop is available
+    if (numberOfTeamsStored) {
+      // If numberOfTeamsStored is provided, update the local state 'setNumberOfTeams' with this data.
+      // numberOfTeamsStored data is fetched from the database and passed to this component
+      setNumberOfTeams(numberOfTeamsStored);
+    }
+  }, [numberOfTeamsStored]);
+
+
+  // Remove team method
   const handleRemoveTeam = (indexToRemove: number) => {
     const newTeamList = teamList.filter((_, index) => index !== indexToRemove);
     setTeamList(newTeamList);
@@ -110,7 +158,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
     }
   };
 
-  // Make sure to update the toggle state when a stand is removed
+  // Remove a stand from selectedStands + update the toggle state when a stand is removed
   const handleRemoveStand = (idToRemove: number, indexToRemove: number) => {
     const removedStandIndex = selectedStands.findIndex(stand => stand.id === idToRemove);
     if (removedStandIndex !== -1) {
@@ -128,6 +176,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
     }
   };
 
+  // Stand selection in stand list
   const handleStandSelection = (event: React.SyntheticEvent<Element, Event>, value: IStands[] | IStands | null) => {
     let newStands: IStands[] = [];
 
@@ -153,81 +202,54 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
     setSelectedStands(newStands);
   };
 
-  // General method to prepare and send data to the DB
-  const prepareAndSendData = (dataList: (IStands | ITeams)[], type: FieldType) => {
+  /**
+   * General method to prepare and send data to the DB
+   * @param dataList Data to update
+   * @param fieldType field to update
+   */
+  const prepareAndSendData = (dataList: (IStands | ITeams)[], fieldType: FieldType) => {
     let dataToSave;
-    if (type === "teams") {
-      // Pour les équipes, ne pas inclure `isCompetitive`
+  
+    if (fieldType === "teams") {
+      // Count teams only if dataList is not empty to prevent zeroing out on initial load
+      if (dataList.length > 0) {
+        sendDataToDB(JSON.stringify(numberOfTeams), "nb_teams");
+      }
+      
       dataToSave = dataList.map(({ id, name }) => ({
         id,
         name
       }));
-    } else {
+      // Check if data is not empty or has been sent once already
+      if (dataToSave.length > 0 || hasTeamsBeenSent.current) {
+        sendDataToDB(JSON.stringify(dataToSave), fieldType);
+        hasTeamsBeenSent.current = true; // Mark that data has been sent
+      }
+    } else {  // Similar logic applied for stands
       dataToSave = dataList.map(item => {
         if ("isCompetitive" in item) {
-          // Type guard to check if the item is an IStands
-          // Item is treated as IStands
           return {
             id: item.id,
             name: item.name,
             isCompetitive: item.isCompetitive
           };
         } else {
-          // This case should theoretically never happen if your data handling is correct
           console.error("Trying to process ITeams as IStands", item);
           return {
             id: item.id,
             name: item.name,
-            isCompetitive: false // Default value or handle error
+            isCompetitive: false
           };
         }
       });
-    }
-    const jsonData = JSON.stringify(dataToSave);
-    const hasBeenSentRef = type === "stands" ? hasStandsBeenSent : hasTeamsBeenSent;
-
-    if (jsonData !== "[]" || (jsonData === "[]" && hasBeenSentRef.current)) {
-      sendDataToDB(jsonData, type);
-      hasBeenSentRef.current = true; // Mark that data has been sent
+  
+      if (dataToSave.length > 0 || hasStandsBeenSent.current) {
+        sendDataToDB(JSON.stringify(dataToSave), fieldType);
+        hasStandsBeenSent.current = true; // Mark that data has been sent
+      }
     }
   };
 
-  useEffect(() => {
-    selectedTheme && generateTeamNames(numberOfTeams, selectedTheme);
-    // eslint-disable-next-line
-  }, [selectedTheme]);
-
-  // useEffect for managing the stands data
-  useEffect(() => {
-    prepareAndSendData(selectedStands, "stands");
-    // eslint-disable-next-line
-  }, [selectedStands]);
-
-  // useEffect for managing the stands data
-  useEffect(() => {
-    prepareAndSendData(teamList, "teams");
-    // eslint-disable-next-line
-  }, [teamList]);
-
-  // useEffect for managing the stands data
-  useEffect(() => {
-    // Check if the standsList prop is available
-    if (standsList) {
-      // If standsList is provided, update the local state 'selectedStands' with this data.
-      // stands data is fetched from the database and passed to this component
-      setSelectedStands(standsList);
-    }
-  }, [standsList]);
-
-  // useEffect for managing the teams data
-  useEffect(() => {
-    // Check if the teamsList prop is available
-    if (teamsList) {
-      // If teamsList is provided, update the local state 'setTeamList' with this data.
-      // teams data is fetched from the database and passed to this component
-      setTeamList(teamsList);
-    }
-  }, [teamsList]);
 
   // This effect re-runs when `selectedTheme` changes.
   const sendDataToDB = async (jsonData: string, dataField: FieldType) => {

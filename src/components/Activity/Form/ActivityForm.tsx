@@ -222,6 +222,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
             <TeamsStandsParams
               activityId={chosenActivityId}
               standsList={activityData.stands}
+              numberOfTeamsStored={activityData.nb_teams}
               teamsList={activityData.teams}
             />
           }
