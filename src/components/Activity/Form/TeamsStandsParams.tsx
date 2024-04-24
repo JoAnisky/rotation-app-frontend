@@ -7,30 +7,39 @@ import CustomSnackbar from "@/components/CustomSnackbar";
 import { ACTIVITY_API, SCENARIO_API, STANDS_API } from "@/routes/api/";
 import { Severity, SnackMessage } from "@/types/SnackbarTypes";
 
-interface ITeams {
+interface ITeam {
   id: number;
   name: string;
 }
-interface IStands extends ITeams {
-  isCompetitive: boolean;
+
+// A new interface to represent the relationship between stands and the number of teams on each
+interface IStand {
+  id: number;
+  name: string;
+  nbTeamsOnStand?: number; // This now directly holds the number of teams for simplicity
 }
 
-interface ToggleStates {
-  [key: number]: boolean;
-}
-
-interface ITeamsStandsParamsProps {
+interface ITeamStandsParamsProps {
   activityId?: number;
-  standsList: IStands[] | null;
-  teamsList: ITeams[] | null;
+  standsList: IStand[] | null;
+  teamsList: ITeam[] | null;
   numberOfTeamsStored: number | null;
 }
 type FieldType = "stands" | "teams" | "nb_teams"; // Datatype corresponding to DB fields to update
 
-const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, standsList, teamsList, numberOfTeamsStored }) => {
+// To keep track of the number of teams on each stand if needed for other operations or UI logic
+interface INbTeamsOnStand {
+  [key: number]: number; // Maps stand ID to numberOfTeamsOnStand
+}
+
+const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
+  activityId,
+  standsList,
+  teamsList,
+  numberOfTeamsStored
+}) => {
   // State for open custom snackbar message
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
-
   // State for manage SnackBar message and color (severity)
   const [snackMessageSeverity, setSnackMessageSeverity] = useState<SnackMessage>({
     message: "",
@@ -43,26 +52,24 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
   // Theme for teams name
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   // teams list
-  const [teamList, setTeamList] = useState<ITeams[]>([]);
+  const [teamList, setTeamList] = useState<ITeam[]>([]);
+
+  // Stands for user selection fetched from : All Stand entries
+  const [fetchedStandsData, standsLoading] = useFetch<IStand[]>(STANDS_API.stands);
+  const [stands, setStands] = useState<IStand[]>([]);
+
+  // Stands added to stnad list by user selection
+  const [selectedStands, setSelectedStands] = useState<IStand[]>([]);
+  const [nbTeamsOnStand, setNbTeamsOnStand] = useState<INbTeamsOnStand>({});
 
   // Prevent PUT request with empty teams and stands array on component mount
   const hasStandsBeenSent = useRef(false); // Tracks if stands data has been sent at least once after mount
   const hasTeamsBeenSent = useRef(false); // Tracks if teams data has been sent at least once after mount
 
-  const [stands, setStands] = useState<IStands[]>([]);
-  const [selectedStands, setSelectedStands] = useState<IStands[]>([]);
-  const [toggleStates, setToggleStates] = useState<ToggleStates>({});
-
-  // Stands for user selection fetched from : All Stand entries
-  const [fetchedStandsData, standsLoading] = useFetch<IStands[]>(STANDS_API.stands);
-
   // Get all themedTeamsNames indexes
   const categories = Object.keys(themedTeamsNames);
   // Replace all "_" in categories names with empty space and sort category by name
-  const formattedCategories = categories.map(category => category.replace(/_/g, " ")).sort();// This replaces all underscores in the string
-
-   // Ajout de useRef pour contrôler l'initialisation des appels API
-  const initialRender = useRef(true);
+  const formattedCategories = categories.map(category => category.replace(/_/g, " ")).sort(); // This replaces all underscores in the string
 
   // Sets Stands for user selection
   useEffect(() => {
@@ -70,7 +77,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
       setStands(fetchedStandsData);
     }
   }, [fetchedStandsData]);
-  
+
   useEffect(() => {
     selectedTheme && generateTeamNames(numberOfTeams, selectedTheme);
     // eslint-disable-next-line
@@ -88,12 +95,8 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
     // eslint-disable-next-line
   }, [teamList]);
 
-  // useEffect for managing the stands data
   useEffect(() => {
-    // Check if the standsList prop is available
     if (standsList) {
-      // If standsList is provided, update the local state 'selectedStands' with this data.
-      // stands data is fetched from the database and passed to this component
       setSelectedStands(standsList);
     }
   }, [standsList]);
@@ -118,7 +121,6 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
     }
   }, [numberOfTeamsStored]);
 
-
   // Remove team method
   const handleRemoveTeam = (indexToRemove: number) => {
     const newTeamList = teamList.filter((_, index) => index !== indexToRemove);
@@ -126,29 +128,34 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
     setNumberOfTeams(prev => prev - 1);
   };
 
-  // Handler to update toggle state
-  const handleToggleCompetitive = (id: number, checked: boolean): void => {
-    setToggleStates(prev => ({
+  /**
+   * Handle the number of teams on stand
+   * @param id Stand to update
+   * @param numberTeam number of teams on the stand
+   */
+  const handleNbTeamsOnStand = (id: number, numberTeam: number) => {
+    setNbTeamsOnStand(prev => ({
       ...prev,
-      [id]: checked
+      [id]: numberTeam
     }));
-    const standToToggleIndex = selectedStands.findIndex(stand => stand.id === id);
-    // Perform a safety check to ensure the stand was found
-    if (standToToggleIndex !== -1) {
-      // Get the stand to toggle
-      const standToToggle = selectedStands[standToToggleIndex];
 
-      // Create a new copy of the stand with the updated isCompetitive property
+    const standToUpdateIndex = selectedStands.findIndex(stand => stand.id === id);
+    // Perform a safety check to ensure the stand was found
+    if (standToUpdateIndex !== -1) {
+      // Get the stand to toggle
+      const standToUpdate = selectedStands[standToUpdateIndex];
+
+      // Create a new copy of the stand with the updated nb teams on stand property
       const updatedStand = {
-        ...standToToggle,
-        isCompetitive: checked
+        ...standToUpdate,
+        nbTeamsOnStand: numberTeam
       };
 
       // Create a new array for the stands that includes this updated stand
       const updatedStands = [
-        ...selectedStands.slice(0, standToToggleIndex),
+        ...selectedStands.slice(0, standToUpdateIndex),
         updatedStand,
-        ...selectedStands.slice(standToToggleIndex + 1)
+        ...selectedStands.slice(standToUpdateIndex + 1)
       ];
 
       // Set the updated stands array back to the state
@@ -158,48 +165,36 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
     }
   };
 
-  // Remove a stand from selectedStands + update the toggle state when a stand is removed
-  const handleRemoveStand = (idToRemove: number, indexToRemove: number) => {
-    const removedStandIndex = selectedStands.findIndex(stand => stand.id === idToRemove);
-    if (removedStandIndex !== -1) {
-      const removedStand = selectedStands[removedStandIndex];
-
-      const newStandList = selectedStands.filter((_, index) => index !== removedStandIndex);
-
-      setSelectedStands(newStandList);
-
-      const newToggleStates = { ...toggleStates };
-      delete newToggleStates[removedStand.id];
-      setToggleStates(newToggleStates);
-    } else {
-      console.error("Invalid index to remove:", indexToRemove);
-    }
+  /**
+   * Remove a stand from selectedStands + update the numberOfteams on stand state when a stand is removed
+   * @param idToRemove Stand to remove
+   */
+  const handleRemoveStand = (idToRemove: number) => {
+    const updatedStands = selectedStands.filter(stand => stand.id !== idToRemove);
+    setSelectedStands(updatedStands);
+    const { [idToRemove]: _, ...remainingTeams } = nbTeamsOnStand; // remove entry for deleted stand
+    setNbTeamsOnStand(remainingTeams);
   };
 
-  // Stand selection in stand list
-  const handleStandSelection = (event: React.SyntheticEvent<Element, Event>, value: IStands[] | IStands | null) => {
-    let newStands: IStands[] = [];
+  /**
+   * Handle selected stand
+   * @param event
+   * @param value
+   */
+  const handleStandSelection = (event: React.SyntheticEvent, value: IStand[] | IStand | null) => {
+    let newStands: IStand[] = [];
 
     if (Array.isArray(value)) {
-      newStands = value.map(stand => ({
-        id: stand.id,
-        name: stand.name,
-        isCompetitive: stand.isCompetitive ?? false
-      }));
+      newStands = value;
     } else if (value) {
-      // Check if value is not null or undefined
-      newStands = [
-        {
-          id: value.id,
-          name: value.name,
-          isCompetitive: value.isCompetitive ?? false
-        }
-      ]; // Wrap single object into an array
-    } else {
-      newStands = [];
+      newStands = [value];
     }
-
     setSelectedStands(newStands);
+    newStands.forEach(stand => {
+      if (nbTeamsOnStand[stand.id] === undefined) {
+        setNbTeamsOnStand(prev => ({ ...prev, [stand.id]: 0 })); // initialise si non défini
+      }
+    });
   };
 
   /**
@@ -207,15 +202,15 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
    * @param dataList Data to update
    * @param fieldType field to update
    */
-  const prepareAndSendData = (dataList: (IStands | ITeams)[], fieldType: FieldType) => {
+  const prepareAndSendData = (dataList: (IStand | ITeam)[], fieldType: FieldType) => {
     let dataToSave;
-  
+
     if (fieldType === "teams") {
       // Count teams only if dataList is not empty to prevent zeroing out on initial load
       if (dataList.length > 0) {
         sendDataToDB(JSON.stringify(numberOfTeams), "nb_teams");
       }
-      
+
       dataToSave = dataList.map(({ id, name }) => ({
         id,
         name
@@ -225,24 +220,21 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
         sendDataToDB(JSON.stringify(dataToSave), fieldType);
         hasTeamsBeenSent.current = true; // Mark that data has been sent
       }
-    } else {  // Similar logic applied for stands
+    } else {
+      // Similar logic applied for stands
       dataToSave = dataList.map(item => {
-        if ("isCompetitive" in item) {
-          return {
-            id: item.id,
-            name: item.name,
-            isCompetitive: item.isCompetitive
-          };
+        // Type guard to check if item is IStand
+        if ("nbTeamsOnStand" in item) {
+          // Safe to access nbTeamsOnStand
+          return { id: item.id, name: item.name, nbTeamsOnStand: nbTeamsOnStand[item.id] || 1 };
         } else {
-          console.error("Trying to process ITeams as IStands", item);
-          return {
-            id: item.id,
-            name: item.name,
-            isCompetitive: false
-          };
+          // This case should theoretically never happen if data handling is correct
+          console.error("Trying to process ITeam as IStand", item);
+          // Default value or handle error
+          return { id: item.id, name: item.name, nbTeamsOnStand: 1 };
         }
       });
-  
+
       if (dataToSave.length > 0 || hasStandsBeenSent.current) {
         sendDataToDB(JSON.stringify(dataToSave), fieldType);
         hasStandsBeenSent.current = true; // Mark that data has been sent
@@ -250,8 +242,11 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
     }
   };
 
-
-  // This effect re-runs when `selectedTheme` changes.
+  /**
+   * Send data to db using field name
+   * @param jsonData Data to send
+   * @param dataField Field name to update
+   */
   const sendDataToDB = async (jsonData: string, dataField: FieldType) => {
     try {
       // Construct payload dynamically based on the dataField
@@ -276,7 +271,6 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
    * @returns void
    */
   const generateTeamNames = (numberOfTeams: number, theme: string) => {
-
     // Immediate return if the theme or number of teams is not initialized properly
     if (!theme || numberOfTeams === null) {
       console.log("Initialization check - Skipping execution");
@@ -426,7 +420,7 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
           {/* Display selected stands if not empty*/}
           {selectedStands.length > 0 && ""}
           <Box display="flex" flexWrap="wrap" gap={2}>
-            {selectedStands.map((stand, index) => (
+            {selectedStands.map(stand => (
               <Box
                 key={stand.id}
                 display="flex"
@@ -438,20 +432,17 @@ const TeamsStandsParams: React.FC<ITeamsStandsParamsProps> = ({ activityId, stan
                 borderRadius={1}
                 width={1}
               >
-                Stand {stand.name}
+                {stand.name}
                 <div style={{ marginLeft: "auto" }}>
-                  Competitif
-                  <Switch
-                    checked={toggleStates[stand.id] || false}
-                    onChange={e => handleToggleCompetitive(stand.id, e.target.checked)}
-                    name="isCompetitive"
-                    color="default"
-                  />
-                  <IconButton
-                    onClick={() => handleRemoveStand(stand.id, index)}
+                  Nb d'équipes
+                  <TextField
+                    type="number"
+                    value={nbTeamsOnStand[stand.id] || 1}
+                    onChange={e => handleNbTeamsOnStand(stand.id, parseInt(e.target.value, 10))}
+                    inputProps={{ min: 1 }}
                     size="small"
-                    sx={{ color: "grey.200" }}
-                  >
+                  />
+                  <IconButton onClick={() => handleRemoveStand(stand.id)} size="small" sx={{ color: "grey.200" }}>
                     <CloseIcon />
                   </IconButton>
                 </div>
