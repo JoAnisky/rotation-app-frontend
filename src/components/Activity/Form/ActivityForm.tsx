@@ -43,8 +43,8 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
     activity_start_time: null,
     pause_start_time: null,
     pause_duration: null,
-    stands: null,
-    teams: null
+    stands: [],
+    teams: []
   });
   
   const inputPropsNumber = {
@@ -52,8 +52,8 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
     min: "0", // Minimum value
     step: "1"
   };
-  // Get activity params
-  const [fetchedActivityData, fetchedActivityDataLoading, fetchedActivityError] = useFetch<IActivityData>(
+  // Get activity params (import fetchedActivityDataLoading & fetchedActivityError to handle loading and error)
+  const [fetchedActivityData] = useFetch<IActivityData>(
     ACTIVITY_API.activityById(chosenActivityId)
   );
 
@@ -222,8 +222,8 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
             <TeamsStandsParams
               activityId={chosenActivityId}
               standsList={activityData.stands}
-              numberOfTeamsStored={activityData.nb_teams}
               teamsList={activityData.teams}
+              numberOfTeamsStored={activityData.nb_teams}
             />
           }
 
