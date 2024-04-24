@@ -55,7 +55,7 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
 
   const createActivity = async (activityName: string) => {
     // User ID comes from the Gamemaster
-    const userId = 3;
+    const userId = 7;
     const options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
