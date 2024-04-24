@@ -3,12 +3,12 @@ interface TeamMember {
   name: string;
 }
 
-export interface IStands {
+export interface IStand {
   id: number;
   name: string;
-  isCompetitive: boolean;
+  nbTeamsOnStand: number
 }
-export interface ITeams {
+export interface ITeam {
   id: number;
   name: string;
 }
@@ -26,6 +26,6 @@ export interface IActivityData {
   team: TeamMember[] | null;
   pause_start_time: string | null;
   pause_duration: string | null;
-  stands: IStands[] | null;   // This can be null
-  teams: ITeams[] | null;     // This can be null
+  stands: IStand[] | null;
+  teams: ITeam[] | null;
 }
