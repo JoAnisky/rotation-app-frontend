@@ -1,23 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Autocomplete, Box, Button, Grid, IconButton, TextField, Typography, Switch } from "@mui/material";
+import { Autocomplete, Box, Button, Grid, IconButton, TextField, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import useFetch from "@/hooks/useFetch";
 import themedTeamsNames from "@/utils/themedTeamsNames";
 import CustomSnackbar from "@/components/CustomSnackbar";
 import { ACTIVITY_API, SCENARIO_API, STANDS_API } from "@/routes/api/";
 import { Severity, SnackMessage } from "@/types/SnackbarTypes";
-
-interface ITeam {
-  id: number;
-  name: string;
-}
-
-// A new interface to represent the relationship between stands and the number of teams on each
-interface IStand {
-  id: number;
-  name: string;
-  nbTeamsOnStand?: number; // This now directly holds the number of teams for simplicity
-}
+import { IStand, ITeam } from "@/types/ActivityInterface";
 
 interface ITeamStandsParamsProps {
   activityId?: number;
@@ -25,6 +14,7 @@ interface ITeamStandsParamsProps {
   teamsList: ITeam[] | null;
   numberOfTeamsStored: number | null;
 }
+
 type FieldType = "stands" | "teams" | "nb_teams"; // Datatype corresponding to DB fields to update
 
 // To keep track of the number of teams on each stand if needed for other operations or UI logic
@@ -63,8 +53,8 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
   const [nbTeamsOnStand, setNbTeamsOnStand] = useState<INbTeamsOnStand>({});
 
   // Prevent PUT request with empty teams and stands array on component mount
-  const hasStandsBeenSent = useRef(false); // Tracks if stands data has been sent at least once after mount
-  const hasTeamsBeenSent = useRef(false); // Tracks if teams data has been sent at least once after mount
+  const hasStandsBeenSent = useRef<boolean>(false); // Tracks if stands data has been sent at least once after mount
+  const hasTeamsBeenSent = useRef<boolean>(false); // Tracks if teams data has been sent at least once after mount
 
   // Get all themedTeamsNames indexes
   const categories = Object.keys(themedTeamsNames);
@@ -83,20 +73,29 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
     // eslint-disable-next-line
   }, [selectedTheme]);
 
-  // useEffect for managing the stands data
   useEffect(() => {
+    // If selected standList change
     prepareAndSendData(selectedStands, "stands");
     // eslint-disable-next-line
   }, [selectedStands]);
 
-  // useEffect for managing the stands data
   useEffect(() => {
+    // If selected teamList change
     prepareAndSendData(teamList, "teams");
     // eslint-disable-next-line
   }, [teamList]);
 
   useEffect(() => {
     if (standsList) {
+      // For nbTeamsOnStand on component mount
+      const newNbTeamsOnStand = standsList.reduce<INbTeamsOnStand>((acc, stand) => {
+        // Use nbTeamsOnStand on stand if available, otherwise initalize 0
+        acc[stand.id] = stand.nbTeamsOnStand || 0;
+        return acc;
+      }, {});
+
+      // update
+      setNbTeamsOnStand(newNbTeamsOnStand);
       setSelectedStands(standsList);
     }
   }, [standsList]);
@@ -121,19 +120,35 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
     }
   }, [numberOfTeamsStored]);
 
-  // Remove team method
-  const handleRemoveTeam = (indexToRemove: number) => {
-    const newTeamList = teamList.filter((_, index) => index !== indexToRemove);
-    setTeamList(newTeamList);
-    setNumberOfTeams(prev => prev - 1);
+  /**
+   * Handle selected stand
+   * @param event
+   * @param value
+   * @returns void
+   */
+  const handleStandSelection = (event: React.SyntheticEvent, value: IStand[] | IStand | null): void => {
+    let newStands: IStand[] = [];
+
+    if (Array.isArray(value)) {
+      newStands = value;
+    } else if (value) {
+      newStands = [value];
+    }
+    setSelectedStands(newStands);
+    newStands.forEach(stand => {
+      if (nbTeamsOnStand[stand.id] === undefined) {
+        setNbTeamsOnStand(prev => ({ ...prev, [stand.id]: 0 })); // initialise si non défini
+      }
+    });
   };
 
   /**
    * Handle the number of teams on stand
    * @param id Stand to update
    * @param numberTeam number of teams on the stand
+   * @returns 
    */
-  const handleNbTeamsOnStand = (id: number, numberTeam: number) => {
+  const handleNbTeamsOnStand = (id: number, numberTeam: number): void => {
     setNbTeamsOnStand(prev => ({
       ...prev,
       [id]: numberTeam
@@ -168,8 +183,9 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
   /**
    * Remove a stand from selectedStands + update the numberOfteams on stand state when a stand is removed
    * @param idToRemove Stand to remove
+   * @returns void
    */
-  const handleRemoveStand = (idToRemove: number) => {
+  const handleRemoveStand = (idToRemove: number): void => {
     const updatedStands = selectedStands.filter(stand => stand.id !== idToRemove);
     setSelectedStands(updatedStands);
     const { [idToRemove]: _, ...remainingTeams } = nbTeamsOnStand; // remove entry for deleted stand
@@ -177,24 +193,71 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
   };
 
   /**
-   * Handle selected stand
-   * @param event
-   * @param value
+   * Generate random teams name using ThemeList "utils/themedTeamsNames.ts"
+   * @returns void
    */
-  const handleStandSelection = (event: React.SyntheticEvent, value: IStand[] | IStand | null) => {
-    let newStands: IStand[] = [];
-
-    if (Array.isArray(value)) {
-      newStands = value;
-    } else if (value) {
-      newStands = [value];
+  const generateTeamNames = (numberOfTeams: number, theme: string): void => {
+    // Immediate return if the theme or number of teams is not initialized properly
+    if (!theme || numberOfTeams === null) {
+      console.log("Initialization check - Skipping execution");
+      return;
     }
-    setSelectedStands(newStands);
-    newStands.forEach(stand => {
-      if (nbTeamsOnStand[stand.id] === undefined) {
-        setNbTeamsOnStand(prev => ({ ...prev, [stand.id]: 0 })); // initialise si non défini
+
+    if (numberOfTeams > 0 && !theme) {
+      setSnackbarOpen(true);
+      setSnackMessageSeverity({
+        message: "Il faudrait choisir un thème",
+        severity: "warning"
+      });
+      return;
+    }
+
+    if (!numberOfTeams && theme) {
+      // Check to avoid triggering this message on mount:
+      if (theme !== "") {
+        setTeamList([]);
+        setSnackbarOpen(true);
+        setSnackMessageSeverity({
+          message: "Il faudrait choisir un nombre d'équipes",
+          severity: "warning"
+        });
       }
-    });
+      return;
+    }
+
+    // Retrieve the list of potential team names based on the selected theme
+    const names = themedTeamsNames[theme] || []; // Safe fallback to prevent errors if theme is undefined
+
+    // Shuffle and slice the array as before
+    const shuffledNames = names.sort(() => 0.5 - Math.random());
+    const selectedNames = shuffledNames.slice(0, numberOfTeams);
+
+    const teamObjects = selectedNames.map((name, index) => ({
+      id: index,
+      name
+    }));
+
+    setTeamList(teamObjects);
+  };
+
+  /**
+   * Gets selected theme for teams name
+   * @param event
+   * @param value Selected theme
+   */
+  const handleThemeChange = (event: React.SyntheticEvent<Element, Event>, value: string | null): void => {
+    setSelectedTheme(value);
+  };
+
+  /**
+   * 
+   * @param indexToRemove Team ID to remove
+   * @returns void
+   */
+  const handleRemoveTeam = (indexToRemove: number): void => {
+    const newTeamList = teamList.filter((_, index) => index !== indexToRemove);
+    setTeamList(newTeamList);
+    setNumberOfTeams(prev => prev - 1);
   };
 
   /**
@@ -247,7 +310,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
    * @param jsonData Data to send
    * @param dataField Field name to update
    */
-  const sendDataToDB = async (jsonData: string, dataField: FieldType) => {
+  const sendDataToDB = async (jsonData: string, dataField: FieldType): Promise<void> => {
     try {
       // Construct payload dynamically based on the dataField
       const payload = {
@@ -267,67 +330,10 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
   };
 
   /**
-   * Generate random teams name using ThemeList "utils/themedTeamsNames.ts"
-   * @returns void
-   */
-  const generateTeamNames = (numberOfTeams: number, theme: string) => {
-    // Immediate return if the theme or number of teams is not initialized properly
-    if (!theme || numberOfTeams === null) {
-      console.log("Initialization check - Skipping execution");
-      return;
-    }
-
-    if (numberOfTeams > 0 && !theme) {
-      setSnackbarOpen(true);
-      setSnackMessageSeverity({
-        message: "Il faudrait choisir un thème",
-        severity: "warning"
-      });
-      return;
-    }
-
-    if (!numberOfTeams && theme) {
-      // Check to avoid triggering this message on mount:
-      if (theme !== "") {
-        setTeamList([]);
-        setSnackbarOpen(true);
-        setSnackMessageSeverity({
-          message: "Il faudrait choisir un nombre d'équipes",
-          severity: "warning"
-        });
-      }
-      return;
-    }
-
-    // Retrieve the list of potential team names based on the selected theme
-    const names = themedTeamsNames[theme] || []; // Safe fallback to prevent errors if theme is undefined
-
-    // Shuffle and slice the array as before
-    const shuffledNames = names.sort(() => 0.5 - Math.random());
-    const selectedNames = shuffledNames.slice(0, numberOfTeams);
-
-    const teamObjects = selectedNames.map((name, index) => ({
-      id: index,
-      name
-    }));
-
-    setTeamList(teamObjects);
-  };
-
-  /**
-   * Gets selected theme for teams name
-   * @param event
-   * @param value
-   */
-  const handleThemeChange = (event: React.SyntheticEvent<Element, Event>, value: string | null) => {
-    setSelectedTheme(value);
-  };
-
-  /**
    * Perform basic checks before sending request to generate Scenario
-   * @returns
+   * @return void
    */
-  const handleGetScenario = () => {
+  const handleGetScenario = (): void => {
     // Check if no teams/Stands have been selected (numberOfTeams/selectedStands.length should be greater than 0)
     if (numberOfTeams <= 0 || selectedStands.length === 0) {
       let errorMessage = "Il faudrait choisir ";
@@ -351,6 +357,9 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
     generateScenario();
   };
 
+  /**
+   * Generate scenario and display error message to the user if an error occurs
+   */
   const generateScenario = async () => {
     let severity: Severity = "success";
     let message = "Scenario généré avec succès"; // Default success message
@@ -390,6 +399,9 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
     setSnackMessageSeverity({ message, severity });
   };
 
+  /**
+   * Close Snackbar message
+   */
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
   };
@@ -433,16 +445,28 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
                 width={1}
               >
                 {stand.name}
-                <div style={{ marginLeft: "auto" }}>
-                  Nb d'équipes
+                <div style={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>
+                  <Typography sx={{ mr: 1 }}>Nb d'équipes:</Typography>
                   <TextField
                     type="number"
                     value={nbTeamsOnStand[stand.id] || 1}
                     onChange={e => handleNbTeamsOnStand(stand.id, parseInt(e.target.value, 10))}
-                    inputProps={{ min: 1 }}
-                    size="small"
+                    inputProps={{ min: 1, max: 5 }}
+                    sx={{
+                      width: "60px",
+                      "& .MuiInputBase-input": {
+                        color: "text.primary",
+                        backgroundColor: "background.paper",
+                        padding: "5px 10px",
+                        borderRadius: "4px"
+                      }
+                    }}
                   />
-                  <IconButton onClick={() => handleRemoveStand(stand.id)} size="small" sx={{ color: "grey.200" }}>
+                  <IconButton
+                    onClick={() => handleRemoveStand(stand.id)}
+                    size="small"
+                    sx={{ color: "grey.200", ml: 1 }}
+                  >
                     <CloseIcon />
                   </IconButton>
                 </div>
@@ -473,7 +497,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
               const numTeams = parseInt(event.target.value, 10);
               if (!isNaN(numTeams)) {
                 setNumberOfTeams(numTeams);
-                selectedTheme && generateTeamNames(numTeams, selectedTheme); // Now we pass `numTeams` directly
+                selectedTheme && generateTeamNames(numTeams, selectedTheme);
               }
             }}
           />
