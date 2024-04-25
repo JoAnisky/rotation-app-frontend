@@ -12,7 +12,7 @@ interface INavbarUpProps {
   role: string;
   handleChangeSelection?: () => void;
   animatorStandSetted: boolean;
-  animatorName: string | null;
+  animatorName?: string | null;
 }
 
 const NavbarUp: React.FC<INavbarUpProps> = ({
