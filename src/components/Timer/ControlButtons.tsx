@@ -5,29 +5,23 @@ import { STOPWATCH_API } from "@/routes/api/stopwatchRoutes";
 import CounterContext from "@/contexts/CounterContext";
 
 const ControlButtons: React.FC = () => {
-  
-  const { isActive, isPaused, counter, setCounter } =
-    useContext(CounterContext);
+  const { isActive, isPaused, counter, setCounter } = useContext(CounterContext);
 
   /**
    * Decrement stopwatch method (every second)
    */
   const decrementStopwatch = useCallback(async () => {
     try {
-      const response = await fetch(
-        `${STOPWATCH_API.stopwatchById("1")}/decrement`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+      const response = await fetch(`${STOPWATCH_API.stopwatchById("1")}/decrement`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
         }
-      );
+      });
 
       if (!response.ok) {
         throw new Error("Erreur lors de la décrémentation du chronomètre");
       }
-
     } catch (error) {
       console.error("Erreur :", error);
     }
@@ -37,31 +31,28 @@ const ControlButtons: React.FC = () => {
    * Update the activity status in Database
    *
    */
-  const updateActivity = useCallback(
-    async (updateData: { status: string; [key: string]: string | null }) => {
-      const options = {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updateData),
-      };
+  const updateActivity = useCallback(async (updateData: { status: string; [key: string]: string | null }) => {
+    const options = {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updateData)
+    };
 
-      try {
-        const response = await fetch(ACTIVITY_API.activityById("1"), options);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        // Handle the response...
-      } catch (error) {
-        console.error(`Failed to update activity: `, error);
+    try {
+      const response = await fetch(ACTIVITY_API.getActivityById("1"), options);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    },
-    []
-  ); // This empty dependency array means the function is only created once per component instance)
+      // Handle the response...
+    } catch (error) {
+      console.error(`Failed to update activity: `, error);
+    }
+  }, []); // This empty dependency array means the function is only created once per component instance)
 
   const handleStop = useCallback(async () => {
     // First, update the activity status
     updateActivity({
-      status: "COMPLETED",
+      status: "COMPLETED"
     });
 
     // Then, make the async call to reset/init the stopwatch
@@ -69,8 +60,8 @@ const ControlButtons: React.FC = () => {
       const response = await fetch(`${STOPWATCH_API.stopwatchById("1")}/init`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
-        },
+          "Content-Type": "application/json"
+        }
       });
       if (!response.ok) {
         throw new Error("Erreur lors de la réinitialisation du chronomètre");
@@ -110,22 +101,21 @@ const ControlButtons: React.FC = () => {
     const now = Date.now();
     updateActivity({
       status: "ROTATING",
-      activity_start_time: now.toString(),
+      activity_start_time: now.toString()
     });
   }, [updateActivity]);
 
   const handlePauseResume = useCallback(() => {
     if (isPaused) {
       updateActivity({
-        status: "IN_PROGRESS",
+        status: "IN_PROGRESS"
       });
     } else {
       // ACTIVITY PAUSED : activity was running and is now being paused
       updateActivity({
-        status: "PAUSED",
+        status: "PAUSED"
       });
     }
-
   }, [isPaused, updateActivity]);
 
   const StartButton = (

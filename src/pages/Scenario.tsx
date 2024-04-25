@@ -33,7 +33,7 @@ interface ScenarioProps {
 }
 const Scenario: React.FC<ScenarioProps> = ({ chosenActivityId }) => {
   const [scenario, setScenario] = useState<ScenarioData[]>([]);
-  const [data, loading, error] = useFetch<ApiResponse>(SCENARIO_API.scenarioByActivityId(chosenActivityId));
+  const [data, loading, error] = useFetch<ApiResponse>(SCENARIO_API.getScenarioByActivityId(chosenActivityId));
 
   useEffect(() => {
     if (data && data.length > 0) {

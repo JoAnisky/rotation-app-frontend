@@ -5,9 +5,7 @@ import useFetch from "./useFetch";
 
 const useActivityData = (id: number) => {
   const [activityData, setActivityData] = useState<IActivityData | null>(null);
-  const [data, loading, error] = useFetch<IActivityData>(
-    ACTIVITY_API.activityById(id)
-  );
+  const [data, loading, error] = useFetch<IActivityData>(ACTIVITY_API.getActivityById(id));
 
   // Use useRef to keep track of the current value of activityData without causing re-renders
   const activityDataRef = useRef<IActivityData | null>(activityData);

@@ -31,7 +31,7 @@ const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
     turnTime: activityDuration,
     elapsedTime: 0,
     isActive: false,
-    isPaused: true,
+    isPaused: true
   });
 
   const [userElapsedTime, setUserElapsedTime] = useState(() => {
@@ -85,7 +85,7 @@ const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
     async (status: string, startTime?: number | null) => {
       // Initialize postData with status
       const postData: { status: string; activity_start_time?: string } = {
-        status,
+        status
       };
 
       // If startTime is provided and not null, add it to postData
@@ -96,11 +96,11 @@ const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
       const options = {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(postData),
+        body: JSON.stringify(postData)
       };
 
       try {
-        const response = await fetch(ACTIVITY_API.activityById("1"), options);
+        const response = await fetch(ACTIVITY_API.getActivityById("1"), options);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -117,11 +117,11 @@ const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
    */
   const start = () => {
     const now = Date.now();
-    setTimer((prevTimer) => ({
+    setTimer(prevTimer => ({
       ...prevTimer,
       isActive: true,
       isPaused: false,
-      elapsedTime: userElapsedTime || 0, // ou la valeur que vous souhaitez
+      elapsedTime: userElapsedTime || 0 // ou la valeur que vous souhaitez
     }));
     updateActivity("ROTATING", now);
     tick();
@@ -132,9 +132,9 @@ const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
    */
   const pauseResume = useCallback(async () => {
     // Toggle the pause state
-    setTimer((prev) => ({
+    setTimer(prev => ({
       ...prev,
-      isPaused: !prev.isPaused,
+      isPaused: !prev.isPaused
     }));
 
     // Check the new state after toggling and update the activity status accordingly
@@ -154,17 +154,17 @@ const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
     // Initialize postData with status
     const postData: { status: string; activity_start_time?: null } = {
       status: "COMPLETED",
-      activity_start_time: null,
+      activity_start_time: null
     };
 
     const options = {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(postData),
+      body: JSON.stringify(postData)
     };
 
     try {
-      const response = await fetch(ACTIVITY_API.activityById("1"), options);
+      const response = await fetch(ACTIVITY_API.getActivityById("1"), options);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -176,14 +176,12 @@ const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
       turnTime: activityDuration,
       elapsedTime: 0,
       isActive: false,
-      isPaused: true,
+      isPaused: true
     });
     setUserElapsedTime(0);
   }, [activityDuration]);
 
-  const parsedActivityStartTime = activityStartTime
-    ? parseInt(activityStartTime, 10)
-    : 0;
+  const parsedActivityStartTime = activityStartTime ? parseInt(activityStartTime, 10) : 0;
 
   // Define a function 'tick' that will be called every second
   const tick = useCallback(async () => {
@@ -200,10 +198,10 @@ const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
     const timeLeft = Math.max(activityDuration - elapsed, 0); // Calculate remaining time, ensuring it doesn't go below 0
 
     // Update the timer state with the new elapsed time and remaining time
-    setTimer((prev) => ({
+    setTimer(prev => ({
       ...prev,
       elapsedTime: elapsed, // Update elapsed time
-      turnTime: activityDuration, // Update remaining time
+      turnTime: activityDuration // Update remaining time
     }));
     // If there's no time left (activity is over)
     if (timeLeft <= 0) {
@@ -222,11 +220,7 @@ const TimeProvider: React.FC<TimeProviderProps> = ({ children }) => {
     }
   }, [timer, tick]);
 
-  return (
-    <TimeContext.Provider value={{ ...timer, start, pauseResume, stop }}>
-      {children}
-    </TimeContext.Provider>
-  );
+  return <TimeContext.Provider value={{ ...timer, start, pauseResume, stop }}>{children}</TimeContext.Provider>;
 };
 
 export { TimeProvider };

@@ -9,7 +9,7 @@ import { Severity, SnackMessage } from "@/types/SnackbarTypes";
 import { IStand, ITeam } from "@/types/ActivityInterface";
 
 interface ITeamStandsParamsProps {
-  activityId?: number;
+  activityId: number | string;
   standsList: IStand[] | null;
   teamsList: ITeam[] | null;
   numberOfTeamsStored: number | null;
@@ -146,7 +146,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
    * Handle the number of teams on stand
    * @param id Stand to update
    * @param numberTeam number of teams on the stand
-   * @returns 
+   * @returns
    */
   const handleNbTeamsOnStand = (id: number, numberTeam: number): void => {
     setNbTeamsOnStand(prev => ({
@@ -250,7 +250,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
   };
 
   /**
-   * 
+   *
    * @param indexToRemove Team ID to remove
    * @returns void
    */
@@ -316,7 +316,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
       const payload = {
         [dataField]: JSON.parse(jsonData)
       };
-      const response = await fetch(`${ACTIVITY_API.activityById(activityId)}`, {
+      const response = await fetch(`${ACTIVITY_API.getActivityById(activityId)}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -365,7 +365,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
     let message = "Scenario généré avec succès"; // Default success message
     let details = " ";
     try {
-      const response = await fetch(`${SCENARIO_API.scenarioByActivityId(activityId)}/generate`, {
+      const response = await fetch(`${SCENARIO_API.getScenarioByActivityId(activityId)}/generate`, {
         method: "GET",
         headers: { "Content-Type": "application/json" }
       });

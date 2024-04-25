@@ -10,7 +10,7 @@ import { SnackMessage } from "@/types/SnackbarTypes";
 import CustomSnackbar from "@/components/CustomSnackbar";
 
 interface ActivityFormProps {
-  chosenActivityId?: number;
+  chosenActivityId: number | string;
 }
 
 const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
@@ -46,16 +46,14 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
     stands: [],
     teams: []
   });
-  
+
   const inputPropsNumber = {
     className: "input-number",
     min: "0", // Minimum value
     step: "1"
   };
   // Get activity params (import fetchedActivityDataLoading & fetchedActivityError to handle loading and error)
-  const [fetchedActivityData] = useFetch<IActivityData>(
-    ACTIVITY_API.activityById(chosenActivityId)
-  );
+  const [fetchedActivityData] = useFetch<IActivityData>(ACTIVITY_API.getActivityById(chosenActivityId));
 
   useEffect(() => {
     if (fetchedActivityData) {
@@ -105,7 +103,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
       };
 
       try {
-        const response = await fetch(ACTIVITY_API.activityById(chosenActivityId), options);
+        const response = await fetch(ACTIVITY_API.getActivityById(chosenActivityId), options);
         if (!response.ok) {
           const errorText = await response.text(); // Safely read the raw text
           setSnackbarOpen(true);

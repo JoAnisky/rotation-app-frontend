@@ -26,8 +26,8 @@ const ActivityProvider: React.FC<Props> = ({ children }) => {
   const fetchData = async () => {
     try {
       setLoading(true); // Set loading state to true
-      const response = await fetch(ACTIVITY_API.activityById("1"), {
-        method: "GET",
+      const response = await fetch(ACTIVITY_API.getActivityById("1"), {
+        method: "GET"
       });
       if (response.ok) {
         const jsonData = await response.json();
@@ -49,15 +49,9 @@ const ActivityProvider: React.FC<Props> = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const contextValue: ActivityContextValue | undefined = activityData
-    ? { ...activityData, loading, error }
-    : undefined;
+  const contextValue: ActivityContextValue | undefined = activityData ? { ...activityData, loading, error } : undefined;
 
-  return (
-    <ActivityContext.Provider value={contextValue}>
-      {children}
-    </ActivityContext.Provider>
-  );
+  return <ActivityContext.Provider value={contextValue}>{children}</ActivityContext.Provider>;
 };
 
 export default ActivityProvider;

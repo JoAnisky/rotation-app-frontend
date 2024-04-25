@@ -6,6 +6,11 @@ export const ACTIVITY_API = {
   activities: `${ACTIVITY_ENDPOINT}`,
 
   // Get, Update, or Delete a single activity by ID (GET, PUT/PATCH, DELETE methods)
-  activityById: (activityId: number | undefined): string =>
-    `${ACTIVITY_ENDPOINT}/${activityId}`,
+  getActivityById: (activityId: number | string): string => `${ACTIVITY_ENDPOINT}/${activityId}`,
+
+  // Get stands for a single activity by ID
+  getActivityStands: (activityId: number | string): string => `${ACTIVITY_ENDPOINT}/${activityId}/stands`,
+
+  // Get teams for a single activity by ID
+  getActivityTeams: (activityId: number | string): string => `${ACTIVITY_ENDPOINT}/${activityId}/teams`
 };
