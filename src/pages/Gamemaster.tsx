@@ -16,7 +16,7 @@ interface IPageContainerProps {
 const Gamemaster: React.FC<IPageContainerProps> = ({
   handleChangeSelection,
 }) => {
-  const [chosenActivityId, setChosenActivityId] = useState<number | undefined>(undefined);
+  const [chosenActivityId, setChosenActivityId] = useState<number | string>(0);
 
   const { setActiveComponent, renderActiveComponent } = useActiveComponent({
     defaultComponent: "ActivityForm",
@@ -33,6 +33,7 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
         role={"Maitre du jeu"}
         handleChangeSelection={() => handleChangeSelection?.()}
         animatorStandSetted={false}
+        animatorName={null}
       />
 
       {/* If activity is not yet selected, choice ou create activity */}
