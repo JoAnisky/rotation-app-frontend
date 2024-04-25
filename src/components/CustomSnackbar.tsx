@@ -1,50 +1,46 @@
-import React from "react";
+import { useState, useImperativeHandle, forwardRef } from "react";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { Box } from "@mui/material";
+import { Severity } from "@/types/SnackbarTypes";
 
-// Alert component
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref
-) {
+const Alert = forwardRef<HTMLDivElement, AlertProps>((props, ref) => {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-interface CustomSnackbarProps {
-  open: boolean;
-  handleClose: () => void;
-  message: string;
-  severity?: "error" | "warning" | "info" | "success";
-}
+const CustomSnackbar = forwardRef((props, ref) => {
+  const [snackPack, setSnackPack] = useState({
+    message: "",
+    severity: "info"
+  });
+  const [open, setOpen] = useState<boolean>(false);
 
-const CustomSnackbar: React.FC<CustomSnackbarProps> = ({
-  open,
-  handleClose,
-  message,
-  severity = "info",
-}) => {
+  const showSnackbar = (message: string, severity: Severity) => {
+    setSnackPack({ message, severity });
+    setOpen(true);
+  };
+
+  useImperativeHandle(ref, () => ({
+    showSnackbar
+  }));
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
     <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
-      {" "}
-      {/* This Box centers its contents horizontally */}
       <Snackbar
         open={open}
         autoHideDuration={6000}
         onClose={handleClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }} // This positions the Snackbar at the bottom-center of its container
-        sx={{ width: "auto", maxWidth: "100%", mb:5 }} // Ensures Snackbar doesn't exceed the width of its contents or screen
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        sx={{ width: "auto", maxWidth: "100%", mb: 5 }}
       >
-        <Alert
-          onClose={handleClose}
-          severity={severity}
-          sx={{ width: "auto", minWidth: "fit-content" }}
-        >
-          {" "}
-          {/* Alert takes width as per content */}
-          {message}
+        <Alert onClose={handleClose} severity={snackPack.severity} sx={{ width: "auto", minWidth: "fit-content" }}>
+          {snackPack.message}
           <IconButton
             size="small"
             aria-label="close"
@@ -58,6 +54,6 @@ const CustomSnackbar: React.FC<CustomSnackbarProps> = ({
       </Snackbar>
     </Box>
   );
-};
+});
 
 export default CustomSnackbar;
