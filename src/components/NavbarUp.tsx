@@ -11,17 +11,19 @@ import { Button } from "@mui/material";
 interface INavbarUpProps {
   role: string;
   handleChangeSelection?: () => void;
-  animatorStandSetted: boolean
+  animatorStandSetted: boolean;
+  animatorName: string | null;
 }
 
 const NavbarUp: React.FC<INavbarUpProps> = ({
   role,
   handleChangeSelection,
-  animatorStandSetted
+  animatorStandSetted,
+  animatorName
 }) => {
   return (
     <Box sx={{ display:'flex' }}>
-      <AppBar position="sticky" component="nav">
+      <AppBar position="static" sx={{ width: '100%' }} component="nav">
         <Toolbar>
           {/* IconButton with HomeIcon and Link */}
           <IconButton
@@ -41,7 +43,7 @@ const NavbarUp: React.FC<INavbarUpProps> = ({
             component="div"
             sx={{ flexGrow: 1, textAlign: "center" }}
           >
-            {role}
+            {animatorName ? animatorName : role}
           </Typography>
           
           {role === "Animateur" && animatorStandSetted ? (
