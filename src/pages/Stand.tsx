@@ -1,22 +1,27 @@
 import React from "react";
-import PagesContainer from "@/layouts/PageContainer";
 import Status from "@/components/Status";
-import { Box } from "@mui/material";
+import { Box, Container } from "@mui/material";
 import Stopwatch from "@/components/Timer/Stopwatch";
 
 interface StatusProps {
-  role: string;
-  standName: string | undefined;
-  handleChangeSelection?: () => void;
-  animatorStandSetted: boolean;
+  standName?: string | undefined;
 }
 
-const Stand: React.FC<StatusProps> = ({ role, standName, handleChangeSelection, animatorStandSetted }) => {
+const Stand: React.FC<StatusProps> = ({ standName }) => {
   return (
-    <PagesContainer
-      role={role}
-      handleChangeSelection={() => handleChangeSelection?.()}
-      animatorStandSetted={animatorStandSetted}
+    <Container
+      maxWidth="sm"
+      sx={{
+        marginTop: 2,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        width: "85%",
+        p: 2,
+        height: "75vh",
+        justifyContent: "center",
+        gap: "10px"
+      }}
     >
       <Status />
       <h2>{standName}</h2>
@@ -29,7 +34,7 @@ const Stand: React.FC<StatusProps> = ({ role, standName, handleChangeSelection, 
 
       <p>A la fin du temps, se rendre :</p>
       <Box>Stand N°</Box>
-    </PagesContainer>
+    </Container>
   );
 };
 
