@@ -5,7 +5,7 @@ import useFetch from "@/hooks/useFetch";
 import themedTeamsNames from "@/utils/themedTeamsNames";
 import CustomSnackbar from "@/components/CustomSnackbar";
 import { ACTIVITY_API, SCENARIO_API, STANDS_API } from "@/routes/api/";
-import { Severity, SnackMessage } from "@/types/SnackbarTypes";
+import { CustomSnackbarMethods, Severity } from "@/types/SnackbarTypes";
 import { IStand, ITeam } from "@/types/ActivityInterface";
 
 interface ITeamStandsParamsProps {
@@ -28,13 +28,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
   teamsList,
   numberOfTeamsStored
 }) => {
-  // State for open custom snackbar message
-  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
-  // State for manage SnackBar message and color (severity)
-  const [snackMessageSeverity, setSnackMessageSeverity] = useState<SnackMessage>({
-    message: "",
-    severity: "success" // Default severity is 'success'
-  });
+  const snackbarRef = useRef<CustomSnackbarMethods>(null);
 
   // Number of teams selected
   const [numberOfTeams, setNumberOfTeams] = useState<number>(0);
@@ -204,11 +198,8 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
     }
 
     if (numberOfTeams > 0 && !theme) {
-      setSnackbarOpen(true);
-      setSnackMessageSeverity({
-        message: "Il faudrait choisir un thème",
-        severity: "warning"
-      });
+
+      snackbarRef.current?.showSnackbar("Il faudrait choisir un thème", "warning");
       return;
     }
 
@@ -216,11 +207,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
       // Check to avoid triggering this message on mount:
       if (theme !== "") {
         setTeamList([]);
-        setSnackbarOpen(true);
-        setSnackMessageSeverity({
-          message: "Il faudrait choisir un nombre d'équipes",
-          severity: "warning"
-        });
+        snackbarRef.current?.showSnackbar("Il faudrait choisir un nombre d'équipes", "warning");
       }
       return;
     }
@@ -345,11 +332,8 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
         errorMessage += "au moins un stand.";
       }
 
-      setSnackbarOpen(true);
-      setSnackMessageSeverity({
-        message: errorMessage,
-        severity: "error"
-      });
+      snackbarRef.current?.showSnackbar( errorMessage, "error");
+
       return; // Stop execution if the condition is not met
     }
 
@@ -394,16 +378,9 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
       console.error("Error submitting data:", error);
       severity = "error";
     }
-    // Set the snackbar message and severity
-    setSnackbarOpen(true);
-    setSnackMessageSeverity({ message, severity });
-  };
 
-  /**
-   * Close Snackbar message
-   */
-  const handleCloseSnackbar = () => {
-    setSnackbarOpen(false);
+    snackbarRef.current?.showSnackbar( message, severity);
+
   };
 
   return (
@@ -537,12 +514,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
             Générer les rotations
           </Button>
         </Grid>
-        <CustomSnackbar
-          open={snackbarOpen}
-          handleClose={handleCloseSnackbar}
-          message={snackMessageSeverity.message}
-          severity={snackMessageSeverity.severity} // Optional: error, warning, info, success
-        />
+        <CustomSnackbar ref={snackbarRef} />
       </Grid>
       {/* END Container for Teams params */}
     </>

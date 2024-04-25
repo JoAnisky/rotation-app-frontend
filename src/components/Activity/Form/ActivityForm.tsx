@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { Box, Button, Container, Grid, TextField, Typography } from "@mui/material";
 // import { ActivityContext } from "../../contexts/ActivityContext";
@@ -6,7 +6,7 @@ import { IActivityData } from "@/types/ActivityInterface";
 import TeamsStandsParams from "./TeamsStandsParams";
 import { ACTIVITY_API } from "@/routes/api/";
 import useFetch from "@/hooks/useFetch";
-import { SnackMessage } from "@/types/SnackbarTypes";
+import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
 import CustomSnackbar from "@/components/CustomSnackbar";
 
 interface ActivityFormProps {
@@ -16,18 +16,7 @@ interface ActivityFormProps {
 const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
 
-  // State for open custom snackbar message
-  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
-
-  // State for manage SnackBar message and color (severity)
-  const [snackMessageSeverity, setSnackMessageSeverity] = useState<SnackMessage>({
-    message: "",
-    severity: "success" // Default severity is 'success'
-  });
-
-  const handleCloseSnackbar = () => {
-    setSnackbarOpen(false);
-  };
+  const snackbarRef = useRef<CustomSnackbarMethods>(null);
 
   const [activityData, setActivityData] = useState<IActivityData>({
     name: "",
@@ -76,11 +65,9 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
 
   const handleSubmit = async () => {
     if (!isFormValid) {
-      setSnackbarOpen(true);
-      setSnackMessageSeverity({
-        message: "Veuillez remplir les champs Nom et Date d'activité",
-        severity: "error"
-      });
+      // Pour ouvrir la snackbar
+      snackbarRef.current?.showSnackbar("Veuillez remplir les champs Nom et Date d'activité", "error");
+
       return;
     }
 
@@ -106,32 +93,20 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
         const response = await fetch(ACTIVITY_API.getActivityById(chosenActivityId), options);
         if (!response.ok) {
           const errorText = await response.text(); // Safely read the raw text
-          setSnackbarOpen(true);
-          setSnackMessageSeverity({
-            message: errorText,
-            severity: "error"
-          });
+          snackbarRef.current?.showSnackbar(errorText, "error");
           throw new Error(`HTTP error! status: ${response.status}, ${errorText}`);
         }
 
-        setSnackbarOpen(true);
-        setSnackMessageSeverity({
-          message: "Activité mise à jour avec succès",
-          severity: "success"
-        });
+        snackbarRef.current?.showSnackbar( "Activité mise à jour avec succès", "success");
       } catch (error) {
         console.error(`Failed to update activity: `, error);
-        setSnackbarOpen(true);
-        setSnackMessageSeverity({
-          message: "Erreur lors de la mise a jour : " + error,
-          severity: "error"
-        });
+        snackbarRef.current?.showSnackbar( "Erreur lors de la mise a jour ", "error");
       }
     }
   };
 
   return (
-    <Container component="main" maxWidth="sm" sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <Container component="main" maxWidth="sm" sx={{ display: "flex", flexDirection: "column", height: "100%",  paddingBottom: '70px' }}>
       <Box sx={{ p: 2 }}>
         <Typography component="h1" variant="h5" align="center" sx={{ mb: 2 }}>
           Paramètres d'activité
@@ -239,12 +214,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
 
           {/* END Grid wrapper for every elements */}
         </Grid>
-        <CustomSnackbar
-          open={snackbarOpen}
-          handleClose={handleCloseSnackbar}
-          message={snackMessageSeverity.message}
-          severity={snackMessageSeverity.severity} // Optional: error, warning, info, success
-        />
+        <CustomSnackbar ref={snackbarRef} />
       </Box>
     </Container>
   );
