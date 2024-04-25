@@ -6,6 +6,7 @@ export const ANIMATOR_API = {
   animators: `${ANIMATOR_ENDPOINT}`,
 
   // Get, Update, or Delete a single activity by ID (GET, PUT/PATCH, DELETE methods)
-  animatorById: (animatorId: string): string =>
-    `${ANIMATOR_ENDPOINT}/${animatorId}`,
+  getAnimatorById: (animatorId: string |number): string => `${ANIMATOR_ENDPOINT}/${animatorId}`,
+  // Set animator stands
+  setAnimatorStands: (animatorId: string |number): string => `${ANIMATOR_ENDPOINT}/${animatorId}/stands`
 };
