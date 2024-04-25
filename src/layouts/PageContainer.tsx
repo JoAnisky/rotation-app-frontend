@@ -26,7 +26,7 @@ const PageContainer: React.FC<PageContainerProps> = ({ children, role, handleCha
     <React.Fragment>
       <CssBaseline />
       <Box height="100vh" display="flex" flexDirection="column">
-        <NavbarUp role={role} handleChangeSelection={() => handleChangeSelection?.()} animatorStandSetted={animatorStandSetted} />
+
 
         <Box className="content-wrapper">{children}</Box>
         <Box
