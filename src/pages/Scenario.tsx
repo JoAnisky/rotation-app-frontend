@@ -29,7 +29,7 @@ type ApiResponse = {
   activity: Activity;
 }[];
 interface ScenarioProps {
-  chosenActivityId?: number;
+  chosenActivityId: number | string;
 }
 const Scenario: React.FC<ScenarioProps> = ({ chosenActivityId }) => {
   const [scenario, setScenario] = useState<ScenarioData[]>([]);
