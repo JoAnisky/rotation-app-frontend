@@ -3,55 +3,51 @@ import { Box, CssBaseline, Typography, Card, CardContent, CardHeader, List, List
 import useFetch from "@/hooks/useFetch";
 import { SCENARIO_API } from "@/routes/api/";
 
-type Competitor = {
-  id: number;
-  name: string;
-};
+type TeamNames = string[];
 
-// Using an index signature to allow any string as a key and Competitor[] as its value
-type ScenarioData = {
-  [key: string]: Competitor[];
+type ScenarioEntry = {
+  [activityName: string]: TeamNames;
 };
 
 type BaseScenario = {
-  data: ScenarioData[];
+  data: ScenarioEntry[];
   success: boolean;
-};
-
-type Activity = {
-  id: number;
 };
 
 type ApiResponse = {
   id: number;
   base_scenario: BaseScenario;
-  current_scenario: null; // Adjust this as needed if it can be other types
-  activity: Activity;
-}[];
+  current_scenario: null; // Adjust as needed
+  activity: { id: number };
+};
+
+type ApiData = ApiResponse[];
+
 interface ScenarioProps {
   chosenActivityId: number | string;
 }
+
 const Scenario: React.FC<ScenarioProps> = ({ chosenActivityId }) => {
-  const [scenario, setScenario] = useState<ScenarioData[]>([]);
-  const [data, loading, error] = useFetch<ApiResponse>(SCENARIO_API.getScenarioByActivityId(chosenActivityId));
+
+  const [scenario, setScenario] = useState<ScenarioEntry[]>([]);
+
+  const [data, loading, error] = useFetch<ApiData>(SCENARIO_API.getScenarioByActivityId(chosenActivityId));
+
+  // useEffect(() => {
+
+  // }, [scenario]); // To log the updated state
 
   useEffect(() => {
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && data[0].base_scenario) {
       setScenario(data[0].base_scenario.data);
     }
   }, [data]);
-
-  useEffect(() => {
-    // console.log(scenario);
-  }, [scenario]); // To log the updated state
 
   return (
     <Box sx={{ flexGrow: 1, overflowY: "auto", padding: 3 }}>
       <CssBaseline />
       {/* Content Area */}
-      <Box
-        flexGrow={1}
-        sx={{
+      <Box flexGrow={1} sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -85,9 +81,9 @@ const Scenario: React.FC<ScenarioProps> = ({ chosenActivityId }) => {
                       <Box key={key} sx={{ mb: 1 }}>
                         <Typography variant="subtitle1">Stand {key}</Typography>
                         <List>
-                          {entries.map((entry: Competitor) => (
-                            <ListItem key={entry.id} sx={{ py: 0.5 }}>
-                              {entry.name}
+                          {entries.map((teamName, index) => (
+                            <ListItem key={`${teamName}-${index}`} sx={{ py: 0.5 }}>
+                              {teamName}
                             </ListItem>
                           ))}
                         </List>
