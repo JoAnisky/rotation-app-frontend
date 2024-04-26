@@ -9,10 +9,7 @@ type ScenarioEntry = {
   [activityName: string]: TeamNames;
 };
 
-type BaseScenario = {
-  data: ScenarioEntry[];
-  success: boolean;
-};
+type BaseScenario = ScenarioEntry[];
 
 type ApiResponse = {
   id: number;
@@ -39,7 +36,8 @@ const Scenario: React.FC<ScenarioProps> = ({ chosenActivityId }) => {
 
   useEffect(() => {
     if (data && data.length > 0 && data[0].base_scenario) {
-      setScenario(data[0].base_scenario.data);
+      setScenario(data[0].base_scenario);
+      console.log(data);
     }
   }, [data]);
 
