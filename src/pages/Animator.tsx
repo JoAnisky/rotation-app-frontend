@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { Autocomplete, Box, Button, Container, Grid, TextField, Typography } from "@mui/material";
+import React, { useState, useEffect, useRef } from "react";
+import { Autocomplete, Button, Container, Grid, TextField, Typography } from "@mui/material";
 import Stand from "./Stand";
 import useFetch from "@/hooks/useFetch";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { STANDS_API, ANIMATOR_API, ACTIVITY_API } from "@/routes/api/";
+import { ANIMATOR_API, ACTIVITY_API } from "@/routes/api/";
 import { IStand } from "@/types/ActivityInterface";
 import NavbarUp from "@/components/NavbarUp";
 import useActiveComponent from "@/hooks/useActiveComponent";
 import NavbarDown from "@/components/NavbarDown";
 import GeneralView from "./GeneralView";
+import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
+import CustomSnackbar from "@/components/CustomSnackbar";
 
 interface IAnimator {
   id: number;
@@ -27,7 +29,6 @@ const Animator: React.FC = () => {
   const { getItem, setItem } = useLocalStorage("animator_stand");
 
   const [animatorStandSetted, setAnimatorStandSetted] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [animators, setAnimators] = useState<IAnimator[]>([]);
   const [selectedAnimator, setSelectedAnimator] = useState<IAnimator | null>(null); // State for the selected Animator
@@ -40,6 +41,9 @@ const Animator: React.FC = () => {
 
   // Fetch stands Data for option list display
   const [fetchedStandsData, standsLoading] = useFetch<IStand[]>(ACTIVITY_API.getActivityStands(15));
+
+  // Snackbar message
+  const snackbarRef = useRef<CustomSnackbarMethods>(null);
 
   const getSelectedStand = () => {
     try {
@@ -95,17 +99,22 @@ const Animator: React.FC = () => {
   }, [setItem, selectedStands]);
 
   const handleSelectedStands = () => {
-    if (selectedStands && selectedAnimator) {
-      console.log(selectedStands);
-      updateAnimatorStands({
-        animator: selectedAnimator.id,
-        stands: selectedStands
-      });
-      setErrorMessage(null);
-    } else {
-      // console.log("Stand or Animator not selected");
-      setErrorMessage("Merci de choisi un nom et un stand !");
+    // If no stand selected
+    if (selectedStands.length == 0) {
+      snackbarRef.current?.showSnackbar("Il faudrait choisir au moins un stand !", "warning");
+      return;
     }
+
+    // If no animator Selected
+    if (!selectedAnimator) {
+      snackbarRef.current?.showSnackbar("Qui êtes vous ?", "warning");
+      return;
+    }
+
+    updateAnimatorStands({
+      animator: selectedAnimator.id,
+      stands: selectedStands
+    });
   };
   /**
    * Update the stand in Database
@@ -120,6 +129,7 @@ const Animator: React.FC = () => {
     try {
       const response = await fetch(ANIMATOR_API.setAnimatorStands(updateData.animator), options);
       if (!response.ok) {
+        snackbarRef.current?.showSnackbar("Erreur de requête vers la BDD", "error");
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       // update is ok
@@ -128,7 +138,7 @@ const Animator: React.FC = () => {
       setAnimatorStandSetted(true);
     } catch (error) {
       console.error(`Failed to update animator: `, error);
-      setErrorMessage("Erreur attribution du stand");
+      snackbarRef.current?.showSnackbar("Erreur attribution du stand", "error");
       // update application state to reflect the error or display an error message
     }
   };
@@ -204,8 +214,8 @@ const Animator: React.FC = () => {
             <Button sx={{ width: "100%" }} variant="contained" onClick={handleSelectedStands}>
               C'est parti !
             </Button>
-            {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
           </Grid>
+          <CustomSnackbar ref={snackbarRef} />
         </Container>
       ) : (
         <>
