@@ -146,7 +146,7 @@ const Animator: React.FC = () => {
   const { setActiveComponent, renderActiveComponent } = useActiveComponent({
     defaultComponent: "Stand",
     components: {
-      Stand: <Stand />,
+      Stand: <Stand standInfos={selectedStands}/>,
       GeneralVieuw: <GeneralView />
     }
   });
