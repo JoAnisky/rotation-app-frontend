@@ -8,6 +8,7 @@ import { ACTIVITY_API } from "@/routes/api/";
 import useFetch from "@/hooks/useFetch";
 import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
 import CustomSnackbar from "@/components/CustomSnackbar";
+import ActivityControls from "../ActivityControls";
 
 interface ActivityFormProps {
   chosenActivityId: number | string;
@@ -108,10 +109,10 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
   return (
     <Container component="main" maxWidth="sm" sx={{ display: "flex", flexDirection: "column", height: "100%",  paddingBottom: '70px' }}>
       <Box sx={{ p: 2 }}>
+    <ActivityControls activityId={chosenActivityId}/>
         <Typography component="h1" variant="h5" align="center" sx={{ mb: 2 }}>
           Paramètres d'activité
         </Typography>
-
         {/* Grid wrapper for every elements */}
         <Grid container spacing={1}>
           <Grid item xs={12}>
