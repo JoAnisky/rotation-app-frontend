@@ -279,7 +279,6 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
           return { id: item.id, name: item.name, nbTeamsOnStand: nbTeamsOnStand[item.id] || 1 };
         } else {
           // This case should theoretically never happen if data handling is correct
-          console.error("Trying to process ITeam as IStand", item);
           // Default value or handle error
           return { id: item.id, name: item.name, nbTeamsOnStand: 1 };
         }
