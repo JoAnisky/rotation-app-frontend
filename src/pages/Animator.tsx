@@ -40,14 +40,15 @@ const Animator: React.FC = () => {
   const [fetchedAnimatorsData, animatorsLoading] = useFetch<IAnimator[]>(ANIMATOR_API.animators);
 
   // Fetch stands Data for option list display
-  const [fetchedStandsData, standsLoading] = useFetch<IStand[]>(ACTIVITY_API.getActivityStands(15));
+  const [fetchedStandsData, standsLoading] = useFetch<IStand[]>(ACTIVITY_API.getActivityStands(18));
 
   // Snackbar message
   const snackbarRef = useRef<CustomSnackbarMethods>(null);
 
-  const getSelectedStand = () => {
+  const getSelectedStandAndAnim = () => {
     try {
       const storedData = getItem();
+
       return storedData ? JSON.parse(storedData) : null;
     } catch (error) {
       console.error("Error parsing selectedStand from localStorage", error);
@@ -56,10 +57,10 @@ const Animator: React.FC = () => {
   };
 
   useEffect(() => {
-    const storedStand = getSelectedStand();
-    if (storedStand) {
-      setSelectedStands(storedStand);
-      // If a stored stand is found, we assume that the animator-stand association has already been set
+    const storedData = getSelectedStandAndAnim();
+    if (storedData) {
+      setSelectedAnimator(storedData.animator);
+      setSelectedStands(storedData.stands);
       setAnimatorStandSetted(true);
     }
   }, []);
@@ -67,11 +68,21 @@ const Animator: React.FC = () => {
   // Add a function to handle changing the selection
   const handleChangeSelection = () => {
     setAnimatorStandSetted(false);
-    // Optionally clear selectedAnimator and selectedStand if you want to reset the selection entirely
+    // Clear selectedAnimator and selectedStand to reset the selection entirely
     setSelectedAnimator(null);
     setSelectedStands([]);
     // Clear the stored data from local storage
     setItem(null); // Adjust based on how your useLocalStorage hook handles removing items
+  };
+
+  const saveSelectionToLocalStorage = () => {
+    if (selectedAnimator && selectedStands.length > 0) {
+      const storageData = {
+        animator: selectedAnimator,
+        stands: selectedStands
+      };
+      setItem(JSON.stringify(storageData)); // Enregistrement dans le localStorage
+    }
   };
 
   useEffect(() => {
@@ -93,10 +104,8 @@ const Animator: React.FC = () => {
   }, [fetchedStandsData]);
 
   useEffect(() => {
-    if (selectedStands) {
-      setItem(JSON.stringify(selectedStands));
-    }
-  }, [setItem, selectedStands]);
+    saveSelectionToLocalStorage();
+  }, [selectedAnimator, selectedStands]);
 
   const handleSelectedStands = () => {
     // If no stand selected
@@ -146,7 +155,7 @@ const Animator: React.FC = () => {
   const { setActiveComponent, renderActiveComponent } = useActiveComponent({
     defaultComponent: "Stand",
     components: {
-      Stand: <Stand standInfos={selectedStands}/>,
+      Stand: <Stand standInfos={selectedStands || []} role={"Animateur"} />,
       GeneralVieuw: <GeneralView />
     }
   });
