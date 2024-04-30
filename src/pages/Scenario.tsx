@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Box, CssBaseline, Typography, Card, CardContent, CardHeader, List, ListItem } from "@mui/material";
 import useFetch from "@/hooks/useFetch";
 import { SCENARIO_API } from "@/routes/api/";
+import {IScenario} from '@/types/ScenarioInterface'
 
 type TeamNames = string[];
 
@@ -9,16 +10,8 @@ type ScenarioEntry = {
   [activityName: string]: TeamNames;
 };
 
-type BaseScenario = ScenarioEntry[];
 
-type ApiResponse = {
-  id: number;
-  base_scenario: BaseScenario;
-  current_scenario: null; // Adjust as needed
-  activity: { id: number };
-};
-
-type ApiData = ApiResponse[];
+type ApiData = IScenario[];
 
 interface ScenarioProps {
   chosenActivityId: number | string;
@@ -30,14 +23,9 @@ const Scenario: React.FC<ScenarioProps> = ({ chosenActivityId }) => {
 
   const [data, loading, error] = useFetch<ApiData>(SCENARIO_API.getScenarioByActivityId(chosenActivityId));
 
-  // useEffect(() => {
-
-  // }, [scenario]); // To log the updated state
-
   useEffect(() => {
     if (data && data.length > 0 && data[0].base_scenario) {
       setScenario(data[0].base_scenario);
-      console.log(data);
     }
   }, [data]);
 
