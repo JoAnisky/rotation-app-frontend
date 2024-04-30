@@ -191,6 +191,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
    * @returns void
    */
   const generateTeamNames = (numberOfTeams: number, theme: string): void => {
+    console.log(theme);
     // Immediate return if the theme or number of teams is not initialized properly
     if (!theme || numberOfTeams === null) {
       console.log("Initialization check - Skipping execution");
@@ -198,7 +199,6 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
     }
 
     if (numberOfTeams > 0 && !theme) {
-
       snackbarRef.current?.showSnackbar("Il faudrait choisir un thème", "warning");
       return;
     }
@@ -211,9 +211,13 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
       }
       return;
     }
+    
+    // Replace spaces with underscores in a theme
+    const formattedTheme = theme.replace(/ /g, "_");
+    console.log("Formatted theme: ", formattedTheme);
 
     // Retrieve the list of potential team names based on the selected theme
-    const names = themedTeamsNames[theme] || []; // Safe fallback to prevent errors if theme is undefined
+    const names = themedTeamsNames[formattedTheme] || []; // Safe fallback to prevent errors if theme is undefined
 
     // Shuffle and slice the array as before
     const shuffledNames = names.sort(() => 0.5 - Math.random());
@@ -331,7 +335,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
         errorMessage += "au moins un stand.";
       }
 
-      snackbarRef.current?.showSnackbar( errorMessage, "error");
+      snackbarRef.current?.showSnackbar(errorMessage, "error");
 
       return; // Stop execution if the condition is not met
     }
@@ -378,8 +382,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
       severity = "error";
     }
 
-    snackbarRef.current?.showSnackbar( message, severity);
-
+    snackbarRef.current?.showSnackbar(message, severity);
   };
 
   return (
