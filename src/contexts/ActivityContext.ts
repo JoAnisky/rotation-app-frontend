@@ -1,16 +1,9 @@
-import { createContext, useContext } from "react";
-import { IActivityData } from "../types/ActivityInterface";
+import { createContext } from "react";
+import { ActivityContextType } from "../types/ActivityInterface";
 
-export const ActivityContext = createContext<IActivityData | undefined>(
-  undefined
-);
 
-export const useActivityContext = () => {
-  const context = useContext(ActivityContext);
-  if (!context) {
-    throw new Error(
-      "useActivityContext must be used within an ActivityProvider"
-    );
-  }
-  return context;
-};
+export const ActivityContext = createContext<ActivityContextType>({
+  activityId: null,
+  role: null,
+  setActivityData: () => {} // Fournissez une implémentation par défaut qui ne fait rien
+});
