@@ -40,7 +40,7 @@ const Animator: React.FC = () => {
   const [fetchedAnimatorsData, animatorsLoading] = useFetch<IAnimator[]>(ANIMATOR_API.animators);
 
   // Fetch stands Data for option list display
-  const [fetchedStandsData, standsLoading] = useFetch<IStand[]>(ACTIVITY_API.getActivityStands(18));
+  const [fetchedStandsData, standsLoading] = useFetch<IStand[]>(ACTIVITY_API.getActivityStands(1));
 
   // Snackbar message
   const snackbarRef = useRef<CustomSnackbarMethods>(null);
