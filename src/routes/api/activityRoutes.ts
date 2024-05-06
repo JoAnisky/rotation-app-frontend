@@ -12,5 +12,8 @@ export const ACTIVITY_API = {
   getActivityStands: (activityId: number | string): string => `${ACTIVITY_ENDPOINT}/${activityId}/stands`,
 
   // Get teams for a single activity by ID
-  getActivityTeams: (activityId: number | string): string => `${ACTIVITY_ENDPOINT}/${activityId}/teams`
+  getActivityTeams: (activityId: number | string): string => `${ACTIVITY_ENDPOINT}/${activityId}/teams`,
+
+  // Get activity and user role (participant or animator) by PIN Code 
+  getActivityByPinCode: (pincode: string): string => `${ACTIVITY_ENDPOINT}/code/${pincode}`
 };
