@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button, Container, Grid, TextField, Typography } from "@mui/material";
 import ActivitySelection from "@/components/Activity/ActivitySelection";
 import CustomSnackbar from "@/components/CustomSnackbar";
-import { SnackMessage } from "@/types/SnackbarTypes";
+import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
 import { ACTIVITY_API } from "@/routes/api/";
 
 interface ActivityChoiceProps {
@@ -17,19 +17,8 @@ interface IActivities {
 const ActivityChoice: React.FC<ActivityChoiceProps> = ({
   setChosenActivityId,
 }) => {
-  // State for open custom snackbar message
-  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
-
-  // State for manage SnackBar message and color (severity)
-  const [snackMessageSeverity, setSnackMessageSeverity] =
-    useState<SnackMessage>({
-      message: "",
-      severity: "success", // Default severity is 'success'
-    });
-
-  const handleCloseSnackbar = () => {
-    setSnackbarOpen(false);
-  };
+  
+  const snackbarRef = useRef<CustomSnackbarMethods>(null);
   // Get selected activity
   const [selectedActivity, setSelectedActivity] = useState<IActivities | null>(
     null
@@ -43,11 +32,7 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
 
   const handleCreateActivity = () => {
     if (!newActivityName || newActivityName == "") {
-      setSnackbarOpen(true);
-      setSnackMessageSeverity({
-        message: "Il faudrait choisir un nom d'activité",
-        severity: "warning",
-      });
+      snackbarRef.current?.showSnackbar("Il faudrait choisir un nom d'activité", "warning")
       return;
     }
     createActivity(newActivityName);
@@ -55,7 +40,7 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
 
   const createActivity = async (activityName: string) => {
     // User ID comes from the Gamemaster
-    const userId = 7;
+    const userId = 3;
     const options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -72,11 +57,7 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
       // Activity is created
       setChosenActivityId(responseData.activity_id);
     } catch (error) {
-      setSnackbarOpen(true);
-      setSnackMessageSeverity({
-        message: "Echec lors de la création de l'activité : " + error,
-        severity: "warning",
-      });
+      snackbarRef.current?.showSnackbar(`Echec lors de la création de l'activité : ${error}`, "error" )
       console.error(`Failed to create activity: `, error);
     }
   };
@@ -87,11 +68,7 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
 
   const handleJoinActivity = () => {
     if (!selectedActivity) {
-      setSnackbarOpen(true);
-      setSnackMessageSeverity({
-        message: "Il faudrait choisir une activité !",
-        severity: "warning",
-      });
+      snackbarRef.current?.showSnackbar("Il faudrait choisir une activité !", "warning")
       return;
     }
     setChosenActivityId(selectedActivity.id); // Only set on button click
@@ -146,12 +123,7 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
             Créer
           </Button>
         </Grid>
-        <CustomSnackbar
-          open={snackbarOpen}
-          handleClose={handleCloseSnackbar}
-          message={snackMessageSeverity.message}
-          severity={snackMessageSeverity.severity} // Optional: error, warning, info, success
-        />
+        <CustomSnackbar ref={snackbarRef} />
       </Grid>
     </Container>
   );
