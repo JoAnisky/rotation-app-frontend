@@ -29,3 +29,9 @@ export interface IActivityData {
   stands: IStand[] | null;
   teams: ITeam[] | null;
 }
+
+export interface ActivityContextType {
+  activityId: string | null;
+  role: string | null;
+  setActivityData: (activityId: string, role: string) => void;
+}
