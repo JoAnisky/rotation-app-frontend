@@ -1,42 +1,55 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Container, Grid, TextField, Typography } from "@mui/material";
 import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
 import { ACTIVITY_API } from "@/routes/api";
 import CustomSnackbar from "@/components/CustomSnackbar";
+import { useActivityContext } from "@/hooks/useActivityContext";
 
 interface ActivityResponse {
   activity_id: string;
-  role: string;
+  code_type: string;
 }
 
 const ActivityCode = () => {
+  const { setActivityData, activityId, role } = useActivityContext();
+
   const snackbarRef = useRef<CustomSnackbarMethods>(null);
 
   const [pincode, setPincode] = useState<string>("");
 
-  const handleJoinActivity = () => {
-    console.log("coucou : ", pincode);
+  useEffect(() => {
+    if (activityId && role) {
+      console.log(`Les données enregistrées sont : Activity ID: ${activityId}, Role: ${role}`);
+      // Vous pouvez aussi utiliser le snackbar pour afficher cette information
+      snackbarRef.current?.showSnackbar(`Activité: ${activityId}, Rôle: ${role} enregistrés.`, "info");
+    }
+  }, [activityId, role]);
+
+  const handleJoinActivity = async () => {
     if (!pincode) {
       snackbarRef.current?.showSnackbar("Il faudrait entrer un code PIN", "warning");
       return;
     }
-    sendPincode(pincode);
+    await sendPincode(pincode);
   };
 
   const sendPincode = async (pincode: string): Promise<void> => {
     try {
-
       const response = await fetch(`${ACTIVITY_API.getActivityByPinCode(pincode)}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" }
       });
 
-      if (!response.ok) throw new Error("Failed to submit pincode");
+      if (!response.ok) {
+        const errorText = await response.text(); // Safely read the raw text
+        snackbarRef.current?.showSnackbar(errorText, "error");
+        throw new Error(`HTTP error! status: ${response.status}, ${errorText}`);
+      }
 
       const data: ActivityResponse = await response.json();
 
       console.log("Activity Found ! : ", data);
-      
+      setActivityData(data.activity_id, data.code_type);
     } catch (error) {
       //console.error("Error submitting data:", error);
       snackbarRef.current?.showSnackbar("Pas d'activité trouvée !", "warning");
@@ -75,7 +88,7 @@ const ActivityCode = () => {
             Valider
           </Button>
         </Grid>
-        <CustomSnackbar ref={snackbarRef}/>
+        <CustomSnackbar ref={snackbarRef} />
       </Grid>
     </Container>
   );
