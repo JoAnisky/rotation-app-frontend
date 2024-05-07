@@ -2,21 +2,23 @@ import React, { useEffect, useState } from "react";
 import Status from "@/components/Status";
 import { Box, Container, Grid, Typography } from "@mui/material";
 // import Stopwatch from "@/components/Timer/Stopwatch";
-import { IStand } from "@/types/ActivityInterface";
-import { IScenario, ScenarioActivity } from "@/types/ScenarioInterface";
+import { IStand, ITeam } from "@/types/ActivityInterface";
+import { ScenarioActivity } from "@/types/ScenarioInterface";
 import { SCENARIO_API } from "@/routes/api";
-import useFetch from "@/hooks/useFetch";
+import { useActivityContext } from "@/hooks/useActivityContext";
 
-interface StatusProps {
-  standInfos: IStand[];
-  role: string;
+interface StandProps {
+  animatorInfo?: IStand[];
+  teamInfo?: ITeam[];
 }
 
-const Stand: React.FC<StatusProps> = ({ standInfos, role }) => {
-  const [data, loading, error] = useFetch<IScenario[]>(SCENARIO_API.getScenarioByActivityId(1));
+const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
+
+  const { activityId, role } = useActivityContext();
 
   // Get the scenario
   const [baseScenario, setBaseScenario] = useState<ScenarioActivity[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const [currentScenario, setCurrentScenario] = useState<ScenarioActivity | null>(null);
 
@@ -26,20 +28,40 @@ const Stand: React.FC<StatusProps> = ({ standInfos, role }) => {
   const [currentTeam, setCurrentTeam] = useState<string>("Nom team");
   const [nextTeam, setNextTeam] = useState<string>("Nom team");
 
+  // Use Effect for fetching data when activityId changes and is not null
   useEffect(() => {
-    console.log(role);
-  }, []);
+    const fetchData = async () => {
+      if (activityId) {
+        console.log(activityId);
+        // Ensure there is an activityId
+        setLoading(true);
+        try {
+          const response = await fetch(SCENARIO_API.getScenarioByActivityId(activityId));
+
+          const data = await response.json(); // Assuming the server responds with JSON
+          setBaseScenario(data[0].base_scenario);
+          setCurrentScenario(data[0].current_scenario);
+        } catch (err) {
+          setBaseScenario([]);
+          console.error('erreur de fetch : ', err)
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchData();
+  }, [activityId]); // Dependency array includes activityId
 
   useEffect(() => {
-    if (data && data.length > 0) {
-      // Since data is an array and you expect only one scenario object in it:
-      const scenario = data[0]; // Access the first object of the array
-  
-      // Now you can safely assign base_scenario and current_scenario
-      setBaseScenario(scenario.base_scenario);
-      setCurrentScenario(scenario.current_scenario);
+    if (role === "animator" && animatorInfo) {
+      console.log("animatorInfo : ", animatorInfo[0].name);
+      setStandName(animatorInfo[0].name);
+    } else if (role === "participant" && teamInfo) {
+      console.log("teamInfo : ", teamInfo[0].name);
+      setCurrentTeam(teamInfo[0].name);
     }
-  }, [data]);
+  }, [animatorInfo, teamInfo, role]);
 
   useEffect(() => {
     console.log("Updated baseScenario:", baseScenario);
@@ -48,13 +70,6 @@ const Stand: React.FC<StatusProps> = ({ standInfos, role }) => {
   useEffect(() => {
     console.log("Updated currentScenario:", currentScenario);
   }, [currentScenario]);
-
-  useEffect(() => {
-    if (standInfos.length > 0) {
-      const { name } = standInfos[0];
-      setStandName(name);
-    }
-  }, [standInfos]);
 
   return (
     <Container

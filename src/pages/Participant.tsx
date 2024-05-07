@@ -65,7 +65,7 @@ const Participant: React.FC = () => {
   const { setActiveComponent, renderActiveComponent } = useActiveComponent({
     defaultComponent: "Stand",
     components: {
-      Stand: <Stand standInfos={[]} role={"Participant"} />,
+      Stand: <Stand teamInfo={selectedTeam ? [selectedTeam] : []}  />,
       GeneralView: <GeneralView />
     }
   });

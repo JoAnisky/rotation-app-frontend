@@ -154,10 +154,9 @@ const Animator: React.FC = () => {
   };
 
   const { setActiveComponent, renderActiveComponent } = useActiveComponent({
-    defaultComponent: "ActivityCode",
+    defaultComponent: "Stand",
     components: {
-      ActivityCode: <ActivityCode/>,
-      Stand: <Stand standInfos={selectedStands || []} role={"Animateur"} />,
+      Stand: <Stand animatorInfo={selectedStands || []} />,
       GeneralVieuw: <GeneralView />
     }
   });
