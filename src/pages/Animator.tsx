@@ -11,6 +11,7 @@ import NavbarDown from "@/components/NavbarDown";
 import GeneralView from "./GeneralView";
 import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
 import CustomSnackbar from "@/components/CustomSnackbar";
+import ActivityCode from "./ActivityCode";
 
 interface IAnimator {
   id: number;
@@ -153,8 +154,9 @@ const Animator: React.FC = () => {
   };
 
   const { setActiveComponent, renderActiveComponent } = useActiveComponent({
-    defaultComponent: "Stand",
+    defaultComponent: "ActivityCode",
     components: {
+      ActivityCode: <ActivityCode/>,
       Stand: <Stand standInfos={selectedStands || []} role={"Animateur"} />,
       GeneralVieuw: <GeneralView />
     }
