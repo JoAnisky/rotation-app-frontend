@@ -13,7 +13,7 @@ interface StatusProps {
 }
 
 const Stand: React.FC<StatusProps> = ({ standInfos, role }) => {
-  const [data, loading, error] = useFetch<IScenario[]>(SCENARIO_API.getScenarioByActivityId(36));
+  const [data, loading, error] = useFetch<IScenario[]>(SCENARIO_API.getScenarioByActivityId(1));
 
   // Get the scenario
   const [baseScenario, setBaseScenario] = useState<ScenarioActivity[]>([]);
