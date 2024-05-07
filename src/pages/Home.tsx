@@ -11,11 +11,11 @@ const Home: React.FC = () => {
       </Box>
 
       <Box className="roles-choice">
-        <Button className="btnChoiceRole" component={Link} to="/participant">
+        <Button className="btnChoiceRole" component={Link} to="/activity_code/participant">
           {" "}
           Participant
         </Button>
-        <Button className="btnChoiceRole" component={Link} to="/animateur">
+        <Button className="btnChoiceRole" component={Link} to="/activity_code/animator">
           {" "}
           Animateur
         </Button>
