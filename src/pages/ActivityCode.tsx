@@ -1,41 +1,36 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Button, Container, Grid, TextField, Typography } from "@mui/material";
 import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
 import { ACTIVITY_API } from "@/routes/api";
 import CustomSnackbar from "@/components/CustomSnackbar";
 import { useActivityContext } from "@/hooks/useActivityContext";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface ActivityResponse {
   activity_id: string;
-  code_type: string;
+  role: string;
 }
 
 const ActivityCode = () => {
-  const { setActivityData, activityId, role } = useActivityContext();
+  const { setActivityData } = useActivityContext();
+  const { role } = useParams();
+  const navigate = useNavigate();
 
   const snackbarRef = useRef<CustomSnackbarMethods>(null);
 
   const [pincode, setPincode] = useState<string>("");
-
-  useEffect(() => {
-    if (activityId && role) {
-      console.log(`Les données enregistrées sont : Activity ID: ${activityId}, Role: ${role}`);
-      // Vous pouvez aussi utiliser le snackbar pour afficher cette information
-      snackbarRef.current?.showSnackbar(`Activité: ${activityId}, Rôle: ${role} enregistrés.`, "info");
-    }
-  }, [activityId, role]);
 
   const handleJoinActivity = async () => {
     if (!pincode) {
       snackbarRef.current?.showSnackbar("Il faudrait entrer un code PIN", "warning");
       return;
     }
-    await sendPincode(pincode);
+    role && await sendPincode(role, pincode);
   };
 
-  const sendPincode = async (pincode: string): Promise<void> => {
+  const sendPincode = async (role: string, pincode: string): Promise<void> => {
     try {
-      const response = await fetch(`${ACTIVITY_API.getActivityByPinCode(pincode)}`, {
+      const response = await fetch(`${ACTIVITY_API.getActivityAndRoleByPinCode(role, pincode)}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" }
       });
@@ -49,7 +44,15 @@ const ActivityCode = () => {
       const data: ActivityResponse = await response.json();
 
       console.log("Activity Found ! : ", data);
-      setActivityData(data.activity_id, data.code_type);
+      setActivityData(data.activity_id, data.role);
+      if (role === 'participant') {
+        navigate('/participant');
+    } else if (role === 'animator') {
+        navigate('/animator');
+    } else {
+        // Unknown role
+        navigate('/');
+    }
     } catch (error) {
       //console.error("Error submitting data:", error);
       snackbarRef.current?.showSnackbar("Pas d'activité trouvée !", "warning");
