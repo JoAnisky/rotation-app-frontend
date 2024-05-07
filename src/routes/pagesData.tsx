@@ -1,8 +1,9 @@
 import { routerType } from "./router.types";
-import Home from "../pages/Home";
-import Participant from "../pages/Participant";
-import Animator from "../pages/Animator";
-import Gamemaster from "../pages/Gamemaster";
+import Home from "@/pages/Home";
+import Participant from "@/pages/Participant";
+import Animator from "@/pages/Animator";
+import Gamemaster from "@/pages/Gamemaster";
+import ActivityCode from "@/pages/ActivityCode";
 
 const pagesData: routerType[] = [
   {
@@ -11,19 +12,32 @@ const pagesData: routerType[] = [
     title: "home",
   },
   {
+    path: "activity_code/:role",
+    element: <ActivityCode/>,
+    title: "activity_code"
+  },
+  // {
+  //   path:"login",
+  //   element: <Login/>
+  //   title: "login"
+  // },
+  {
     path: "participant",
     element: <Participant />,
     title: "participant",
+    roles : ['ROLE_PARTICIPANT'],
   },
   {
     path: "animateur",
     element: <Animator />,
     title: "animator",
+    roles: ['ROLE_ANIMATOR']
   },
   {
     path: "gamemaster",
     element: <Gamemaster />,
     title: "gamemaster",
+    roles: ['ROLE_GAMEMASTER']
   },
 ];
 
