@@ -2,23 +2,12 @@ import { useEffect, useState } from "react";
 import { Box, CssBaseline, Typography, Card, CardContent, CardHeader, List, ListItem } from "@mui/material";
 import useFetch from "@/hooks/useFetch";
 import { SCENARIO_API } from "@/routes/api/";
-import { IScenario } from "@/types/ScenarioInterface";
+import { IScenario, ScenarioActivity } from "@/types/ScenarioInterface";
+import { ITeam } from "@/types/ActivityInterface";
 
-// Définir une interface pour représenter une équipe
-interface Team {
-  teamId: number;
-  teamName: string;
-}
 
-// Définir une interface pour représenter un stand
-interface Stand {
-  standId: number;
-  standName: string;
-  teams: Team[];
-}
 
 // Définir une interface pour représenter un tour
-type Turn = Stand[];
 type ApiData = IScenario[];
 
 interface ScenarioProps {
@@ -27,7 +16,7 @@ interface ScenarioProps {
 
 
 const Scenario: React.FC<ScenarioProps> = ({ chosenActivityId }) => {
-  const [scenario, setScenario] = useState<Turn[]>([]);
+  const [scenario, setScenario] = useState<ScenarioActivity[] | null>(null);
 
   const [data, loading, error] = useFetch<ApiData>(SCENARIO_API.getScenarioByActivityId(chosenActivityId));
 
@@ -68,7 +57,7 @@ const Scenario: React.FC<ScenarioProps> = ({ chosenActivityId }) => {
         {!loading && !error && (
           <>
             <Typography>Affichage du scenario :</Typography>
-            {scenario.length > 0 ? (
+            {scenario && scenario.length > 0 ? (
               scenario.map((turn, index) => (
                 <Card key={index} sx={{ mb: 1, width: "90%", maxWidth: 700, padding: 0 }}>
                   <CardHeader title={`Tour n°${index + 1}`} />
@@ -80,8 +69,8 @@ const Scenario: React.FC<ScenarioProps> = ({ chosenActivityId }) => {
                           <List>
                             {stand.teams &&
                               Array.isArray(stand.teams) &&
-                              stand.teams.map((team, teamIndex) => (
-                                <ListItem key={teamIndex} sx={{ py: 0.5 }}>
+                              stand.teams.map((team: ITeam) => (
+                                <ListItem key={team.teamId} sx={{ py: 0.5 }}>
                                   {team.teamName}
                                 </ListItem>
                               ))}
