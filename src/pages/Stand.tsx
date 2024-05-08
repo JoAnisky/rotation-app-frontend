@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Status from "@/components/Status";
 import { Box, Container, Grid, Typography } from "@mui/material";
 // import Stopwatch from "@/components/Timer/Stopwatch";
 import { IStand, ITeam } from "@/types/ActivityInterface";
-import { ScenarioActivity } from "@/types/ScenarioInterface";
+import { IScenario, ScenarioActivity  } from "@/types/ScenarioInterface";
 import { SCENARIO_API } from "@/routes/api";
 import { useActivityContext } from "@/hooks/useActivityContext";
 
@@ -17,7 +17,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
   const { activityId, role } = useActivityContext();
 
   // Get the scenario
-  const [baseScenario, setBaseScenario] = useState<ScenarioActivity[]>([]);
+  const [baseScenario, setBaseScenario] = useState<IScenario[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [currentScenario, setCurrentScenario] = useState<ScenarioActivity | null>(null);
@@ -32,13 +32,12 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
   useEffect(() => {
     const fetchData = async () => {
       if (activityId) {
-        console.log(activityId);
         // Ensure there is an activityId
         setLoading(true);
         try {
           const response = await fetch(SCENARIO_API.getScenarioByActivityId(activityId));
 
-          const data = await response.json(); // Assuming the server responds with JSON
+          const data = await response.json();
           setBaseScenario(data[0].base_scenario);
           setCurrentScenario(data[0].current_scenario);
         } catch (err) {
@@ -49,27 +48,45 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
         }
       }
     };
-
     fetchData();
   }, [activityId]); // Dependency array includes activityId
 
+  const findStandNameByTeamId = useCallback(
+    (teamId: number): string | null => {
+      if (currentScenario) {
+        for (const key in currentScenario) {
+          const stand = currentScenario[key];
+          const foundTeam = stand.teams.find(team => team.teamId === teamId);
+          if (foundTeam) {
+            return stand.standName;
+          }
+        }
+      }
+      return null; // Retourne null si aucun stand correspondant n'est trouvé
+    },
+    [currentScenario]
+  );
+  
   useEffect(() => {
     if (role === "animator" && animatorInfo) {
       console.log("animatorInfo : ", animatorInfo[0].name);
       setStandName(animatorInfo[0].name);
     } else if (role === "participant" && teamInfo) {
-      console.log("teamInfo : ", teamInfo[0].name);
-      setCurrentTeam(teamInfo[0].name);
+      setStandName(findStandNameByTeamId(teamInfo[0].teamId));
+      console.log(findStandNameByTeamId(teamInfo[0].teamId))
+      setCurrentTeam(teamInfo[0].teamName);
     }
-  }, [animatorInfo, teamInfo, role]);
+  }, [animatorInfo, teamInfo, role, standName, findStandNameByTeamId]);
 
   useEffect(() => {
-    console.log("Updated baseScenario:", baseScenario);
-  }, [baseScenario]);
+    console.log("Updated baseScenario:", baseScenario)
+  }, [baseScenario])
 
   useEffect(() => {
     console.log("Updated currentScenario:", currentScenario);
   }, [currentScenario]);
+
+
 
   return (
     <Container
