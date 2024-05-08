@@ -1,19 +1,15 @@
-// Définir une interface pour représenter une équipe
-interface Team {
-  teamId: number;
-  teamName: string;
-}
+import { ITeam } from "./ActivityInterface";
 
 // Définir une interface pour représenter un stand
-interface Stand {
+interface IScenarioStand {
   standId: number;
   standName: string;
-  teams: Team[];
+  teams: ITeam[];
 }
 
 // Définir une interface pour représenter une activité de scénario
 export interface ScenarioActivity {
-  [key: string]: Stand;
+  [key: string]: IScenarioStand;
 }
 
 export interface IScenario {
