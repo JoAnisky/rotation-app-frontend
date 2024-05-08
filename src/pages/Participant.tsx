@@ -96,7 +96,7 @@ const Participant: React.FC = () => {
               disablePortal
               id="team-autocomplete"
               options={teamsData}
-              getOptionLabel={option => option.name}
+              getOptionLabel={option => option.teamName}
               onChange={(event, value: ITeam | null) => setSelectedTeam(value)} // Ensuring the value type is correctly hinted
               loading={teamsDataLoading}
               loadingText="Chargement..."

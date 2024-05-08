@@ -9,8 +9,8 @@ export interface IStand {
   nbTeamsOnStand: number
 }
 export interface ITeam {
-  id: number;
-  name: string;
+  teamId: number;
+  teamName: string;
 }
 export interface IActivityData {
   name: string;

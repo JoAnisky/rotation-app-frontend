@@ -222,9 +222,9 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
     const shuffledNames = names.sort(() => 0.5 - Math.random());
     const selectedNames = shuffledNames.slice(0, numberOfTeams);
 
-    const teamObjects = selectedNames.map((name, index) => ({
-      id: index,
-      name
+    const teamObjects = selectedNames.map((teamName, index) => ({
+      teamId: index,
+      teamName
     }));
 
     setTeamList(teamObjects);
@@ -264,10 +264,16 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
         sendDataToDB(JSON.stringify(numberOfTeams), "nb_teams");
       }
 
-      dataToSave = dataList.map(({ id, name }) => ({
-        id,
-        name
-      }));
+      dataToSave = dataList.map((item) => {
+        if ('teamId' in item) {
+          const team = item as ITeam;
+          // Si c'est une équipe, retournez une structure de données avec les propriétés de l'équipe
+          return {
+            teamId: team.teamId,
+            teamName: team.teamName
+          };
+        }
+      });
       // Check if data is not empty or has been sent once already
       if (dataToSave.length > 0 || hasTeamsBeenSent.current) {
         sendDataToDB(JSON.stringify(dataToSave), fieldType);
@@ -283,7 +289,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
         } else {
           // This case should theoretically never happen if data handling is correct
           // Default value or handle error
-          return { id: item.id, name: item.name, nbTeamsOnStand: 1 };
+          return { id: item.teamId, name: item.teamName, nbTeamsOnStand: 1 };
         }
       });
 
@@ -501,7 +507,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
             <Box display="flex" flexWrap="wrap" gap={2} sx={{ mb: 2 }}>
               {teamList.map((team, index) => (
                 <Box key={index} bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1}>
-                  Équipe {team.name}
+                  Équipe {team.teamName}
                   <IconButton onClick={() => handleRemoveTeam(index)} size="small" sx={{ color: "grey.200" }}>
                     <CloseIcon />
                   </IconButton>
