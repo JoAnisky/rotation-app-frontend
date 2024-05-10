@@ -1,0 +1,1 @@
+export type UserRoles = 'ROLE_PARTICIPANT' | 'ROLE_GAMEMASTER' | 'ROLE_ANIMATOR';
