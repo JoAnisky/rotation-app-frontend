@@ -26,12 +26,14 @@ const pagesData: routerType[] = [
     element: <Participant />,
     title: "participant",
     roles : ['ROLE_PARTICIPANT'],
+    protected: true
   },
   {
     path: "animator",
     element: <Animator />,
     title: "animator",
-    roles: ['ROLE_ANIMATOR']
+    roles: ['ROLE_ANIMATOR'],
+    protected: true
   },
   {
     path: "gamemaster",
