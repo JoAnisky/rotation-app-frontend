@@ -1,17 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Autocomplete, Button, Container, Grid, TextField, Typography } from "@mui/material";
-import Stand from "./Stand";
-import useFetch from "@/hooks/useFetch";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useFetch, useLocalStorage, useActiveComponent } from "@/hooks/";
 import { ANIMATOR_API, ACTIVITY_API } from "@/routes/api/";
 import { IStand } from "@/types/ActivityInterface";
-import NavbarUp from "@/components/NavbarUp";
-import useActiveComponent from "@/hooks/useActiveComponent";
-import NavbarDown from "@/components/NavbarDown";
-import GeneralView from "./GeneralView";
+import { NavbarUp, CustomSnackbar, NavbarDown } from "@/components";
+import { Stand, GeneralView } from "@/pages";
 import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
-import CustomSnackbar from "@/components/CustomSnackbar";
-import ActivityCode from "./ActivityCode";
 
 interface IAnimator {
   id: number;
