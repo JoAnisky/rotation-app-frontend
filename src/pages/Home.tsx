@@ -19,7 +19,7 @@ const Home: React.FC = () => {
           {" "}
           Animateur
         </Button>
-        <Button className="btnChoiceRole" component={Link} to="/gamemaster">
+        <Button className="btnChoiceRole" component={Link} to="/login">
           {" "}
           Maitre du jeu
         </Button>
