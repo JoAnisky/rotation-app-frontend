@@ -1,40 +1,55 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import Alert from "@mui/material/Alert";
-import Box from "@mui/material/Box";
 import { Container } from "@mui/material";
+import { LOGIN_API } from "@/routes/api/loginRoutes";
+import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
+import { CustomSnackbar } from "@/components";
 
 const Login: React.FC = () => {
+  const snackbarRef = useRef<CustomSnackbarMethods>(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [token, setToken] = useState<string>("");
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
 
+    if (!username) {
+      snackbarRef.current?.showSnackbar("Il faudrait entrer un nom", "warning");
+      return;
+    }
+
+    if (!password) {
+      snackbarRef.current?.showSnackbar("Il faudrait entrer un mot de passe", "warning");
+      return;
+    }
+
     try {
-      const response = await fetch("/login", {
+      const response = await fetch(LOGIN_API.loginCheck, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ login: username, password })
+        body: JSON.stringify({ username, password })
       });
 
       if (!response.ok) {
-        throw new Error("Login failed!");
+        throw new Error("Entrées invalides");
       }
 
       const data = await response.json();
-      console.log("data reçue : ", data);
-      //onLoginSuccess(data.token); // Vous pouvez stocker le token ici ou mettre à jour l'état global
-    } catch (error) {
+      setToken(data.token);
+    } catch (error: unknown) {
       console.error(error);
-      //   setError(error.message || 'An error occurred');
+      snackbarRef.current?.showSnackbar(`${String(error)}`, "error");
     }
   };
 
+  useEffect(() => {
+    console.log("token : ", token);
+  }, [token])
+  
   return (
     <Container sx={{ display: "flex", flexDirection: "column", height: "100vh", padding: "0" }}>
       <Container
@@ -71,12 +86,13 @@ const Login: React.FC = () => {
             margin="normal"
             fullWidth
           />
-          {error && <Alert severity="error">{error}</Alert>}
+
           <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-            Login
+            Connexion
           </Button>
         </form>
       </Container>
+      <CustomSnackbar ref={snackbarRef} />
     </Container>
   );
 };
