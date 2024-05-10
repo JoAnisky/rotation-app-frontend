@@ -2,11 +2,10 @@
 import React, { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import Router from "./routes/router";
-// import {TimeProvider} from "./context/TimeProvider";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import ActivityProvider from "./providers/ActivityProvider";
-import CounterProvider from "./providers/CounterProvider";
-// Hook responsible to ActivityData get
+import { AuthProvider } from "./providers/AuthProvider";
+// import CounterProvider from "./providers/CounterProvider";
 
 const App: React.FC = () => {
   // On app launch, store the application's start time in localStorage.
@@ -22,13 +21,10 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       <ActivityProvider>
-        <CounterProvider>
+        <AuthProvider>
           <Router />
-        </CounterProvider>
+        </AuthProvider>
       </ActivityProvider>
-      {/* <TimeProvider> */}
-
-      {/* </TimeProvider> */}
     </BrowserRouter>
   );
 };
