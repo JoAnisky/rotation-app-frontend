@@ -1,15 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Autocomplete, Button, Container, Grid, TextField, Typography } from "@mui/material";
-import Stand from "./Stand";
 import useActiveComponent from "@/hooks/useActiveComponent";
-import GeneralView from "./GeneralView";
-import NavbarDown from "@/components/NavbarDown";
-import NavbarUp from "@/components/NavbarUp";
+import { Stand, GeneralView } from "@/pages";
+import { NavbarDown, NavbarUp, CustomSnackbar } from "@/components";
 import { ACTIVITY_API } from "@/routes/api";
 import { ITeam } from "@/types/ActivityInterface";
 import { useActivityContext } from "@/hooks/useActivityContext";
 import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
-import CustomSnackbar from "@/components/CustomSnackbar";
 
 const Participant: React.FC = () => {
   const [teamChosen, setTeamChosen] = useState<boolean>(false);
@@ -36,13 +33,13 @@ const Participant: React.FC = () => {
             headers: { "Content-Type": "application/json" }
           });
           const data = await response.json(); // Assuming the server responds with JSON
-          setTeamsData(data || []);  // Ensure data is an array
+          setTeamsData(data || []); // Ensure data is an array
           if (!response.ok) {
             throw new Error(data.message || "Unknown error occurred");
           }
         } catch (err) {
           console.log(err);
-          setTeamsData([]);  // Set to empty array on error
+          setTeamsData([]); // Set to empty array on error
         } finally {
           setTeamsDataLoading(false);
         }
@@ -65,7 +62,7 @@ const Participant: React.FC = () => {
   const { setActiveComponent, renderActiveComponent } = useActiveComponent({
     defaultComponent: "Stand",
     components: {
-      Stand: <Stand teamInfo={selectedTeam ? [selectedTeam] : []}  />,
+      Stand: <Stand teamInfo={selectedTeam ? [selectedTeam] : []} />,
       GeneralView: <GeneralView />
     }
   });
