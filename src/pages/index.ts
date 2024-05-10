@@ -7,5 +7,6 @@ import GeneralView from "./GeneralView";
 import Participant from "./Participant";
 import Scenario from "./Scenario";
 import Stand from "./Stand";
+import Login from "./Login"
 
-export { ActivityChoice, ActivityCode, Animator, Home, Gamemaster, GeneralView, Participant, Scenario, Stand };
+export { ActivityChoice, ActivityCode, Animator, Home, Gamemaster, GeneralView, Participant, Scenario, Stand, Login };
