@@ -1,9 +1,5 @@
 import { routerType } from "./router.types";
-import Home from "@/pages/Home";
-import Participant from "@/pages/Participant";
-import Animator from "@/pages/Animator";
-import Gamemaster from "@/pages/Gamemaster";
-import ActivityCode from "@/pages/ActivityCode";
+import {Home, ActivityCode, Participant, Animator, Gamemaster, Login} from "@/pages"
 
 const pagesData: routerType[] = [
   {
@@ -16,11 +12,11 @@ const pagesData: routerType[] = [
     element: <ActivityCode/>,
     title: "activity_code"
   },
-  // {
-  //   path:"login",
-  //   element: <Login/>
-  //   title: "login"
-  // },
+  {
+    path:"login",
+    element: <Login/>,
+    title: "login",
+  },
   {
     path: "participant",
     element: <Participant />,
@@ -39,6 +35,7 @@ const pagesData: routerType[] = [
     path: "gamemaster",
     element: <Gamemaster />,
     title: "gamemaster",
+    protected: true,
     roles: ['ROLE_GAMEMASTER']
   },
 ];
