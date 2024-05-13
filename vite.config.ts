@@ -8,15 +8,5 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, 'src'),  // Redirige tous les imports '@' vers le dossier 'src'
     }
-  },
-  server: {
-    proxy: {
-      '/api': {
-        target: 'https://localhost:8000',
-        changeOrigin: true,
-        secure: false, // If your backend is HTTP, you might need to set secure to false
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
-  },
+  }
 });
