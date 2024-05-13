@@ -1,7 +1,8 @@
 import { UserRoles } from "./commonTypes";
 
 export interface User {
-    id?: number;
+    userName?: string;
+    userID?: number;
     role: UserRoles
     authToken?: string;
 }
