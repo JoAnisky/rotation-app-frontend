@@ -2,11 +2,24 @@ import { createContext } from "react";
 import { User } from "@/types/userInterface";
 
 interface AuthContext {
-    user: User | null;
-    setUser: (user: User | null) => void
+    userName: string | null;
+    userRole: string | null;
+    userId: number | null;
+    authToken: User | null;
+    //setUser: (user: User | null) => void;
+    setAuthToken: (token: User | null) => void;
+    setUserName: (name: string) => void;
+    setUserRole: (role: string) => void;
+    setUserId: (id: number | null) => void;
 }
 
 export const AuthContext = createContext<AuthContext>({
-    user: null,
-    setUser: () => {}
+    userName: null,
+    userRole:  null,
+    userId: null,
+    authToken: null,
+    setAuthToken: () => {},
+    setUserName: () => {},
+    setUserRole: () => {},
+    setUserId: () => {},
 })
