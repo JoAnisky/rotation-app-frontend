@@ -1,5 +1,7 @@
+import { API_BASE_URL } from "@/routes/api/apiBaseUrl";
+
 // Défines all Stopwatches routes
-const STOPWATCH_ENDPOINT = "/api/stopwatch";
+const STOPWATCH_ENDPOINT = `${API_BASE_URL}/stopwatch`;
 
 export const STOPWATCH_API = {
   // List all stopwatches

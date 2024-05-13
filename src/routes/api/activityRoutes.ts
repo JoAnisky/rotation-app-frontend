@@ -1,5 +1,7 @@
+import { API_BASE_URL } from "@/routes/api/apiBaseUrl";
+
 // Défines all Activities routes
-const ACTIVITY_ENDPOINT = "/api/activity";
+const ACTIVITY_ENDPOINT = `${API_BASE_URL}/activity`;
 
 export const ACTIVITY_API = {
   // List all activities

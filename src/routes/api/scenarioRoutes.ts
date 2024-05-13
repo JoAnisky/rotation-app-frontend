@@ -1,5 +1,7 @@
-// Défines all Activities routes
-const SCENARIO_ENDPOINT = "/api/scenario";
+import { API_BASE_URL } from "@/routes/api/apiBaseUrl";
+
+// Défines all Scenario routes
+const SCENARIO_ENDPOINT = `${API_BASE_URL}/scenario`;
 
 export const SCENARIO_API = {
   // List all activities

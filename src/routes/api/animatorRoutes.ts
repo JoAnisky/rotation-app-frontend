@@ -1,5 +1,7 @@
+import { API_BASE_URL } from "@/routes/api/apiBaseUrl";
+
 // Défines all Activities routes
-const ANIMATOR_ENDPOINT = "/api/animators";
+const ANIMATOR_ENDPOINT = `${API_BASE_URL}/animators`;
 
 export const ANIMATOR_API = {
   // List all animators

@@ -1,5 +1,7 @@
-// Défines all Activities routes
-const STANDS_ENDPOINT = "/api/stands";
+import { API_BASE_URL } from "@/routes/api/apiBaseUrl";
+
+// Défines all Stands routes
+const STANDS_ENDPOINT = `${API_BASE_URL}/stands`;
 
 export const STANDS_API = {
   // List all stands
