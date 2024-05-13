@@ -2,14 +2,18 @@ import { useContext, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import React from "react";
 import { User } from "@/types/userInterface";
+import { useLocalStorage } from "@/hooks";
 
 interface Props {
   children: React.ReactNode;
 }
 
 const AuthProvider: React.FC<Props> = ({ children }) => {
-  const storedToken = localStorage.getItem("token");
-  const initialAuthToken: User | null = storedToken ? JSON.parse(storedToken) : null;
+  const { getItem } = useLocalStorage("token");
+
+  const storedToken = getItem();
+
+  const initialAuthToken: User | null = storedToken ? storedToken : null;
 
   const [userName, setUserName] = useState<string>("");
   const [userRole, setUserRole] = useState<string>("");
