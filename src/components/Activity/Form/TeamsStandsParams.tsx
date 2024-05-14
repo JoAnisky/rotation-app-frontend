@@ -314,6 +314,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
       const response = await fetch(`${ACTIVITY_API.getActivityById(activityId)}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(payload)
       });
       if (!response.ok) throw new Error("Failed to submit data");
@@ -359,7 +360,8 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
     try {
       const response = await fetch(`${SCENARIO_API.getScenarioByActivityId(activityId)}/generate`, {
         method: "GET",
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
       });
       const data = await response.json(); // Assuming the server responds with JSON
       details = data.details;

@@ -84,9 +84,10 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
           : format(new Date(), "yyyy-MM-dd HH:mm:ss")
       };
 
-      const options = {
+      const options: RequestInit = {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(formattedActivityData)
       };
 
