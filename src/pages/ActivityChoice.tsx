@@ -4,9 +4,10 @@ import ActivitySelection from "@/components/Activity/ActivitySelection";
 import CustomSnackbar from "@/components/CustomSnackbar";
 import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
 import { ACTIVITY_API } from "@/routes/api/";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface ActivityChoiceProps {
-  setChosenActivityId: (activityId: number |string) => void;
+  setChosenActivityId: (activityId: number | string) => void;
 }
 
 interface IActivities {
@@ -14,17 +15,14 @@ interface IActivities {
   name: string;
 }
 
-const ActivityChoice: React.FC<ActivityChoiceProps> = ({
-  setChosenActivityId,
-}) => {
-  
+const ActivityChoice: React.FC<ActivityChoiceProps> = ({ setChosenActivityId }) => {
+  const auth = useAuth();
+  const { userId } = auth;
+
   const snackbarRef = useRef<CustomSnackbarMethods>(null);
   // Get selected activity
-  const [selectedActivity, setSelectedActivity] = useState<IActivities | null>(
-    null
-  );
+  const [selectedActivity, setSelectedActivity] = useState<IActivities | null>(null);
   const [newActivityName, setNewActivityName] = useState<string>("");
-
 
   const handleActivityNameChange = (name: string) => {
     setNewActivityName(name);
@@ -32,7 +30,7 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
 
   const handleCreateActivity = () => {
     if (!newActivityName || newActivityName == "") {
-      snackbarRef.current?.showSnackbar("Il faudrait choisir un nom d'activité", "warning")
+      snackbarRef.current?.showSnackbar("Il faudrait choisir un nom d'activité", "warning");
       return;
     }
     createActivity(newActivityName);
@@ -40,11 +38,12 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
 
   const createActivity = async (activityName: string) => {
     // User ID comes from the Gamemaster
-    const userId = 3;
-    const options = {
+    
+    const options: RequestInit = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: activityName, user: userId }),
+      credentials: "include", // Important: include credentials (cookies)
+      body: JSON.stringify({ name: activityName, user: userId })
     };
 
     try {
@@ -57,7 +56,7 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
       // Activity is created
       setChosenActivityId(responseData.activity_id);
     } catch (error) {
-      snackbarRef.current?.showSnackbar(`Echec lors de la création de l'activité : ${error}`, "error" )
+      snackbarRef.current?.showSnackbar(`Echec lors de la création de l'activité : ${error}`, "error");
       console.error(`Failed to create activity: `, error);
     }
   };
@@ -68,7 +67,7 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
 
   const handleJoinActivity = () => {
     if (!selectedActivity) {
-      snackbarRef.current?.showSnackbar("Il faudrait choisir une activité !", "warning")
+      snackbarRef.current?.showSnackbar("Il faudrait choisir une activité !", "warning");
       return;
     }
     setChosenActivityId(selectedActivity.id); // Only set on button click
@@ -86,7 +85,7 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
         width: "85%",
         p: 2, // Padding général pour l'intérieur du conteneur
         height: "75vh",
-        justifyContent: "center",
+        justifyContent: "center"
       }}
     >
       <Typography variant="h6" component="h1" sx={{ mb: 2 }}>
@@ -96,12 +95,7 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
       <Grid container gap={5}>
         <Grid item xs={12}>
           <ActivitySelection onActivitySelect={handleActivitySelect} />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleJoinActivity}
-            sx={{ mt: 1, mb: 2, width: "100%" }}
-          >
+          <Button variant="contained" color="primary" onClick={handleJoinActivity} sx={{ mt: 1, mb: 2, width: "100%" }}>
             Rejoindre
           </Button>
         </Grid>
@@ -112,14 +106,10 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({
             sx={{ width: "100%" }}
             variant="outlined"
             value={newActivityName}
-            onChange={(e) => handleActivityNameChange(e.target.value)}
+            onChange={e => handleActivityNameChange(e.target.value)}
           />
 
-          <Button
-            variant="contained"
-            sx={{ mt: 1, mb: 2, width: "100%" }}
-            onClick={handleCreateActivity}
-          >
+          <Button variant="contained" sx={{ mt: 1, mb: 2, width: "100%" }} onClick={handleCreateActivity}>
             Créer
           </Button>
         </Grid>

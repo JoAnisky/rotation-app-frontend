@@ -5,6 +5,7 @@ import { ACTIVITY_API } from "@/routes/api";
 import CustomSnackbar from "@/components/CustomSnackbar";
 import { useActivityContext } from "@/hooks/useActivityContext";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface ActivityResponse {
   activity_id: string;
@@ -12,13 +13,16 @@ interface ActivityResponse {
 }
 
 const ActivityCode = () => {
+  const [pincode, setPincode] = useState<string>("");
+
   const { setActivityData } = useActivityContext();
   const { role } = useParams();
   const navigate = useNavigate();
 
-  const snackbarRef = useRef<CustomSnackbarMethods>(null);
+  const auth = useAuth();
+  const {setIsAuthenticated, setUserRole} = auth;
 
-  const [pincode, setPincode] = useState<string>("");
+  const snackbarRef = useRef<CustomSnackbarMethods>(null);
 
   const handleJoinActivity = async () => {
     if (!pincode) {
@@ -45,6 +49,10 @@ const ActivityCode = () => {
 
       console.log("Activity Found ! : ", data);
       setActivityData(data.activity_id);
+      setUserRole(data.role)
+
+      // User successfuly authenticated
+      setIsAuthenticated(true);
       if (role === 'participant') {
         navigate('/participant');
     } else if (role === 'animator') {
