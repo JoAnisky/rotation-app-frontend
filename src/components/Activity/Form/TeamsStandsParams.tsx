@@ -7,6 +7,7 @@ import CustomSnackbar from "@/components/CustomSnackbar";
 import { ACTIVITY_API, SCENARIO_API, STANDS_API } from "@/routes/api/";
 import { CustomSnackbarMethods, Severity } from "@/types/SnackbarTypes";
 import { IStand, ITeam } from "@/types/ActivityInterface";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface ITeamStandsParamsProps {
   activityId: number | string;
@@ -54,6 +55,9 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
   const categories = Object.keys(themedTeamsNames);
   // Replace all "_" in categories names with empty space and sort category by name
   const formattedCategories = categories.map(category => category.replace(/_/g, " ")).sort(); // This replaces all underscores in the string
+
+  const auth = useAuth();
+  const { authToken } = auth;
 
   // Sets Stands for user selection
   useEffect(() => {
@@ -191,7 +195,6 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
    * @returns void
    */
   const generateTeamNames = (numberOfTeams: number, theme: string): void => {
-
     // Immediate return if the theme or number of teams is not initialized properly
     if (!theme || numberOfTeams === null) {
       console.log("Initialization check - Skipping execution");
@@ -211,7 +214,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
       }
       return;
     }
-    
+
     // Replace spaces with underscores in a theme
     const formattedTheme = theme.replace(/ /g, "_");
 
@@ -264,8 +267,8 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
         sendDataToDB(JSON.stringify(numberOfTeams), "nb_teams");
       }
 
-      dataToSave = dataList.map((item) => {
-        if ('teamId' in item) {
+      dataToSave = dataList.map(item => {
+        if ("teamId" in item) {
           const team = item as ITeam;
           // Si c'est une équipe, retournez une structure de données avec les propriétés de l'équipe
           return {
@@ -313,8 +316,11 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
       };
       const response = await fetch(`${ACTIVITY_API.getActivityById(activityId)}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
+        headers: {
+          Authorization: "Bearer" + " " + authToken,
+          "Content-Type": "application/json", 
+        },
         body: JSON.stringify(payload)
       });
       if (!response.ok) throw new Error("Failed to submit data");
@@ -360,8 +366,10 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
     try {
       const response = await fetch(`${SCENARIO_API.getScenarioByActivityId(activityId)}/generate`, {
         method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        headers: {
+          Authorization: "Bearer" + " " + authToken,
+          "Content-Type": "application/json", 
+        },
       });
       const data = await response.json(); // Assuming the server responds with JSON
       details = data.details;

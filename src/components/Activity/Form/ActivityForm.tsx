@@ -9,6 +9,7 @@ import useFetch from "@/hooks/useFetch";
 import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
 import CustomSnackbar from "@/components/CustomSnackbar";
 import ActivityControls from "../ActivityControls";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface ActivityFormProps {
   chosenActivityId: number | string;
@@ -36,6 +37,9 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
     stands: [],
     teams: []
   });
+  
+  const auth = useAuth();
+  const { authToken } = auth;
 
   const inputPropsNumber = {
     className: "input-number",
@@ -86,7 +90,10 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
 
       const options: RequestInit = {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          Authorization: "Bearer" + " " + authToken,
+          "Content-Type": "application/json", 
+        },
         credentials: "include",
         body: JSON.stringify(formattedActivityData)
       };

@@ -17,7 +17,7 @@ interface IActivities {
 
 const ActivityChoice: React.FC<ActivityChoiceProps> = ({ setChosenActivityId }) => {
   const auth = useAuth();
-  const { userId } = auth;
+  const { userId, authToken } = auth;
 
   const snackbarRef = useRef<CustomSnackbarMethods>(null);
   // Get selected activity
@@ -41,7 +41,10 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({ setChosenActivityId }) 
     
     const options: RequestInit = {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        Authorization: "Bearer" + " " + authToken,
+        "Content-Type": "application/json", 
+      },
       credentials: "include", // Important: include credentials (cookies)
       body: JSON.stringify({ name: activityName, user: userId })
     };
