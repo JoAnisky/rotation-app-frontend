@@ -1,28 +1,25 @@
+import React from "react";
 import { useContext, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
-import React from "react";
-import { User } from "@/types/userInterface";
-import { useLocalStorage } from "@/hooks";
+import { getCookie } from "@/utils/cookies";
 
 interface Props {
   children: React.ReactNode;
 }
 
 const AuthProvider: React.FC<Props> = ({ children }) => {
-  const { getItem } = useLocalStorage("token");
 
-  const storedToken = getItem();
-
-  const initialAuthToken: User | null = storedToken ? storedToken : null;
-
+  const token = getCookie('authToken');
+  console.log(token);
   const [userName, setUserName] = useState<string>("");
   const [userRole, setUserRole] = useState<string>("");
   const [userId, setUserId] = useState<number | null>(null);
-  const [authToken, setAuthToken] = useState<User | null>(initialAuthToken);
+  const [authToken, setAuthToken] = useState<string | null>(token ? token : null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!token);
 
   return (
     <AuthContext.Provider
-      value={{ userName, setUserName, userRole, setUserRole, userId, setUserId, authToken, setAuthToken }}
+      value={{ userName, setUserName, userRole, setUserRole, userId, setUserId, authToken, setAuthToken , isAuthenticated, setIsAuthenticated}}
     >
       {children}
     </AuthContext.Provider>
