@@ -1,24 +1,29 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { CircularProgress, Container } from "@mui/material";
 import { LOGIN_API } from "@/routes/api/loginRoutes";
 import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
 import { CustomSnackbar } from "@/components";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/providers/AuthProvider";
+
 
 const Login: React.FC = () => {
-  const snackbarRef = useRef<CustomSnackbarMethods>(null);
+  
   const [username, setUsername] = useState("");
-  const [userId, setUserId] = useState("");
-
-  // const userInfos = useState({
-  //   username
-  // })
   const [password, setPassword] = useState("");
-  const [token, setToken] = useState<string>("");
+
   const [loading, setLoading] = useState<boolean>(false);
   const [usernameError, setUsernameError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
+
+  const navigate = useNavigate();
+
+  const auth = useAuth();
+  const { setUserName, setUserRole, setUserId, setAuthToken } = auth;
+
+  const snackbarRef = useRef<CustomSnackbarMethods>(null);
 
   const errorMessage = "Ce champ est requis";
 
@@ -60,10 +65,11 @@ const Login: React.FC = () => {
       }
       const data = await response.json();
       if (data.token) {
-        setToken(data.token);
+        setAuthToken(data.token);
+
         getUserId(data.token);
       } else {
-        setLoading(false)
+        setLoading(false);
         snackbarRef.current?.showSnackbar(`Pas de jeton récupéré`, "error");
       }
     } catch (error: unknown) {
@@ -73,12 +79,11 @@ const Login: React.FC = () => {
   };
 
   const getUserId = async (userToken: string) => {
-    console.log(userToken);
     try {
       const response = await fetch(LOGIN_API.login, {
         method: "POST",
         headers: {
-          "Authorization": "Bearer" + " " + userToken
+          Authorization: "Bearer" + " " + userToken
         },
       });
 
@@ -87,18 +92,21 @@ const Login: React.FC = () => {
       }
       const data = await response.json();
       setLoading(false);
-      console.log(data);
-      // if (data.token) {
-      //   setUserId(data.user_id)
-      //   getUserId(token);
-      // } else {
-      //   snackbarRef.current?.showSnackbar(`Pas de jeton récupéré`, "error");
-      //}
+
+      if (data) {
+        setUserName(data.username)
+        setUserRole(data.role[0])
+        setUserId(data.user_id)
+    
+        navigate("/gamemaster")
+      } else {
+        snackbarRef.current?.showSnackbar(`Pas de jeton récupéré`, "error");
+      }
     } catch (error: unknown) {
       setLoading(false);
       snackbarRef.current?.showSnackbar(`${String(error)}`, "error");
     }
-  }
+  };
 
   return (
     <Container sx={{ display: "flex", flexDirection: "column", height: "100vh", padding: "0" }}>
