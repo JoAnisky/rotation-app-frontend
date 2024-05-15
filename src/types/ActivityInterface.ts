@@ -30,8 +30,7 @@ export interface IActivityData {
   teams: ITeam[] | null;
 }
 
-export interface ActivityContextType {
+export interface IActivityContext {
   activityId: string | null;
-  role: string | null;
-  setActivityData: (activityId: string, role: string) => void;
+  setActivityData: (activityId: string) => void;
 }

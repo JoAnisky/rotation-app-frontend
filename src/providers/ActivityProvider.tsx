@@ -8,15 +8,13 @@ interface Props {
 
 export const ActivityProvider: React.FC<Props> = ({ children }) => {
   const [activityId, setActivityId] = useState<string | null>(null);
-  const [role, setRole] = useState<string | null>(null);
 
-  const setActivityData = (activityId: string, role: string) => {
+  const setActivityData = (activityId: string) => {
     setActivityId(activityId);
-    setRole(role);
   };
 
   return (
-    <ActivityContext.Provider value={{ activityId, role, setActivityData }}>
+    <ActivityContext.Provider value={{ activityId, setActivityData }}>
       {children}
     </ActivityContext.Provider>
   );

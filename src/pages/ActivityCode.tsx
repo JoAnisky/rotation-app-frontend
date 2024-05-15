@@ -44,7 +44,7 @@ const ActivityCode = () => {
       const data: ActivityResponse = await response.json();
 
       console.log("Activity Found ! : ", data);
-      setActivityData(data.activity_id, data.role);
+      setActivityData(data.activity_id);
       if (role === 'participant') {
         navigate('/participant');
     } else if (role === 'animator') {
