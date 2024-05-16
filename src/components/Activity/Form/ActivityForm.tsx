@@ -63,9 +63,9 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
   };
 
   useEffect(() => {
-    const isValid = activityData.name.trim() !== "" && Boolean(activityData.activity_date);
+    const isValid = activityData.name.trim() !== "";
     setIsFormValid(isValid);
-  }, [activityData.name, activityData.activity_date]);
+  }, [activityData.name]);
 
   const handleSubmit = async () => {
     if (!isFormValid) {
