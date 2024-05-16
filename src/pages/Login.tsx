@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { CircularProgress, Container } from "@mui/material";
@@ -8,6 +8,11 @@ import { CustomSnackbar } from "@/components";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
 
+interface UserInfos {
+  username: string,
+  user_id: number,
+  role: string[]
+}
 
 const Login: React.FC = () => {
   
@@ -21,11 +26,17 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
 
   const auth = useAuth();
-  const { setUserName, setUserRole, setUserId, setAuthToken } = auth;
+  const { setUserName, setUserRole, setUserId, authToken, setAuthToken, setIsAuthenticated } = auth;
 
   const snackbarRef = useRef<CustomSnackbarMethods>(null);
 
   const errorMessage = "Ce champ est requis";
+
+  useEffect(() => {
+    if(authToken){
+       getUserInfos(authToken);
+    }
+  }, []);
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -67,7 +78,7 @@ const Login: React.FC = () => {
       if (data.token) {
         setAuthToken(data.token);
 
-        getUserId(data.token);
+        await getUserInfos(data.token);
       } else {
         setLoading(false);
         snackbarRef.current?.showSnackbar(`Pas de jeton récupéré`, "error");
@@ -78,7 +89,7 @@ const Login: React.FC = () => {
     }
   };
 
-  const getUserId = async (userToken: string) => {
+  const getUserInfos = async (userToken: string) => {
     try {
       const response = await fetch(LOGIN_API.login, {
         method: "POST",
@@ -90,15 +101,11 @@ const Login: React.FC = () => {
       if (!response.ok) {
         throw new Error("Entrées invalides");
       }
-      const data = await response.json();
+      const data: UserInfos = await response.json();
       setLoading(false);
 
       if (data) {
-        setUserName(data.username)
-        setUserRole(data.role[0])
-        setUserId(data.user_id)
-    
-        navigate("/gamemaster")
+       setUserInfos(data);
       } else {
         snackbarRef.current?.showSnackbar(`Pas de jeton récupéré`, "error");
       }
@@ -108,6 +115,14 @@ const Login: React.FC = () => {
     }
   };
 
+  const setUserInfos = (userInfos: UserInfos) => {
+    setUserName(userInfos.username)
+    setUserRole(userInfos.role[0])
+    setUserId(userInfos.user_id)
+    setIsAuthenticated(true)
+
+    navigate("/gamemaster")
+  }
   return (
     <Container sx={{ display: "flex", flexDirection: "column", height: "100vh", padding: "0" }}>
       <Container

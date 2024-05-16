@@ -12,7 +12,7 @@ const PrivateRoutes = () => {
         
         // Si pas de token mais authentifié via code PIN
         // et si le rôle est celui d'un participant ou animateur
-        if (isAuthenticated && (userRole === 'ROLE_PARTICIPANT' || userRole === 'ROLE_ANIMATEUR')) {
+        if (isAuthenticated && (userRole === 'ROLE_PARTICIPANT' || userRole === 'ROLE_ANIMATOR')) {
           return true;
         }
     
