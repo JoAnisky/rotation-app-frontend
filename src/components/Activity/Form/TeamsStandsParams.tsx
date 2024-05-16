@@ -62,6 +62,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
   // Sets Stands for user selection
   useEffect(() => {
     if (Array.isArray(fetchedStandsData)) {
+
       setStands(fetchedStandsData);
     }
   }, [fetchedStandsData]);
@@ -120,11 +121,11 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
 
   /**
    * Handle selected stand
-   * @param event
+   * @param _event
    * @param value
    * @returns void
    */
-  const handleStandSelection = (event: React.SyntheticEvent, value: IStand[] | IStand | null): void => {
+  const handleStandSelection = (_event: React.SyntheticEvent, value: IStand[] | IStand | null): void => {
     let newStands: IStand[] = [];
 
     if (Array.isArray(value)) {
@@ -186,6 +187,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
   const handleRemoveStand = (idToRemove: number): void => {
     const updatedStands = selectedStands.filter(stand => stand.id !== idToRemove);
     setSelectedStands(updatedStands);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { [idToRemove]: _, ...remainingTeams } = nbTeamsOnStand; // remove entry for deleted stand
     setNbTeamsOnStand(remainingTeams);
   };
@@ -238,7 +240,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
    * @param event
    * @param value Selected theme
    */
-  const handleThemeChange = (event: React.SyntheticEvent<Element, Event>, value: string | null): void => {
+  const handleThemeChange = (_event: React.SyntheticEvent<Element, Event>, value: string | null): void => {
     setSelectedTheme(value);
   };
 
