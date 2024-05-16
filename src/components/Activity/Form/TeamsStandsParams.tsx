@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { Autocomplete, Box, Button, Grid, IconButton, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Checkbox, Grid, IconButton, TextField, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import {useFetch, useAuth} from "@/hooks";
+import { useFetch, useAuth } from "@/hooks";
 import themedTeamsNames from "@/utils/themedTeamsNames";
 import CustomSnackbar from "@/components/CustomSnackbar";
 import { ACTIVITY_API, SCENARIO_API, STANDS_API } from "@/routes/api/";
 import { CustomSnackbarMethods, Severity } from "@/types/SnackbarTypes";
 import { IStand, ITeam } from "@/types/ActivityInterface";
-
+import { CheckBox, CheckBoxOutlineBlank } from "@mui/icons-material";
 
 interface ITeamStandsParamsProps {
   activityId: number | string;
@@ -22,6 +22,8 @@ type FieldType = "stands" | "teams" | "nb_teams"; // Datatype corresponding to D
 interface INbTeamsOnStand {
   [key: number]: number; // Maps stand ID to numberOfTeamsOnStand
 }
+const icon = <CheckBoxOutlineBlank fontSize="small" />;
+const checkedIcon = <CheckBox fontSize="small" />;
 
 const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
   activityId,
@@ -62,7 +64,6 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
   // Sets Stands for user selection
   useEffect(() => {
     if (Array.isArray(fetchedStandsData)) {
-
       setStands(fetchedStandsData);
     }
   }, [fetchedStandsData]);
@@ -290,7 +291,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
         // Type guard to check if item is IStand
         if ("nbTeamsOnStand" in item) {
           // Safe to access nbTeamsOnStand
-  
+
           return { id: item.id, name: item.name, nbTeamsOnStand: nbTeamsOnStand[item.id] || 1 };
         } else {
           // This case should theoretically never happen if data handling is correct
@@ -322,7 +323,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
         credentials: "include",
         headers: {
           Authorization: "Bearer" + " " + authToken,
-          "Content-Type": "application/json", 
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(payload)
       });
@@ -371,8 +372,8 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
         method: "GET",
         headers: {
           Authorization: "Bearer" + " " + authToken,
-          "Content-Type": "application/json", 
-        },
+          "Content-Type": "application/json"
+        }
       });
       const data = await response.json(); // Assuming the server responds with JSON
       details = data.details;
@@ -414,6 +415,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
           <Autocomplete
             multiple
             disablePortal
+            disableCloseOnSelect
             value={selectedStands}
             id="stand-autocomplete"
             options={stands}
@@ -424,7 +426,16 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
             loading={standsLoading}
             loadingText="Chargement..."
             noOptionsText="Aucune option"
-            renderInput={params => <TextField {...params} label="Choisir ou créer des stands " />}
+            renderInput={params => <TextField {...params} label="Choisir ou créer des stands" />}
+            renderOption={(props, option) => {
+              const isSelected = selectedStands.some((stand) => stand.id === option.id);
+              return (
+                <li {...props}>
+                  <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={isSelected} />
+                  {option.name}
+                </li>
+              );
+            }}
           />
           {/* Display selected stands if not empty*/}
           {selectedStands.length > 0 && ""}
