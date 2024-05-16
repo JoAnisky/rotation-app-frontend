@@ -1,15 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { Box, Button, Container, Grid, TextField, Typography } from "@mui/material";
-// import { ActivityContext } from "../../contexts/ActivityContext";
 import { IActivityData } from "@/types/ActivityInterface";
 import TeamsStandsParams from "./TeamsStandsParams";
 import { ACTIVITY_API } from "@/routes/api/";
-import useFetch from "@/hooks/useFetch";
+import {useFetch, useAuth} from "@/hooks";
 import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
 import CustomSnackbar from "@/components/CustomSnackbar";
 import ActivityControls from "../ActivityControls";
-import { useAuth } from "@/providers/AuthProvider";
+
 
 interface ActivityFormProps {
   chosenActivityId: number | string;

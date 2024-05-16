@@ -1,11 +1,10 @@
 import { useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button, Container, Grid, TextField, Typography } from "@mui/material";
 import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
 import { ACTIVITY_API } from "@/routes/api";
 import CustomSnackbar from "@/components/CustomSnackbar";
-import { useActivityContext } from "@/hooks/useActivityContext";
-import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "@/providers/AuthProvider";
+import { useActivityContext, useAuth } from "@/hooks";
 
 interface ActivityResponse {
   activity_id: string;

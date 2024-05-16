@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Autocomplete, Box, Button, Grid, IconButton, TextField, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import useFetch from "@/hooks/useFetch";
+import {useFetch, useAuth} from "@/hooks";
 import themedTeamsNames from "@/utils/themedTeamsNames";
 import CustomSnackbar from "@/components/CustomSnackbar";
 import { ACTIVITY_API, SCENARIO_API, STANDS_API } from "@/routes/api/";
 import { CustomSnackbarMethods, Severity } from "@/types/SnackbarTypes";
 import { IStand, ITeam } from "@/types/ActivityInterface";
-import { useAuth } from "@/providers/AuthProvider";
+
 
 interface ITeamStandsParamsProps {
   activityId: number | string;
@@ -288,6 +288,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
         // Type guard to check if item is IStand
         if ("nbTeamsOnStand" in item) {
           // Safe to access nbTeamsOnStand
+  
           return { id: item.id, name: item.name, nbTeamsOnStand: nbTeamsOnStand[item.id] || 1 };
         } else {
           // This case should theoretically never happen if data handling is correct

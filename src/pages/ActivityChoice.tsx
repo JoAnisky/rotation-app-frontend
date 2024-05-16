@@ -4,7 +4,7 @@ import ActivitySelection from "@/components/Activity/ActivitySelection";
 import CustomSnackbar from "@/components/CustomSnackbar";
 import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
 import { ACTIVITY_API } from "@/routes/api/";
-import { useAuth } from "@/providers/AuthProvider";
+import { useAuth } from "@/hooks"
 
 interface ActivityChoiceProps {
   setChosenActivityId: (activityId: number | string) => void;

@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { CircularProgress, Container } from "@mui/material";
 import { LOGIN_API } from "@/routes/api/loginRoutes";
 import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
 import { CustomSnackbar } from "@/components";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/providers/AuthProvider";
+import { useAuth } from "@/hooks";
 
 interface UserInfos {
   username: string,
