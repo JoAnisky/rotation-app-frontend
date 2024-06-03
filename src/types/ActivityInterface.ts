@@ -31,6 +31,6 @@ export interface IActivityData {
 }
 
 export interface IActivityContext {
-  activityId: string | null;
+  activityId: string | number;
   setActivityData: (activityId: string) => void;
 }
