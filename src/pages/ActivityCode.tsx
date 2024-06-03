@@ -46,7 +46,6 @@ const ActivityCode = () => {
 
       const data: ActivityResponse = await response.json();
 
-      console.log("Activity Found ! : ", data);
       setActivityData(data.activity_id);
       setUserRole(data.role)
 
