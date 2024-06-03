@@ -1,13 +1,19 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { Box, Button } from "@mui/material";
 import { SCENARIO_API } from "@/routes/api";
-import { IScenario } from "@/types/ScenarioInterface";
+import { IScenario, ScenarioActivity } from "@/types/ScenarioInterface";
 
 interface ActivityControlsProps {
   activityId: number | string;
 }
 
 const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
+  const [gameLaunched, setGameLaunched] = useState(false);
+  const [rotationEnabled, setRotationEnabled] = useState(false);
+  const [standEnabled, setStandEnabled] = useState(false);
+  const [currentScenario, setCurrentScenario] = useState<ScenarioActivity | null>(null);
+  const [initialScenario, setInitialScenario] = useState<ScenarioActivity | null>(null);
+  const [remainingScenarios, setRemainingScenarios] = useState<ScenarioActivity[]>([]);
 
   /**
    * Gets the Scenario in database
@@ -18,7 +24,7 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const scenario: IScenario[]  = await response.json();
+    const scenario: IScenario[] = await response.json();
     return scenario.length > 0 ? scenario[0] : null;
   }, [activityId]);
 
@@ -30,10 +36,10 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
     // Gets the scenario ID
     const scenarioId = scenarioData.id;
     // Gets the base_scenario corresponding line (turn number)
-    const currentScenario = scenarioData.base_scenario[0];
+    const currentScenario = scenarioData.base_scenario;
 
-    console.log("firstTurn : ", currentScenario);
-    console.log("scenarioData : ", scenarioData);
+    // console.log("scenarioData : ", scenarioData);
+    // console.log("firstTurn : ", currentScenario);
 
     if (!scenarioData) {
       console.error("No scenario data available to update");
@@ -58,18 +64,86 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
 
   // Launch the game
   const handleStart = async () => {
-    const currentScenario = await fetchScenario();
-    currentScenario && updateCurrentScenario(currentScenario);
+    setGameLaunched(true);
+    setRotationEnabled(false);
+    setStandEnabled(true);
+    const fetchedScenario = await fetchScenario();
+    if (fetchedScenario) {
+      setCurrentScenario(fetchedScenario.current_scenario);
+      setInitialScenario(fetchedScenario.current_scenario); // Stocker la copie initiale du scénario
+      setRemainingScenarios(fetchedScenario.base_scenario);
+    }
+  };
+
+  // Handle rotation
+  const handleRotation = () => {
+    setRotationEnabled(false);
+    setStandEnabled(true);
+  };
+
+  // Handle stand
+  const handleStand = async () => {
+    if (remainingScenarios.length > 0) {
+      const newRemainingScenarios = remainingScenarios.slice(1);
+      setRemainingScenarios(newRemainingScenarios);
+
+      if (currentScenario) {
+        const updatedScenario = {
+          ...currentScenario,
+          base_scenario: newRemainingScenarios
+        };
+
+        setCurrentScenario(updatedScenario);
+        await updateCurrentScenario(updatedScenario);
+
+        if (newRemainingScenarios.length === 0) {
+          setGameLaunched(false);
+          setRotationEnabled(true);
+          setStandEnabled(false);
+          resetScenario();
+        } else {
+          setRotationEnabled(true);
+          setStandEnabled(false);
+        }
+      }
+    } else {
+      setGameLaunched(false);
+      setRotationEnabled(true);
+      setStandEnabled(false);
+      resetScenario();
+    }
+  };
+
+  // Réinitialiser currentScenario à la position de départ
+  const resetScenario = () => {
+    console.log("initialScenario: ", initialScenario);
+    if (initialScenario) {
+      setCurrentScenario(initialScenario);
+    }
+  };
+
+  // Handle stop
+  const handleStop = () => {
+    setGameLaunched(false);
+    setRotationEnabled(true);
+    setStandEnabled(true);
+    resetScenario(); // Réinitialiser le scénario à la position de départ
   };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-      <Button variant="contained" onClick={handleStart}>
+      <Button variant="contained" onClick={handleStart} disabled={gameLaunched}>
         Lancer la partie
       </Button>
-      <Button variant="contained"> Rotation</Button>
-      <Button variant="contained"> Stand</Button>
-      <Button variant="outlined"> Arrêter la partie</Button>
+      <Button variant="contained" onClick={handleRotation} disabled={!rotationEnabled}>
+        Rotation
+      </Button>
+      <Button variant="contained" onClick={handleStand} disabled={!standEnabled}>
+        Stand
+      </Button>
+      <Button variant="outlined" onClick={handleStop} disabled={!gameLaunched}>
+        Arrêter la partie
+      </Button>
     </Box>
   );
 };
