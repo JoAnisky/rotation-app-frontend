@@ -29,28 +29,39 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
   const [currentTeams, setCurrentTeams] = useState<string[]>([]);
   const [nextTeam, setNextTeam] = useState<string>("Nom team");
 
+  // Fonction pour fetch les données du scénario
+  const fetchScenario = useCallback(async () => {
+    if (activityId) {
+      setLoading(true);
+      try {
+        const response = await fetch(SCENARIO_API.getScenarioByActivityId(activityId));
+        const data = await response.json();
+        setBaseScenario(data[0].base_scenario);
+        setCurrentScenario(data[0].current_scenario);
+      } catch (err) {
+        setBaseScenario([]);
+        console.error("erreur de fetch : ", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }, [activityId]);
+
   // Use Effect for fetching data when activityId changes and is not null
   useEffect(() => {
-    const fetchData = async () => {
-      if (activityId) {
-        // Ensure there is an activityId
-        setLoading(true);
-        try {
-          const response = await fetch(SCENARIO_API.getScenarioByActivityId(activityId));
+    fetchScenario();
+  }, [fetchScenario]);
 
-          const data = await response.json();
-          setBaseScenario(data[0].base_scenario);
-          setCurrentScenario(data[0].current_scenario);
-        } catch (err) {
-          setBaseScenario([]);
-          console.error("erreur de fetch : ", err);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-    fetchData();
-  }, [activityId]); // Dependency array includes activityId
+  // Fetch data every X seconds
+  useEffect(() => {
+   
+      const interval = setInterval(() => {
+      fetchScenario();
+    }, 2000);
+
+    return () => clearInterval(interval); // clear interval
+  
+  }, [fetchScenario]);
 
   const findStandNameByTeamId = useCallback(
     (teamId: number): string | null => {
@@ -73,12 +84,15 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
     (standId: number): string[] => {
       if (currentScenario) {
         const firstScenario = currentScenario[0];
-        console.log("firstScenario : ", firstScenario);
-        const stand = firstScenario.find(stand => stand.standId === standId);
-        console.log("stand : ", stand);
-        if (stand) {
-          return stand.teams.map(team => team.teamName);
+        if(firstScenario){
+          console.log("firstScenario : ", firstScenario);
+          const stand = firstScenario.find(stand => stand.standId === standId);
+          console.log("stand : ", stand);
+          if (stand) {
+            return stand.teams.map(team => team.teamName);
+          }
         }
+
       }
       return []; // Retourne un tableau vide si aucun stand ou aucune équipe n'est trouvée
     },
@@ -91,7 +105,6 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
       const teamNames = findTeamNamesByStandId(animatorInfo[0].id);
       setCurrentTeams(teamNames);
 
-      console.log("teamsName : ", teamNames);
     } else if (userRole === "ROLE_PARTICIPANT" && teamInfo) {
       setStandName(findStandNameByTeamId(teamInfo[0].teamId));
       console.log(findStandNameByTeamId(teamInfo[0].teamId));
@@ -99,13 +112,13 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
     }
   }, [animatorInfo, teamInfo, userRole, standName, findStandNameByTeamId]);
 
-  useEffect(() => {
-    console.log("Updated baseScenario:", baseScenario);
-  }, [baseScenario]);
+  // useEffect(() => {
+  //   console.log("Updated baseScenario:", baseScenario);
+  // }, [baseScenario]);
 
-  useEffect(() => {
-    console.log("Updatedm currentScenario:", currentScenario);
-  }, [currentScenario]);
+  // useEffect(() => {
+  //   console.log("Updatedm currentScenario:", currentScenario);
+  // }, [currentScenario]);
 
   return (
     <Container
@@ -151,12 +164,12 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
       {/* Footer content aligned at the bottom of the page */}
       <Grid container spacing={1} direction="column" sx={{ width: "100%", gap: "10px" }}>
         <Box sx={{ mt: "auto", textAlign: "center" }}>
-          <Typography variant="button">À la fin du temps, votre équipe va :</Typography>
+          <Typography variant="button">À la fin du temps, l'équipe va :</Typography>
           <Box bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
             {standName || "Non spécifié"}
           </Box>
           <Typography variant="button" component="span">
-            Équipe suivante :
+            Équipe(s) suivante :
           </Typography>
           <Box bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
             {nextTeam || "Non spécifié"}
