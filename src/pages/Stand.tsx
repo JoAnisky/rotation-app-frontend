@@ -3,9 +3,10 @@ import Status from "@/components/Status";
 import { Box, Container, Grid, Typography } from "@mui/material";
 // import Stopwatch from "@/components/Timer/Stopwatch";
 import { IStand, ITeam } from "@/types/ActivityInterface";
-import { IScenario, ScenarioActivity  } from "@/types/ScenarioInterface";
+import { IScenario, ScenarioActivity } from "@/types/ScenarioInterface";
 import { SCENARIO_API } from "@/routes/api";
 import { useActivityContext } from "@/hooks/useActivityContext";
+import { useAuth } from "@/hooks";
 
 interface StandProps {
   animatorInfo?: IStand[];
@@ -13,8 +14,8 @@ interface StandProps {
 }
 
 const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
-
-  const { activityId, role } = useActivityContext();
+  const { activityId } = useActivityContext();
+  const { userRole } = useAuth();
 
   // Get the scenario
   const [baseScenario, setBaseScenario] = useState<IScenario[]>([]);
@@ -25,7 +26,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
   const [standName, setStandName] = useState<string | null>(null);
   const [nextStand, setNextStand] = useState<string | null>(null);
 
-  const [currentTeam, setCurrentTeam] = useState<string>("Nom team");
+  const [currentTeams, setCurrentTeams] = useState<string[]>([]);
   const [nextTeam, setNextTeam] = useState<string>("Nom team");
 
   // Use Effect for fetching data when activityId changes and is not null
@@ -42,7 +43,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
           setCurrentScenario(data[0].current_scenario);
         } catch (err) {
           setBaseScenario([]);
-          console.error('erreur de fetch : ', err)
+          console.error("erreur de fetch : ", err);
         } finally {
           setLoading(false);
         }
@@ -66,27 +67,45 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
     },
     [currentScenario]
   );
-  
+
+  // Fonction pour trouver les noms d'équipes par standId en utilisant le premier élément du scénario
+  const findTeamNamesByStandId = useCallback(
+    (standId: number): string[] => {
+      if (currentScenario) {
+        const firstScenario = currentScenario[0];
+        console.log("firstScenario : ", firstScenario);
+        const stand = firstScenario.find(stand => stand.standId === standId);
+        console.log("stand : ", stand);
+        if (stand) {
+          return stand.teams.map(team => team.teamName);
+        }
+      }
+      return []; // Retourne un tableau vide si aucun stand ou aucune équipe n'est trouvée
+    },
+    [currentScenario]
+  );
+
   useEffect(() => {
-    if (role === "animator" && animatorInfo) {
-      console.log("animatorInfo : ", animatorInfo[0].name);
+    if (userRole === "ROLE_ANIMATOR" && animatorInfo) {
       setStandName(animatorInfo[0].name);
-    } else if (role === "participant" && teamInfo) {
+      const teamNames = findTeamNamesByStandId(animatorInfo[0].id);
+      setCurrentTeams(teamNames);
+
+      console.log("teamsName : ", teamNames);
+    } else if (userRole === "ROLE_PARTICIPANT" && teamInfo) {
       setStandName(findStandNameByTeamId(teamInfo[0].teamId));
-      console.log(findStandNameByTeamId(teamInfo[0].teamId))
-      setCurrentTeam(teamInfo[0].teamName);
+      console.log(findStandNameByTeamId(teamInfo[0].teamId));
+      setCurrentTeams(teamName);
     }
-  }, [animatorInfo, teamInfo, role, standName, findStandNameByTeamId]);
+  }, [animatorInfo, teamInfo, userRole, standName, findStandNameByTeamId]);
 
   useEffect(() => {
-    console.log("Updated baseScenario:", baseScenario)
-  }, [baseScenario])
+    console.log("Updated baseScenario:", baseScenario);
+  }, [baseScenario]);
 
   useEffect(() => {
-    console.log("Updated currentScenario:", currentScenario);
+    console.log("Updatedm currentScenario:", currentScenario);
   }, [currentScenario]);
-
-
 
   return (
     <Container
@@ -107,8 +126,24 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
         <Typography variant="h6" component="h1">
           {standName || "Pas récupéré le nom du stand"}
         </Typography>
-        <Box bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1}>
-          {currentTeam}
+        <Box p={1} display="flex" alignItems="center">
+          {currentTeams.length > 1 ? (
+            <>
+              <Box bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1}>
+                {currentTeams[0]}
+              </Box>
+              <Box mx={1}>VS</Box>
+              <Box bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1}>
+                {currentTeams[1]}
+              </Box>
+            </>
+          ) : (
+            currentTeams.map((teamName, index) => (
+              <Box key={index} bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1}>
+                {teamName}
+              </Box>
+            ))
+          )}
         </Box>
         {/* <Stopwatch /> */}
       </Box>
