@@ -1,8 +1,8 @@
-import { ITeam } from "./ActivityInterface";
+import { IStand, ITeam } from "./ActivityInterface";
 
 // Définir une interface pour représenter un stand
 interface IScenarioStand {
-  standId: number;
+  [standId: number]: IStand;
   standName: string;
   teams: ITeam[];
 }
