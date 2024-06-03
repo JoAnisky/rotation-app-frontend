@@ -15,6 +15,12 @@ cd projectFolder
 yarn install
 ```
 
+Configure VITE_API_URL variable in the .env file
+
+```shell
+VITE_API_URl="your API url"
+```
+
 Launch application
 
 ```shell
