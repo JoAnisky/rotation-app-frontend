@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Autocomplete, Button, Container, Grid, TextField, Typography } from "@mui/material";
-import { useFetch, useLocalStorage, useActiveComponent } from "@/hooks/";
+import { useFetch, useLocalStorage, useActiveComponent, useActivityContext } from "@/hooks/";
 import { ANIMATOR_API, ACTIVITY_API } from "@/routes/api/";
 import { IStand } from "@/types/ActivityInterface";
 import { NavbarUp, CustomSnackbar, NavbarDown } from "@/components";
@@ -22,6 +22,7 @@ interface UpdateAnimatorStandsData {
 const Animator: React.FC = () => {
   // When animator and stand are selected, store this choice in localstorage.
   const { getItem, setItem } = useLocalStorage("animator_stand");
+  const { activityId } = useActivityContext();
 
   const [animatorStandSetted, setAnimatorStandSetted] = useState<boolean>(false);
 
@@ -35,7 +36,7 @@ const Animator: React.FC = () => {
   const [fetchedAnimatorsData, animatorsLoading] = useFetch<IAnimator[]>(ANIMATOR_API.animators);
 
   // Fetch stands Data for option list display
-  const [fetchedStandsData, standsLoading] = useFetch<IStand[]>(ACTIVITY_API.getActivityStands(1));
+  const [fetchedStandsData, standsLoading] = useFetch<IStand[]>(ACTIVITY_API.getActivityStands(activityId));
 
   // Snackbar message
   const snackbarRef = useRef<CustomSnackbarMethods>(null);
