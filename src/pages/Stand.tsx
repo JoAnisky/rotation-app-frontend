@@ -24,10 +24,10 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
   const [currentScenario, setCurrentScenario] = useState<ScenarioActivity | null>(null);
 
   const [standName, setStandName] = useState<string | null>(null);
-  const [nextStand, setNextStand] = useState<string | null>(null);
+  const [nextStandNames, setNextStandNames] = useState<{ teamId: number; nextStandName: string | null }[]>([]);
 
-  const [currentTeams, setCurrentTeams] = useState<string[]>([]);
-  const [nextTeam, setNextTeam] = useState<string>("Nom team");
+  const [currentTeams, setCurrentTeams] = useState<ITeam[]>([]);
+  const [nextTeams, setNextTeams] = useState<ITeam[]>([]);
 
   // Fonction pour fetch les données du scénario
   const fetchScenario = useCallback(async () => {
@@ -54,13 +54,11 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
 
   // Fetch data every X seconds
   useEffect(() => {
-   
-      const interval = setInterval(() => {
+    const interval = setInterval(() => {
       fetchScenario();
     }, 2000);
 
     return () => clearInterval(interval); // clear interval
-  
   }, [fetchScenario]);
 
   const findStandNameByTeamId = useCallback(
@@ -80,37 +78,99 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
   );
 
   // Fonction pour trouver les noms d'équipes par standId en utilisant le premier élément du scénario
-  const findTeamNamesByStandId = useCallback(
-    (standId: number): string[] => {
+  const findTeamsByStandId = useCallback(
+    (standId: number): ITeam[] => {
       if (currentScenario) {
         const firstScenario = currentScenario[0];
-        if(firstScenario){
-          console.log("firstScenario : ", firstScenario);
+        if (firstScenario) {
           const stand = firstScenario.find(stand => stand.standId === standId);
-          console.log("stand : ", stand);
           if (stand) {
-            return stand.teams.map(team => team.teamName);
+            return stand.teams.map(team => ({
+              teamId: team.teamId,
+              teamName: team.teamName
+            }));
           }
         }
-
       }
       return []; // Retourne un tableau vide si aucun stand ou aucune équipe n'est trouvée
     },
     [currentScenario]
   );
 
+  const findNextStandByTeamId = useCallback(
+    (teamId: number): string | null => {
+      if (baseScenario && currentScenario) {
+        console.log("currentScenario : ", currentScenario);
+        const currentIndex = baseScenario.findIndex(scenario =>
+          scenario.some(stand => stand.teams.some(team => team.teamId === teamId))
+        );
+        console.log("currentIndex : ", currentIndex);
+
+        if (currentIndex !== -1 && currentIndex < baseScenario.length - 1) {
+          const nextScenario = currentScenario[currentIndex + 1];
+          console.log("nextScenario : ", nextScenario);
+          const nextStand = nextScenario.find(stand => stand.teams.some(team => team.teamId === teamId));
+          if (nextStand) {
+            return nextStand.standName;
+          }
+        }
+      }
+      return null;
+    },
+    [baseScenario, currentScenario]
+  );
+
+  const findTeamsArrivingNextByStandId = useCallback(
+    (standId: number): ITeam[] => {
+      if (baseScenario && currentScenario) {
+        const currentIndex = baseScenario.findIndex(scenario => scenario.some(stand => stand.standId === standId));
+        if (currentIndex !== -1 && currentIndex < baseScenario.length - 1) {
+          const nextScenario = currentScenario[currentIndex + 1];
+          const nextStand = nextScenario.find(stand => stand.standId === standId);
+          if (nextStand) {
+            return nextStand.teams.map(team => ({
+              teamId: team.teamId,
+              teamName: team.teamName
+            }));
+          }
+        }
+      }
+      return [];
+    },
+    [baseScenario, currentScenario]
+  );
+
   useEffect(() => {
     if (userRole === "ROLE_ANIMATOR" && animatorInfo) {
       setStandName(animatorInfo[0].name);
-      const teamNames = findTeamNamesByStandId(animatorInfo[0].id);
-      setCurrentTeams(teamNames);
+      const teams = findTeamsByStandId(animatorInfo[0].id);
+      setCurrentTeams(teams);
 
+      // Boucler sur chaque équipe pour trouver leur prochain stand
+      const nextStandNames = teams.map(team => ({
+        teamId: team.teamId,
+        nextStandName: findNextStandByTeamId(team.teamId)
+      }));
+      setNextStandNames(nextStandNames);
+
+      const nextTeamsArriving = findTeamsArrivingNextByStandId(animatorInfo[0].id);
+      setNextTeams(nextTeamsArriving);
     } else if (userRole === "ROLE_PARTICIPANT" && teamInfo) {
       setStandName(findStandNameByTeamId(teamInfo[0].teamId));
-      console.log(findStandNameByTeamId(teamInfo[0].teamId));
-      setCurrentTeams(teamName);
+      const nextStandName = findNextStandByTeamId(teamInfo[0].teamId);
+      setNextStandNames([{ teamId: teamInfo[0].teamId, nextStandName }]);
+      setCurrentTeams([{ teamId: teamInfo[0].teamId, teamName: teamInfo[0].teamName }]);
     }
-  }, [animatorInfo, teamInfo, userRole, standName, findStandNameByTeamId]);
+  }, [
+    animatorInfo,
+    teamInfo,
+    userRole,
+    standName,
+    findTeamsByStandId,
+    findStandNameByTeamId,
+    findNextStandByTeamId,
+    findTeamsArrivingNextByStandId
+  ]);
 
   // useEffect(() => {
   //   console.log("Updated baseScenario:", baseScenario);
@@ -143,17 +203,17 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
           {currentTeams.length > 1 ? (
             <>
               <Box bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1}>
-                {currentTeams[0]}
+                {currentTeams[0].teamName}
               </Box>
               <Box mx={1}>VS</Box>
               <Box bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1}>
-                {currentTeams[1]}
+                {currentTeams[1].teamName}
               </Box>
             </>
           ) : (
-            currentTeams.map((teamName, index) => (
+            currentTeams.map((team, index) => (
               <Box key={index} bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1}>
-                {teamName}
+                {team.teamName}
               </Box>
             ))
           )}
@@ -161,20 +221,36 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
         {/* <Stopwatch /> */}
       </Box>
 
-      {/* Footer content aligned at the bottom of the page */}
       <Grid container spacing={1} direction="column" sx={{ width: "100%", gap: "10px" }}>
         <Box sx={{ mt: "auto", textAlign: "center" }}>
-          <Typography variant="button">À la fin du temps, l'équipe va :</Typography>
-          <Box bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
-            {standName || "Non spécifié"}
-          </Box>
+          <Typography variant="button">À la fin du temps :</Typography>
+          {nextStandNames && nextStandNames.length > 0 ? (
+            nextStandNames.map((item, index) => (
+              <Box key={index} bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1} mb={1}>
+                {` ${currentTeams.find(team => team.teamId === item.teamId)?.teamName} va à ${
+                  item.nextStandName || "Non spécifié"
+                }`}
+              </Box>
+            ))
+          ) : (
+            <Box bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
+              Non spécifié
+            </Box>
+          )}
           <Typography variant="button" component="span">
             Équipe(s) suivante :
           </Typography>
-          <Box bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
-            {nextTeam || "Non spécifié"}
-          </Box>
-          (Actuellement sur 'nom stand actuel')
+          {nextTeams.length > 0 ? (
+            nextTeams.map((team, index) => (
+              <Box key={index} bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
+                {team.teamName}
+              </Box>
+            ))
+          ) : (
+            <Box bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
+              Non spécifié
+            </Box>
+          )}
         </Box>
       </Grid>
     </Container>
