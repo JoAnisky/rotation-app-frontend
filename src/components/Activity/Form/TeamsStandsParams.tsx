@@ -422,13 +422,14 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
             fullWidth
             sx={{ mb: 2 }}
             getOptionLabel={option => option.name}
+            isOptionEqualToValue={(option, value) => option.id === value.id} // Customize the equality test
             onChange={handleStandSelection}
             loading={standsLoading}
             loadingText="Chargement..."
             noOptionsText="Aucune option"
             renderInput={params => <TextField {...params} label="Choisir ou créer des stands" />}
             renderOption={(props, option) => {
-              const isSelected = selectedStands.some((stand) => stand.id === option.id);
+              const isSelected = selectedStands.some(stand => stand.id === option.id);
               return (
                 <li {...props}>
                   <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={isSelected} />
