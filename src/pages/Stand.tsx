@@ -64,15 +64,18 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
   const findStandNameByTeamId = useCallback(
     (teamId: number): string | null => {
       if (currentScenario) {
-        for (const key in currentScenario) {
-          const stand = currentScenario[key];
-          const foundTeam = stand.teams.find(team => team.teamId === teamId);
-          if (foundTeam) {
-            return stand.standName;
+        const firstScenario = Object.values(currentScenario)[0]; // Get the first line of current scenario
+        if (firstScenario) {
+          // Loop on each stand to find team id
+          for (const stand of Object.values(firstScenario)) {
+            const foundTeam = stand.teams.find(team => team.teamId === teamId);
+            if (foundTeam) {
+              return stand.standName; // Return stand name
+            }
           }
         }
       }
-      return null; // if stand not found
+      return null; // Return null if no corresponding stand found
     },
     [currentScenario]
   );
@@ -92,7 +95,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
           }
         }
       }
-      return []; // Retourne un tableau vide si aucun stand ou aucune équipe n'est trouvée
+      return []; // Return an empty array if no corresponding team found
     },
     [currentScenario]
   );
@@ -172,14 +175,6 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
     findTeamsArrivingNextByStandId
   ]);
 
-  // useEffect(() => {
-  //   console.log("Updated baseScenario:", baseScenario);
-  // }, [baseScenario]);
-
-  // useEffect(() => {
-  //   console.log("Updatedm currentScenario:", currentScenario);
-  // }, [currentScenario]);
-
   return (
     <Container
       maxWidth="sm"
@@ -197,7 +192,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
       <Status />
       <Box className="timer-container" sx={{ alignSelf: "center", textAlign: "center" }}>
         <Typography variant="h6" component="h1">
-          {standName || "Pas récupéré le nom du stand"}
+          {standName || "Pas de stand attribué"}
         </Typography>
         <Box p={1} display="flex" alignItems="center">
           {currentTeams.length > 1 ? (
@@ -223,13 +218,15 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
 
       <Grid container spacing={1} direction="column" sx={{ width: "100%", gap: "10px" }}>
         <Box sx={{ mt: "auto", textAlign: "center" }}>
-          <Typography variant="button">À la fin du temps :</Typography>
+          <Typography variant="button">Stand suivant </Typography>
           {nextStandNames && nextStandNames.length > 0 ? (
             nextStandNames.map((item, index) => (
               <Box key={index} bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1} mb={1}>
-                {` ${currentTeams.find(team => team.teamId === item.teamId)?.teamName} va à ${
-                  item.nextStandName || "Non spécifié"
-                }`}
+                {userRole === "ROLE_ANIMATOR"
+                  ? `Equipe ${currentTeams.find(team => team.teamId === item.teamId)?.teamName} va à ${
+                      item.nextStandName || "Non spécifié"
+                    }`
+                  : `${item.nextStandName ? item.nextStandName : "Fin ou non démarréé"}` || "Non spécifié"}
               </Box>
             ))
           ) : (
@@ -237,19 +234,23 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
               Non spécifié
             </Box>
           )}
-          <Typography variant="button" component="span">
-            Équipe(s) suivante :
-          </Typography>
-          {nextTeams.length > 0 ? (
-            nextTeams.map((team, index) => (
-              <Box key={index} bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
-                {team.teamName}
-              </Box>
-            ))
-          ) : (
-            <Box bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
-              Non spécifié
-            </Box>
+          {userRole === "ROLE_ANIMATOR" && (
+            <>
+              <Typography variant="button" component="span">
+                Équipe(s) suivante :
+              </Typography>
+              {nextTeams.length > 0 ? (
+                nextTeams.map((team, index) => (
+                  <Box key={index} bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
+                    {team.teamName}
+                  </Box>
+                ))
+              ) : (
+                <Box bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
+                  Non spécifié
+                </Box>
+              )}
+            </>
           )}
         </Box>
       </Grid>
