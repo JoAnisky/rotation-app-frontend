@@ -34,7 +34,6 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
    * @param scenarioData Scenario data
    */
   const updateCurrentScenario = useCallback(async (scenarioId: number, currentScenario: ScenarioActivity[]) => {
-
     if (!currentScenario) {
       console.error("No scenario data available to update");
       return;
@@ -60,8 +59,8 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
   // Launch the game
   const handleStart = async () => {
     setGameLaunched(true);
-    setRotationEnabled(false);
-    setStandEnabled(true);
+    setRotationEnabled(true);
+    setStandEnabled(false);
     const fetchedScenario = await fetchScenario();
 
     if (fetchedScenario) {
@@ -69,6 +68,7 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
       setBaseScenario(fetchedScenario.base_scenario);
       setRemainingScenarios(fetchedScenario.base_scenario);
       setCurrentScenario(fetchedScenario.base_scenario); // Initialiser currentScenario
+      await updateCurrentScenario(scenarioId, baseScenario);
     }
   };
 
@@ -80,6 +80,7 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
 
   // Handle stand
   const handleStand = async () => {
+    console.log("currentScenario.length : ", currentScenario.length);
     if (currentScenario.length === 0) {
       // Initial setting of currentScenario to baseScenario
       setCurrentScenario(baseScenario);
@@ -110,9 +111,12 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
 
   // Réinitialiser currentScenario à la position de départ
   const resetScenario = async () => {
-    setCurrentScenario(baseScenario);
-    await updateCurrentScenario(scenarioId, baseScenario);
-    console.log("resetScenario - baseScenario : ", baseScenario);
+    setCurrentScenario([]); // or setCurrentScenario(null); depending on your needs
+
+    if (scenarioId) {
+      await updateCurrentScenario(scenarioId, []);
+    }
+    console.log("resetScenario - currentScenario : ", currentScenario);
     setRemainingScenarios(baseScenario);
   };
 
