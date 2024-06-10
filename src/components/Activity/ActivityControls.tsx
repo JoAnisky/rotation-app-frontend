@@ -11,8 +11,9 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
   const [gameLaunched, setGameLaunched] = useState(false);
   const [rotationEnabled, setRotationEnabled] = useState(false);
   const [standEnabled, setStandEnabled] = useState(false);
-  const [currentScenario, setCurrentScenario] = useState<ScenarioActivity | null>(null);
-  const [initialScenario, setInitialScenario] = useState<ScenarioActivity | null>(null);
+  const [scenarioId, setScenarioId] = useState<number>(0);
+  const [currentScenario, setCurrentScenario] = useState<ScenarioActivity[]>([]);
+  const [baseScenario, setBaseScenario] = useState<ScenarioActivity[]>([]);
   const [remainingScenarios, setRemainingScenarios] = useState<ScenarioActivity[]>([]);
 
   /**
@@ -32,19 +33,13 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
    * Update the current scenario
    * @param scenarioData Scenario data
    */
-  const updateCurrentScenario = useCallback(async (scenarioData: IScenario) => {
-    // Gets the scenario ID
-    const scenarioId = scenarioData.id;
-    // Gets the base_scenario corresponding line (turn number)
-    const currentScenario = scenarioData.base_scenario;
+  const updateCurrentScenario = useCallback(async (scenarioId: number, currentScenario: ScenarioActivity[]) => {
 
-    // console.log("scenarioData : ", scenarioData);
-    // console.log("firstTurn : ", currentScenario);
-
-    if (!scenarioData) {
+    if (!currentScenario) {
       console.error("No scenario data available to update");
       return;
     }
+
     const options = {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -68,10 +63,12 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
     setRotationEnabled(false);
     setStandEnabled(true);
     const fetchedScenario = await fetchScenario();
+
     if (fetchedScenario) {
-      setCurrentScenario(fetchedScenario.current_scenario);
-      setInitialScenario(fetchedScenario.current_scenario); // Stocker la copie initiale du scénario
+      setScenarioId(fetchedScenario.id);
+      setBaseScenario(fetchedScenario.base_scenario);
       setRemainingScenarios(fetchedScenario.base_scenario);
+      setCurrentScenario(fetchedScenario.base_scenario); // Initialiser currentScenario
     }
   };
 
@@ -83,51 +80,48 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
 
   // Handle stand
   const handleStand = async () => {
-    if (remainingScenarios.length > 0) {
+    if (currentScenario.length === 0) {
+      // Initial setting of currentScenario to baseScenario
+      setCurrentScenario(baseScenario);
+      await updateCurrentScenario(scenarioId, baseScenario);
+    } else if (remainingScenarios.length > 0) {
       const newRemainingScenarios = remainingScenarios.slice(1);
       setRemainingScenarios(newRemainingScenarios);
+      setCurrentScenario(newRemainingScenarios); // Mettre à jour currentScenario
 
-      if (currentScenario) {
-        const updatedScenario = {
-          ...currentScenario,
-          base_scenario: newRemainingScenarios
-        };
+      await updateCurrentScenario(scenarioId, newRemainingScenarios);
 
-        setCurrentScenario(updatedScenario);
-        await updateCurrentScenario(updatedScenario);
-
-        if (newRemainingScenarios.length === 0) {
-          setGameLaunched(false);
-          setRotationEnabled(true);
-          setStandEnabled(false);
-          resetScenario();
-        } else {
-          setRotationEnabled(true);
-          setStandEnabled(false);
-        }
+      if (newRemainingScenarios.length === 0) {
+        setGameLaunched(false);
+        setRotationEnabled(true);
+        setStandEnabled(false);
+        await resetScenario();
+      } else {
+        setRotationEnabled(true);
+        setStandEnabled(false);
       }
     } else {
       setGameLaunched(false);
       setRotationEnabled(true);
       setStandEnabled(false);
-      resetScenario();
+      await resetScenario();
     }
   };
 
   // Réinitialiser currentScenario à la position de départ
-  const resetScenario = () => {
-    console.log("initialScenario: ", initialScenario);
-    if (initialScenario) {
-      setCurrentScenario(initialScenario);
-    }
+  const resetScenario = async () => {
+    setCurrentScenario(baseScenario);
+    await updateCurrentScenario(scenarioId, baseScenario);
+    console.log("resetScenario - baseScenario : ", baseScenario);
+    setRemainingScenarios(baseScenario);
   };
 
   // Handle stop
-  const handleStop = () => {
+  const handleStop = async () => {
     setGameLaunched(false);
     setRotationEnabled(true);
     setStandEnabled(true);
-    resetScenario(); // Réinitialiser le scénario à la position de départ
+    await resetScenario(); // Réinitialiser le scénario à la position de départ
   };
 
   return (
