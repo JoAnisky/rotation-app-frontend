@@ -51,8 +51,6 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
 
   // track activity Status
   useEffect(() => {
-    console.log("Status changed: ", activityStatus);
-
     switch (activityStatus) {
       case "COMPLETED":
       case "NOT_STARTED":
@@ -71,9 +69,7 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
         setStandEnabled(true);
         break;
       default:
-        // Handle any other status or the initial state
         console.log("Unhandled status: ", activityStatus);
-      // Optionally, set default states or do nothing
     }
   }, [activityStatus]);
 
