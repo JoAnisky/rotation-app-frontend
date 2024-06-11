@@ -1,13 +1,14 @@
+import { ActivityStatus } from "@/types/ActivityStatus";
 import STATUS from "@/utils/statusCode";
 
-interface StatusProps {
-  status: string;
+export interface StatusProps {
+  status: ActivityStatus | null;
 }
 
 const Status = ({ status }: StatusProps) => {
   // Function to translate status code to string
-  const getStatusString = (statusCode: string) => {
-    return (STATUS as Record<string, string>)[statusCode] || "";
+  const getStatusString = (statusCode: string | null) => {
+    return statusCode ? (STATUS as Record<string, string>)[statusCode] || "" : "Unknown";
   };
 
   return (
