@@ -22,7 +22,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
   const [loading, setLoading] = useState(false);
 
   const [currentScenario, setCurrentScenario] = useState<ScenarioActivity | null>(null);
-
+  const [status, setStatus] = useState<string>("Pas récupéré");
   const [standName, setStandName] = useState<string | null>(null);
   const [nextStandNames, setNextStandNames] = useState<{ teamId: number; nextStandName: string | null }[]>([]);
 
@@ -38,6 +38,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
         const data = await response.json();
         setBaseScenario(data[0].base_scenario);
         setCurrentScenario(data[0].current_scenario);
+        setStatus(data[0].status);
       } catch (err) {
         setBaseScenario([]);
         console.error("erreur de fetch : ", err);
@@ -189,7 +190,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
       }}
     >
       {/* Timer and names section centered */}
-      <Status />
+      <Status status={status} />
       <Box className="timer-container" sx={{ alignSelf: "center", textAlign: "center" }}>
         <Typography variant="h6" component="h1">
           {standName || "Pas de stand attribué"}
@@ -226,7 +227,13 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
                   ? `Equipe ${currentTeams.find(team => team.teamId === item.teamId)?.teamName} va à ${
                       item.nextStandName || "Non spécifié"
                     }`
-                  : `${item.nextStandName ? item.nextStandName : "Fin ou non démarréé"}` || "Non spécifié"}
+                  : item.nextStandName
+                  ? item.nextStandName
+                  : status === "COMPLETED"
+                  ? "Activitée terminée !"
+                  : status === "NOT_STARTED"
+                  ? "Activitée non démarrée"
+                  : "Non spécifié"}
               </Box>
             ))
           ) : (
