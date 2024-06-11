@@ -6,7 +6,7 @@ interface TeamMember {
 export interface IStand {
   id: number;
   name: string;
-  nbTeamsOnStand: number
+  nbTeamsOnStand: number;
 }
 export interface ITeam {
   teamId: number;
@@ -28,6 +28,8 @@ export interface IActivityData {
   pause_duration: string | null;
   stands: IStand[] | null;
   teams: ITeam[] | null;
+  animatorCode: string;
+  participantCode: string;
 }
 
 export interface IActivityContext {

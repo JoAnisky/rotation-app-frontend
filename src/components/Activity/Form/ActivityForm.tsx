@@ -4,11 +4,10 @@ import { Box, Button, Container, Grid, TextField, Typography } from "@mui/materi
 import { IActivityData } from "@/types/ActivityInterface";
 import TeamsStandsParams from "./TeamsStandsParams";
 import { ACTIVITY_API } from "@/routes/api/";
-import {useFetch, useAuth} from "@/hooks";
+import { useFetch, useAuth } from "@/hooks";
 import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
 import CustomSnackbar from "@/components/CustomSnackbar";
 import ActivityControls from "../ActivityControls";
-
 
 interface ActivityFormProps {
   chosenActivityId: number | string;
@@ -34,9 +33,11 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
     pause_start_time: null,
     pause_duration: null,
     stands: [],
-    teams: []
+    teams: [],
+    animatorCode: "",
+    participantCode: ""
   });
-  
+
   const auth = useAuth();
   const { authToken } = auth;
 
@@ -91,7 +92,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
         method: "PUT",
         headers: {
           Authorization: "Bearer" + " " + authToken,
-          "Content-Type": "application/json", 
+          "Content-Type": "application/json"
         },
         credentials: "include",
         body: JSON.stringify(formattedActivityData)
@@ -105,18 +106,22 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
           throw new Error(`HTTP error! status: ${response.status}, ${errorText}`);
         }
 
-        snackbarRef.current?.showSnackbar( "Activité mise à jour avec succès", "success");
+        snackbarRef.current?.showSnackbar("Activité mise à jour avec succès", "success");
       } catch (error) {
         console.error(`Failed to update activity: `, error);
-        snackbarRef.current?.showSnackbar( "Erreur lors de la mise a jour ", "error");
+        snackbarRef.current?.showSnackbar("Erreur lors de la mise a jour ", "error");
       }
     }
   };
 
   return (
-    <Container component="main" maxWidth="sm" sx={{ display: "flex", flexDirection: "column", height: "100%",  paddingBottom: '70px' }}>
+    <Container
+      component="main"
+      maxWidth="sm"
+      sx={{ display: "flex", flexDirection: "column", height: "100%", paddingBottom: "70px" }}
+    >
       <Box sx={{ p: 2 }}>
-    <ActivityControls activityId={chosenActivityId}/>
+        <ActivityControls activityId={chosenActivityId} />
         <Typography component="h1" variant="h5" align="center" sx={{ mb: 2 }}>
           Paramètres d'activité
         </Typography>
@@ -157,7 +162,14 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
               }}
             />
           </Grid>
-
+          <Grid display="flex" justifyContent="space-between" width="100%" sx={{ mb: 2 }}>
+            <Typography>Code Participant</Typography>
+            <Box>{activityData.participantCode}</Box>
+          </Grid>
+          <Grid display="flex" justifyContent="space-between" width="100%" sx={{ mb: 2 }}>
+            <Typography>Code Animateur</Typography>
+            <Box>{activityData.animatorCode}</Box>
+          </Grid>
           {/* Container for Time params */}
           <Grid container alignItems="center" justifyContent="space-between">
             <Typography variant="h6" component="h2" gutterBottom sx={{ mb: 2 }}>
