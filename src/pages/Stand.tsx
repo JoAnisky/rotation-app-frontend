@@ -7,6 +7,7 @@ import { IScenario, ScenarioActivity } from "@/types/ScenarioInterface";
 import { SCENARIO_API } from "@/routes/api";
 import { useActivityContext } from "@/hooks/useActivityContext";
 import { useAuth } from "@/hooks";
+import { ActivityStatus } from "@/types/ActivityStatus";
 
 interface StandProps {
   animatorInfo?: IStand[];
@@ -22,7 +23,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
   const [loading, setLoading] = useState(false);
 
   const [currentScenario, setCurrentScenario] = useState<ScenarioActivity | null>(null);
-  const [status, setStatus] = useState<string>("Pas récupéré");
+  const [status, setStatus] = useState<ActivityStatus | null>(null);
   const [standName, setStandName] = useState<string | null>(null);
   const [nextStandNames, setNextStandNames] = useState<{ teamId: number; nextStandName: string | null }[]>([]);
 
@@ -189,14 +190,63 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
         justifyContent: "space-between"
       }}
     >
-      {/* Timer and names section centered */}
       <Status status={status} />
+      <Box sx={{ fontWeight: "bold", color: "primary.main", textAlign: "center" }} p={1} borderRadius={1}>
+        <Typography variant="h6" component="h6">
+          {userRole === "ROLE_ANIMATOR" ? (
+            <>Stand {standName}</>
+          ) : (
+            <>Équipe {currentTeams.length > 0 ? currentTeams[0].teamName : "Nom d'équipe non disponible"}</>
+          )}
+        </Typography>
+      </Box>
       <Box className="timer-container" sx={{ alignSelf: "center", textAlign: "center" }}>
-        <Typography variant="h6" component="h1">
-          {standName || "Pas de stand attribué"}
+        <Typography variant="h6" component="h6">
+          {status === "NOT_STARTED" && "Activité non démarrée"}
+          {status === "ROTATING" && userRole !== "ROLE_ANIMATOR" && (
+            <>
+              <p>On change de stand !</p>
+              <p>Aller à </p>
+              {nextStandNames.map((item, index) => (
+                <Box key={index} bgcolor="secondary.main" color="primary.contrastText" borderRadius={1}>
+                  {item.nextStandName || "Non spécifié"}
+                </Box>
+              ))}
+            </>
+          )}
+          {status === "ROTATING" && userRole === "ROLE_ANIMATOR" && (
+            <>
+              <p>On change d'équipe(s) !</p>
+              <p>Accueillir</p>
+            </>
+          )}
+          {status === "COMPLETED" && "Activité terminée"}
+          {status !== "NOT_STARTED" &&
+            status !== "ROTATING" &&
+            status !== "COMPLETED" &&
+            userRole == "ROLE_PARTICIPANT" &&
+            (standName || "Pas de stand attribué")}
         </Typography>
         <Box p={1} display="flex" alignItems="center">
-          {currentTeams.length > 1 ? (
+          {status === "ROTATING" ? (
+            nextTeams.length > 1 ? (
+              <>
+                <Box bgcolor="secondary.main" color="primary.contrastText" p={1} borderRadius={1}>
+                  {nextTeams[0].teamName}
+                </Box>
+                <Box mx={1}>VS</Box>
+                <Box bgcolor="secondary.main" color="primary.contrastText" p={1} borderRadius={1}>
+                  {nextTeams[1].teamName}
+                </Box>
+              </>
+            ) : (
+              nextTeams.map((team, index) => (
+                <Box key={index} bgcolor="secondary.main" color="primary.contrastText" p={1} borderRadius={1}>
+                  {team.teamName}
+                </Box>
+              ))
+            )
+          ) : currentTeams.length > 1 ? (
             <>
               <Box bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1}>
                 {currentTeams[0].teamName}
@@ -217,6 +267,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
         {/* <Stopwatch /> */}
       </Box>
 
+      {/**Bottom part */}
       <Grid container spacing={1} direction="column" sx={{ width: "100%", gap: "10px" }}>
         <Box sx={{ mt: "auto", textAlign: "center" }}>
           <Typography variant="button">Stand suivant </Typography>
@@ -241,26 +292,29 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
               Non spécifié
             </Box>
           )}
-          {userRole === "ROLE_ANIMATOR" && (
-            <>
-              <Typography variant="button" component="span">
-                Équipe(s) suivante :
-              </Typography>
-              {nextTeams.length > 0 ? (
-                nextTeams.map((team, index) => (
-                  <Box key={index} bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
-                    {team.teamName}
-                  </Box>
-                ))
-              ) : (
-                <Box bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
-                  Non spécifié
-                </Box>
-              )}
-            </>
-          )}
         </Box>
       </Grid>
+
+      {userRole === "ROLE_ANIMATOR" && (
+        <Grid container spacing={1} direction="column" sx={{ width: "100%", gap: "10px" }}>
+          <Box sx={{ mt: "auto", textAlign: "center" }}>
+            <Typography variant="button" component="span">
+              Équipe(s) suivante :
+            </Typography>
+            {nextTeams.length > 0 ? (
+              nextTeams.map((team, index) => (
+                <Box key={index} bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1} mb={1}>
+                  {team.teamName}
+                </Box>
+              ))
+            ) : (
+              <Box bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
+                Non spécifié
+              </Box>
+            )}
+          </Box>
+        </Grid>
+      )}
     </Container>
   );
 };

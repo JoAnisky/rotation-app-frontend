@@ -13,8 +13,8 @@ const Status = ({ status }: StatusProps) => {
 
   return (
     <div style={{ textAlign: "center" }}>
-      <h2>Statut</h2>
-      <p>{getStatusString(status)}</p>
+      <h2>Statut d'activité</h2>
+      <h3>{getStatusString(status)}</h3>
     </div>
   );
 };
