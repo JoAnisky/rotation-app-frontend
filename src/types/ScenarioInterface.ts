@@ -19,5 +19,5 @@ export interface IScenario {
   activity: {
     id: number;
   };
+  status: string;
 }
-
