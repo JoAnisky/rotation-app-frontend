@@ -1,7 +1,9 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Box, Button } from "@mui/material";
 import { SCENARIO_API } from "@/routes/api";
 import { IScenario, ScenarioActivity } from "@/types/ScenarioInterface";
+import Status from "../Status";
+import { ActivityStatus } from "@/types/ActivityStatus";
 
 interface ActivityControlsProps {
   activityId: number | string;
@@ -16,6 +18,8 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
   const [baseScenario, setBaseScenario] = useState<ScenarioActivity[]>([]);
   const [remainingScenarios, setRemainingScenarios] = useState<ScenarioActivity[]>([]);
 
+  const [activityStatus, setActivityStatus] = useState<ActivityStatus | null>(null);
+
   /**
    * Gets the Scenario in database
    * @returns
@@ -25,9 +29,53 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const scenario: IScenario[] = await response.json();
-    return scenario.length > 0 ? scenario[0] : null;
+    const scenarios: IScenario[] = await response.json();
+
+    if (scenarios.length > 0) {
+      const scenario = scenarios[0];
+      setActivityStatus(scenario.status as ActivityStatus);
+      setScenarioId(scenario.id);
+
+      return scenario;
+    }
+    return null;
   }, [activityId]);
+
+  // Fetch the scenario when the component mounts
+  useEffect(() => {
+    const initializeScenario = async () => {
+      await fetchScenario();
+    };
+    initializeScenario();
+  }, [fetchScenario]);
+
+  // track activity Status
+  useEffect(() => {
+    console.log("Status changed: ", activityStatus);
+
+    switch (activityStatus) {
+      case "COMPLETED":
+      case "NOT_STARTED":
+        setGameLaunched(false);
+        setRotationEnabled(false);
+        setStandEnabled(false);
+        break;
+      case "IN_PROGRESS":
+        setGameLaunched(true);
+        setRotationEnabled(true);
+        setStandEnabled(false);
+        break;
+      case "ROTATING":
+        setGameLaunched(true);
+        setRotationEnabled(false);
+        setStandEnabled(true);
+        break;
+      default:
+        // Handle any other status or the initial state
+        console.log("Unhandled status: ", activityStatus);
+      // Optionally, set default states or do nothing
+    }
+  }, [activityStatus]);
 
   /**
    * Update the current scenario
@@ -56,6 +104,33 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
     }
   }, []);
 
+  /**
+   * Update activity status (stored in "scenario")
+   */
+  const updateActivityStatus = useCallback(async (scenarioId: number, activityStatus: ActivityStatus) => {
+    if (!activityStatus) {
+      console.error("No status data available to update");
+      return;
+    }
+
+    const options = {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: activityStatus })
+    };
+
+    try {
+      const response = await fetch(SCENARIO_API.getScenarioById(scenarioId), options);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      console.log("Base scenario updated successfully");
+      setActivityStatus(activityStatus);
+    } catch (error) {
+      console.error("Failed to update base scenario: ", error);
+    }
+  }, []);
+
   // Launch the game
   const handleStart = async () => {
     setGameLaunched(true);
@@ -69,18 +144,19 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
       setRemainingScenarios(fetchedScenario.base_scenario);
       setCurrentScenario(fetchedScenario.base_scenario); // Initialiser currentScenario
       await updateCurrentScenario(scenarioId, baseScenario);
+      await updateActivityStatus(scenarioId, "IN_PROGRESS");
     }
   };
 
   // Handle rotation
-  const handleRotation = () => {
+  const handleRotation = async () => {
     setRotationEnabled(false);
     setStandEnabled(true);
+    await updateActivityStatus(scenarioId, "ROTATING");
   };
 
   // Handle stand
   const handleStand = async () => {
-    console.log("currentScenario.length : ", currentScenario.length);
     if (currentScenario.length === 0) {
       // Initial setting of currentScenario to baseScenario
       setCurrentScenario(baseScenario);
@@ -91,6 +167,7 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
       setCurrentScenario(newRemainingScenarios); // Mettre à jour currentScenario
 
       await updateCurrentScenario(scenarioId, newRemainingScenarios);
+      await updateActivityStatus(scenarioId, "IN_PROGRESS");
 
       if (newRemainingScenarios.length === 0) {
         setGameLaunched(false);
@@ -109,27 +186,30 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
     }
   };
 
-  // Réinitialiser currentScenario à la position de départ
+  /**
+   * Reset Scenario
+   */
   const resetScenario = async () => {
-    setCurrentScenario([]); // or setCurrentScenario(null); depending on your needs
+    setCurrentScenario([]);
 
     if (scenarioId) {
       await updateCurrentScenario(scenarioId, []);
+      await updateActivityStatus(scenarioId, "COMPLETED");
     }
-    console.log("resetScenario - currentScenario : ", currentScenario);
     setRemainingScenarios(baseScenario);
   };
 
   // Handle stop
   const handleStop = async () => {
     setGameLaunched(false);
-    setRotationEnabled(true);
-    setStandEnabled(true);
-    await resetScenario(); // Réinitialiser le scénario à la position de départ
+    setRotationEnabled(false);
+    setStandEnabled(false);
+    await resetScenario(); // Reset current scenario to base scenario
   };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+      <Status status={activityStatus} />
       <Button variant="contained" onClick={handleStart} disabled={gameLaunched}>
         Lancer la partie
       </Button>
