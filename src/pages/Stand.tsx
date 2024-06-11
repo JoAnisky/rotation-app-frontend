@@ -216,8 +216,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
           )}
           {status === "ROTATING" && userRole === "ROLE_ANIMATOR" && (
             <>
-              <p>On change d'équipe(s) !</p>
-              <p>Accueillir</p>
+              <p>Vous allez accueillir</p>
             </>
           )}
           {status === "COMPLETED" && "Activité terminée"}
