@@ -1,19 +1,10 @@
-import { useContext, useEffect, useState } from "react";
 import STATUS from "@/utils/statusCode";
-import { ActivityContext } from "@/contexts/ActivityContext";
 
-const Status: React.FC = () => {
-  const [initialStatus, setActivityStatus] = useState<string>("");
+interface StatusProps {
+  status: string;
+}
 
-  const activityData = useContext(ActivityContext);
-
-  useEffect(() => {
-    if (activityData) {
-      const { status: activityStatus } = activityData;
-      setActivityStatus(activityStatus);
-    }
-  }, [activityData]);
-
+const Status = ({ status }: StatusProps) => {
   // Function to translate status code to string
   const getStatusString = (statusCode: string) => {
     return (STATUS as Record<string, string>)[statusCode] || "";
@@ -22,7 +13,7 @@ const Status: React.FC = () => {
   return (
     <div style={{ textAlign: "center" }}>
       <h2>Statut</h2>
-      <p>{getStatusString(initialStatus)}</p>
+      <p>{getStatusString(status)}</p>
     </div>
   );
 };
