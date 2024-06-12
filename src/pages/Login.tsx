@@ -9,13 +9,13 @@ import { CustomSnackbar } from "@/components";
 import { useAuth } from "@/hooks";
 
 interface UserInfos {
-  username: string,
-  user_id: number,
-  role: string[]
+  username: string;
+  user_id: number;
+  role: string[];
+  csrfToken: string;
 }
 
 const Login: React.FC = () => {
-  
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -26,15 +26,16 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
 
   const auth = useAuth();
-  const { setUserName, setUserRole, setUserId, authToken, setAuthToken, setIsAuthenticated } = auth;
+  const { setUserName, setUserRole, setUserId, setCsrfToken, setIsAuthenticated } = auth;
 
   const snackbarRef = useRef<CustomSnackbarMethods>(null);
 
   const errorMessage = "Ce champ est requis";
 
   useEffect(() => {
-    if(authToken){
-       getUserInfos(authToken);
+    const csrfToken = localStorage.getItem("csrfToken");
+    if (csrfToken) {
+      getUserInfos(csrfToken);
     }
   }, []);
 
@@ -76,8 +77,6 @@ const Login: React.FC = () => {
       }
       const data = await response.json();
       if (data.token) {
-        setAuthToken(data.token);
-
         await getUserInfos(data.token);
       } else {
         setLoading(false);
@@ -95,7 +94,7 @@ const Login: React.FC = () => {
         method: "POST",
         headers: {
           Authorization: "Bearer" + " " + userToken
-        },
+        }
       });
 
       if (!response.ok) {
@@ -105,7 +104,7 @@ const Login: React.FC = () => {
       setLoading(false);
 
       if (data) {
-       setUserInfos(data);
+        setUserInfos(data);
       } else {
         snackbarRef.current?.showSnackbar(`Pas de jeton récupéré`, "error");
       }
@@ -116,13 +115,15 @@ const Login: React.FC = () => {
   };
 
   const setUserInfos = (userInfos: UserInfos) => {
-    setUserName(userInfos.username)
-    setUserRole(userInfos.role[0])
-    setUserId(userInfos.user_id)
-    setIsAuthenticated(true)
+    localStorage.setItem('csrfToken', userInfos.csrfToken);
+    setUserName(userInfos.username);
+    setUserRole(userInfos.role[0]);
+    setUserId(userInfos.user_id);
+    setCsrfToken(userInfos.csrfToken);
+    setIsAuthenticated(true);
 
-    navigate("/gamemaster")
-  }
+    navigate("/gamemaster");
+  };
   return (
     <Container sx={{ display: "flex", flexDirection: "column", height: "100vh", padding: "0" }}>
       <Container

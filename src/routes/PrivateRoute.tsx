@@ -2,11 +2,11 @@ import {Navigate, Outlet} from 'react-router-dom'
 import { useAuth } from '@/hooks';
 
 const PrivateRoutes = () => {
-    const { authToken, isAuthenticated, userRole } = useAuth();
+    const { csrfToken, isAuthenticated, userRole } = useAuth();
   
     const checkAuthorization = () => {
         // Si l'utilisateur a un token et le bon rôle, il est autorisé
-        if (authToken && (userRole === 'ROLE_GAMEMASTER' || userRole === 'ROLE_ADMIN')) {
+        if (csrfToken && (userRole === 'ROLE_GAMEMASTER' || userRole === 'ROLE_ADMIN')) {
           return true;
         }
         

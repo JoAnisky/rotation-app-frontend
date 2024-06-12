@@ -59,7 +59,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
   const formattedCategories = categories.map(category => category.replace(/_/g, " ")).sort(); // This replaces all underscores in the string
 
   const auth = useAuth();
-  const { authToken } = auth;
+  const { csrfToken } = auth;
 
   // Sets Stands for user selection
   useEffect(() => {
@@ -320,11 +320,12 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
       };
       const response = await fetch(`${ACTIVITY_API.getActivityById(activityId)}`, {
         method: "PUT",
-        credentials: "include",
         headers: {
-          Authorization: "Bearer" + " " + authToken,
-          "Content-Type": "application/json"
+          "x-xsrf-token": csrfToken as string, // Utiliser le token CSRF ici
+          "Content-Type": "application/json",
         },
+        mode: "cors",
+        credentials: "include",
         body: JSON.stringify(payload)
       });
       if (!response.ok) throw new Error("Failed to submit data");
@@ -371,9 +372,11 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
       const response = await fetch(`${SCENARIO_API.getScenarioByActivityId(activityId)}/generate`, {
         method: "GET",
         headers: {
-          Authorization: "Bearer" + " " + authToken,
-          "Content-Type": "application/json"
-        }
+          "x-xsrf-token": csrfToken as string, // Utiliser le token CSRF ici
+          "Content-Type": "application/json",
+        },
+        mode: "cors",
+        credentials: "include",
       });
       const data = await response.json(); // Assuming the server responds with JSON
       details = data.details;

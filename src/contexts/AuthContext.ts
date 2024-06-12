@@ -4,9 +4,9 @@ interface AuthContext {
     userName: string | null;
     userRole: string | null;
     userId: number | null;
-    authToken: string |  null;
+    csrfToken: string |  null;
     isAuthenticated: boolean;
-    setAuthToken: (token: string | null) => void;
+    setCsrfToken: (csrfToken: string | null) => void;
     setUserName: (name: string) => void;
     setUserRole: (role: string) => void;
     setUserId: (id: number | null) => void;
@@ -17,9 +17,9 @@ export const AuthContext = createContext<AuthContext>({
     userName: null,
     userRole:  null,
     userId: null,
-    authToken: null,
+    csrfToken: null,
     isAuthenticated: false,
-    setAuthToken: () => {},
+    setCsrfToken: () => {},
     setUserName: () => {},
     setUserRole: () => {},
     setUserId: () => {},
