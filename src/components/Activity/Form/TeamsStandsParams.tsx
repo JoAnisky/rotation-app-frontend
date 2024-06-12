@@ -324,7 +324,6 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
           "x-xsrf-token": csrfToken as string, // Utiliser le token CSRF ici
           "Content-Type": "application/json",
         },
-        mode: "cors",
         credentials: "include",
         body: JSON.stringify(payload)
       });
@@ -375,7 +374,6 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
           "x-xsrf-token": csrfToken as string, // Utiliser le token CSRF ici
           "Content-Type": "application/json",
         },
-        mode: "cors",
         credentials: "include",
       });
       const data = await response.json(); // Assuming the server responds with JSON

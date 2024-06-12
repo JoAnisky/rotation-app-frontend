@@ -94,7 +94,6 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ chosenActivityId }) => {
           "x-xsrf-token": csrfToken as string, // Utiliser le token CSRF ici
           "Content-Type": "application/json",
         },
-        mode: "cors",
         credentials: "include",
         body: JSON.stringify(formattedActivityData)
       };

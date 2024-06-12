@@ -69,6 +69,7 @@ const Login: React.FC = () => {
         headers: {
           "Content-Type": "application/json"
         },
+        credentials: "include",
         body: JSON.stringify({ username, password })
       });
 
@@ -92,9 +93,10 @@ const Login: React.FC = () => {
     try {
       const response = await fetch(LOGIN_API.login, {
         method: "POST",
+        credentials: "include",
         headers: {
           Authorization: "Bearer" + " " + userToken
-        }
+        },
       });
 
       if (!response.ok) {
