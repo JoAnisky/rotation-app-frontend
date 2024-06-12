@@ -1,20 +1,21 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import path from 'path'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+import mkcert from "vite-plugin-mkcert";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), mkcert()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),  // Redirige tous les imports '@' vers le dossier 'src'
+      "@": path.resolve(__dirname, "src") // Redirects '@' imports to 'src' folder
     }
   },
   server: {
     cors: {
-      origin: '*',
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE '],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      origin: "https://localhost:3000", // Front end URL origin
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE "],
+      allowedHeaders: ["Content-Type", "Authorization", "x-xsrf-token"],
       credentials: true
     }
   }
