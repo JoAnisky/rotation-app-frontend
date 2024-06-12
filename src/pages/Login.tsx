@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -31,13 +31,6 @@ const Login: React.FC = () => {
   const snackbarRef = useRef<CustomSnackbarMethods>(null);
 
   const errorMessage = "Ce champ est requis";
-
-  useEffect(() => {
-    const csrfToken = localStorage.getItem("csrfToken");
-    if (csrfToken) {
-      getUserInfos(csrfToken);
-    }
-  }, []);
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
