@@ -3,7 +3,7 @@ import Status from "@/components/Status";
 import { Box, Container, Grid, Typography } from "@mui/material";
 // import Stopwatch from "@/components/Timer/Stopwatch";
 import { IStand, ITeam } from "@/types/ActivityInterface";
-import { IScenario, ScenarioActivity } from "@/types/ScenarioInterface";
+import { IScenario, ICurrentScenario, IScenarioStand } from "@/types/ScenarioInterface";
 import { SCENARIO_API } from "@/routes/api";
 import { useActivityContext } from "@/hooks/useActivityContext";
 import { useAuth } from "@/hooks";
@@ -19,10 +19,10 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
   const { userRole } = useAuth();
 
   // Get the scenario
-  const [baseScenario, setBaseScenario] = useState<IScenario[]>([]);
+  const [baseScenario, setBaseScenario] = useState<ICurrentScenario[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const [currentScenario, setCurrentScenario] = useState<ScenarioActivity | null>(null);
+  const [currentScenario, setCurrentScenario] = useState<ICurrentScenario[]>([]);
   const [status, setStatus] = useState<ActivityStatus | null>(null);
   const [standName, setStandName] = useState<string | null>(null);
   const [nextStandNames, setNextStandNames] = useState<{ teamId: number; nextStandName: string | null }[]>([]);
@@ -67,14 +67,19 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
     (teamId: number): string | null => {
       if (currentScenario) {
         const firstScenario = Object.values(currentScenario)[0]; // Get the first line of current scenario
-        if (firstScenario) {
-          // Loop on each stand to find team id
-          for (const stand of Object.values(firstScenario)) {
-            const foundTeam = stand.teams.find(team => team.teamId === teamId);
+
+        console.log("firstScenario:", firstScenario);
+
+        if (Array.isArray(firstScenario)) {
+          for (const stand of firstScenario) {
+            const foundTeam = stand.teams.find((team: ITeam) => team.teamId === teamId);
             if (foundTeam) {
-              return stand.standName; // Return stand name
+              console.log("foundTeam:", foundTeam);
+              return stand.standName;
             }
           }
+        } else {
+          console.log("firstScenario is not an array");
         }
       }
       return null; // Return null if no corresponding stand found
@@ -86,11 +91,12 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
   const findTeamsByStandId = useCallback(
     (standId: number): ITeam[] => {
       if (currentScenario) {
-        const firstScenario = currentScenario[0];
-        if (firstScenario) {
-          const stand = firstScenario.find(stand => stand.standId === standId);
+        const firstScenario = Object.values(currentScenario)[0]; // Get the first line of current scenario
+        if (Array.isArray(firstScenario)) {
+          const stand = firstScenario.find((stand: IScenarioStand) => stand.standId === standId);
+
           if (stand) {
-            return stand.teams.map(team => ({
+            return stand.teams.map((team: ITeam) => ({
               teamId: team.teamId,
               teamName: team.teamName
             }));
@@ -107,15 +113,19 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
     (teamId: number): string | null => {
       if (baseScenario && currentScenario) {
         const currentIndex = baseScenario.findIndex(scenario =>
-          scenario.some(stand => stand.teams.some(team => team.teamId === teamId))
+          scenario.some((stand: IScenarioStand) => stand.teams.some((team: ITeam) => team.teamId === teamId))
         );
 
         if (currentIndex !== -1 && currentIndex < baseScenario.length - 1) {
           const nextScenario = currentScenario[currentIndex + 1];
-          const nextStand =
-            nextScenario && nextScenario.find(stand => stand.teams.some(team => team.teamId === teamId));
-          if (nextStand) {
-            return nextStand.standName;
+          if (Array.isArray(nextScenario)) {
+            const nextStand = nextScenario.find((stand: IScenarioStand) =>
+              stand.teams.some((team: ITeam) => team.teamId === teamId)
+            );
+
+            if (nextStand) {
+              return nextStand.standName;
+            }
           }
         }
       }
@@ -133,7 +143,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
           const nextScenario = currentScenario[currentIndex + 1];
           const nextStand = nextScenario && nextScenario.find(stand => stand.standId === standId);
           if (nextStand) {
-            return nextStand.teams.map(team => ({
+            return nextStand.teams.map((team: ITeam) => ({
               teamId: team.teamId,
               teamName: team.teamName
             }));
