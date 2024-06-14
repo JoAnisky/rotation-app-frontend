@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { SCENARIO_API } from "@/routes/api";
-import { IScenario, ScenarioActivity } from "@/types/ScenarioInterface";
+import { IScenario, ICurrentScenario } from "@/types/ScenarioInterface";
 import Status from "../Status";
 import { ActivityStatus } from "@/types/ActivityStatus";
 
@@ -14,10 +14,11 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
   const [rotationEnabled, setRotationEnabled] = useState(false);
   const [standEnabled, setStandEnabled] = useState(false);
   const [scenarioId, setScenarioId] = useState<number>(0);
-  const [currentScenario, setCurrentScenario] = useState<ScenarioActivity[]>([]);
-  const [baseScenario, setBaseScenario] = useState<ScenarioActivity[]>([]);
-  const [remainingScenarios, setRemainingScenarios] = useState<ScenarioActivity[]>([]);
+  const [currentScenario, setCurrentScenario] = useState<ICurrentScenario[]>([]);
+  const [baseScenario, setBaseScenario] = useState<ICurrentScenario[]>([]);
+  const [remainingScenarios, setRemainingScenarios] = useState<ICurrentScenario[]>([]);
 
+  const [lastTurn, setLastTurn] = useState<boolean>(false);
   const [activityStatus, setActivityStatus] = useState<ActivityStatus | null>(null);
 
   /**
@@ -73,65 +74,48 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
     }
   }, [activityStatus]);
 
-  /**
-   * Update the current scenario
-   * @param scenarioData Scenario data
-   */
-  const updateCurrentScenario = useCallback(async (scenarioId: number, currentScenario: ScenarioActivity[]) => {
-    if (!currentScenario) {
-      console.error("No scenario data available to update");
-      return;
-    }
-
-    const options = {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ current_scenario: currentScenario })
-    };
-
-    try {
-      const response = await fetch(SCENARIO_API.getScenarioById(scenarioId), options);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+  const updateScenario = useCallback(
+    async (scenarioId: number, currentScenario?: ICurrentScenario[], activityStatus?: ActivityStatus) => {
+      if (!activityStatus && !currentScenario) {
+        console.error("No data available to update");
+        return;
       }
-      console.log("Base scenario updated successfully");
-    } catch (error) {
-      console.error("Failed to update base scenario: ", error);
-    }
-  }, []);
+      const bodyData: { current_scenario?: ICurrentScenario[]; status?: ActivityStatus } = {};
 
-  /**
-   * Update activity status (stored in "scenario")
-   */
-  const updateActivityStatus = useCallback(async (scenarioId: number, activityStatus: ActivityStatus) => {
-    if (!activityStatus) {
-      console.error("No status data available to update");
-      return;
-    }
-
-    const options = {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: activityStatus })
-    };
-
-    try {
-      const response = await fetch(SCENARIO_API.getScenarioById(scenarioId), options);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (currentScenario) {
+        bodyData.current_scenario = currentScenario;
+        if (currentScenario.length === 1) {
+          console.log("Dernier tour ! : ", currentScenario);
+          setLastTurn(true);
+        }
       }
-      console.log("Base scenario updated successfully");
-      setActivityStatus(activityStatus);
-    } catch (error) {
-      console.error("Failed to update base scenario: ", error);
-    }
-  }, []);
+      if (activityStatus) bodyData.status = activityStatus;
+
+      const options = {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bodyData)
+      };
+
+      try {
+        const response = await fetch(SCENARIO_API.getScenarioById(scenarioId), options);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        console.log("Scenario updated successfully");
+        if (activityStatus) setActivityStatus(activityStatus);
+      } catch (error) {
+        console.error("Failed to update scenario: ", error);
+      }
+    },
+    []
+  );
 
   // Launch the game
   const handleStart = async () => {
     setGameLaunched(true);
-    setRotationEnabled(true);
-    setStandEnabled(false);
+    setRotationEnabled(false);
+    setStandEnabled(true);
     const fetchedScenario = await fetchScenario();
 
     if (fetchedScenario) {
@@ -139,8 +123,7 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
       setBaseScenario(fetchedScenario.base_scenario);
       setRemainingScenarios(fetchedScenario.base_scenario);
       setCurrentScenario(fetchedScenario.base_scenario); // Initialiser currentScenario
-      await updateCurrentScenario(scenarioId, baseScenario);
-      await updateActivityStatus(scenarioId, "IN_PROGRESS");
+      await updateScenario(scenarioId, baseScenario, "IN_PROGRESS");
     }
   };
 
@@ -148,7 +131,7 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
   const handleRotation = async () => {
     setRotationEnabled(false);
     setStandEnabled(true);
-    await updateActivityStatus(scenarioId, "ROTATING");
+    await updateScenario(scenarioId, undefined, "ROTATING");
   };
 
   // Handle stand
@@ -156,14 +139,13 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
     if (currentScenario.length === 0) {
       // Initial setting of currentScenario to baseScenario
       setCurrentScenario(baseScenario);
-      await updateCurrentScenario(scenarioId, baseScenario);
+      await updateScenario(scenarioId, baseScenario);
     } else if (remainingScenarios.length > 0) {
       const newRemainingScenarios = remainingScenarios.slice(1);
       setRemainingScenarios(newRemainingScenarios);
-      setCurrentScenario(newRemainingScenarios); // Mettre à jour currentScenario
 
-      await updateCurrentScenario(scenarioId, newRemainingScenarios);
-      await updateActivityStatus(scenarioId, "IN_PROGRESS");
+      setCurrentScenario(newRemainingScenarios); // Mettre à jour currentScenario
+      await updateScenario(scenarioId, newRemainingScenarios, "IN_PROGRESS");
 
       if (newRemainingScenarios.length === 0) {
         setGameLaunched(false);
@@ -187,10 +169,9 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
    */
   const resetScenario = async () => {
     setCurrentScenario([]);
-
+    setLastTurn(false);
     if (scenarioId) {
-      await updateCurrentScenario(scenarioId, []);
-      await updateActivityStatus(scenarioId, "COMPLETED");
+      await updateScenario(scenarioId, [], "COMPLETED");
     }
     setRemainingScenarios(baseScenario);
   };
@@ -206,16 +187,21 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "10px" }}>
       <Status status={activityStatus} />
+      {lastTurn && (
+        <Typography color="warning.main" variant="h6" textAlign={"center"}>
+          Dernier tour !
+        </Typography>
+      )}
       <Button variant="contained" onClick={handleStart} disabled={gameLaunched}>
         Lancer la partie
       </Button>
-      <Button variant="contained" onClick={handleRotation} disabled={!rotationEnabled}>
+      <Button variant="contained" onClick={handleRotation} disabled={!rotationEnabled || lastTurn}>
         Rotation
       </Button>
-      <Button variant="contained" onClick={handleStand} disabled={!standEnabled}>
+      <Button variant="contained" onClick={handleStand} disabled={!standEnabled || lastTurn}>
         Stand
       </Button>
-      <Button variant="outlined" onClick={handleStop} disabled={!gameLaunched}>
+      <Button variant="outlined" color="error" onClick={handleStop} disabled={!gameLaunched}>
         Arrêter la partie
       </Button>
     </Box>

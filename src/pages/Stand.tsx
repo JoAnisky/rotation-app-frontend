@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
-import Status from "@/components/Status";
 import { Box, Container, Grid, Typography } from "@mui/material";
+import Status from "@/components/Status";
 // import Stopwatch from "@/components/Timer/Stopwatch";
 import { IStand, ITeam } from "@/types/ActivityInterface";
-import { IScenario, ICurrentScenario, IScenarioStand } from "@/types/ScenarioInterface";
+import { ICurrentScenario, IScenarioStand } from "@/types/ScenarioInterface";
 import { SCENARIO_API } from "@/routes/api";
 import { useActivityContext } from "@/hooks/useActivityContext";
 import { useAuth } from "@/hooks";
@@ -20,10 +20,12 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
 
   // Get the scenario
   const [baseScenario, setBaseScenario] = useState<ICurrentScenario[]>([]);
-  const [loading, setLoading] = useState(false);
-
   const [currentScenario, setCurrentScenario] = useState<ICurrentScenario[]>([]);
   const [status, setStatus] = useState<ActivityStatus | null>(null);
+
+  const [loading, setLoading] = useState(false);
+  const [lastTurn, setLastTurn] = useState<boolean>(false);
+
   const [standName, setStandName] = useState<string | null>(null);
   const [nextStandNames, setNextStandNames] = useState<{ teamId: number; nextStandName: string | null }[]>([]);
 
@@ -62,6 +64,15 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
 
     return () => clearInterval(interval); // clear interval
   }, [fetchScenario]);
+
+  useEffect(() => {
+    console.log("currentScenario : ", currentScenario);
+    if (currentScenario.length === 1) {
+      setLastTurn(true);
+    } else {
+      setLastTurn(false);
+    }
+  }, [currentScenario]);
 
   const findStandNameByTeamId = useCallback(
     (teamId: number): string | null => {
@@ -141,7 +152,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
         const currentIndex = baseScenario.findIndex(scenario => scenario.some(stand => stand.standId === standId));
         if (currentIndex !== -1 && currentIndex < baseScenario.length - 1) {
           const nextScenario = currentScenario[currentIndex + 1];
-          const nextStand = nextScenario && nextScenario.find(stand => stand.standId === standId);
+          const nextStand = nextScenario && nextScenario.find((stand: IScenarioStand) => stand.standId === standId);
           if (nextStand) {
             return nextStand.teams.map((team: ITeam) => ({
               teamId: team.teamId,
@@ -201,15 +212,22 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
       }}
     >
       <Status status={status} />
+
+      {/** Up display for Team name or Stand name */}
       <Box sx={{ fontWeight: "bold", color: "primary.main", textAlign: "center" }} p={1} borderRadius={1}>
         <Typography variant="h6" component="h6">
           {userRole === "ROLE_ANIMATOR" ? (
-            <>Stand {standName}</>
+            <Box border={1} borderColor="primary.main" borderRadius={1} p={1}>
+              Stand {standName}
+            </Box>
           ) : (
-            <>Équipe {currentTeams.length > 0 ? currentTeams[0].teamName : "Nom d'équipe non disponible"}</>
+            <Box border={1} borderColor="primary.main" borderRadius={1} p={1}>
+              Équipe {currentTeams.length > 0 ? currentTeams[0].teamName : "Nom d'équipe non disponible"}
+            </Box>
           )}
         </Typography>
       </Box>
+
       <Box className="timer-container" sx={{ alignSelf: "center", textAlign: "center" }}>
         <Typography variant="h6" component="h6">
           {status === "NOT_STARTED" && "Activité non démarrée"}
@@ -229,12 +247,20 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
               <p>Vous allez accueillir</p>
             </>
           )}
-          {status === "COMPLETED" && "Activité terminée"}
+          {status === "COMPLETED" && "Activité terminée !"}
           {status !== "NOT_STARTED" &&
             status !== "ROTATING" &&
             status !== "COMPLETED" &&
             userRole == "ROLE_PARTICIPANT" &&
-            (standName || "Pas de stand attribué")}
+            ((
+              <>
+                <Typography variant="h5">Stand</Typography>
+                <Box bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1}>
+                  {standName}
+                </Box>
+              </>
+            ) ||
+              "Pas de stand attribué")}
         </Typography>
         <Box p={1} display="flex" alignItems="center">
           {status === "ROTATING" ? (
@@ -266,6 +292,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
               </Box>
             </>
           ) : (
+            userRole === "ROLE_ANIMATOR" &&
             currentTeams.map((team, index) => (
               <Box key={index} bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1}>
                 {team.teamName}
@@ -278,41 +305,47 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
 
       {/**Bottom part */}
       <Grid container spacing={1} direction="column" sx={{ width: "100%", gap: "10px" }}>
-        <Box sx={{ mt: "auto", textAlign: "center" }}>
-          <Typography variant="button">Stand suivant </Typography>
-          {nextStandNames && nextStandNames.length > 0 ? (
-            nextStandNames.map((item, index) => (
-              <Box key={index} bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1} mb={1}>
-                {userRole === "ROLE_ANIMATOR"
-                  ? `Equipe ${currentTeams.find(team => team.teamId === item.teamId)?.teamName} va à ${
-                      item.nextStandName || "Non spécifié"
-                    }`
-                  : item.nextStandName
-                  ? item.nextStandName
-                  : status === "COMPLETED"
-                  ? "Activitée terminée !"
-                  : status === "NOT_STARTED"
-                  ? "Activitée non démarrée"
-                  : "Non spécifié"}
+        {status !== "COMPLETED" && (
+          <Box sx={{ mt: "auto", textAlign: "center" }}>
+            {lastTurn ? (
+              <Box bgcolor="success.main" color="primary.contrastText" p={1} borderRadius={1}>
+                Dernier tour !
               </Box>
-            ))
-          ) : (
-            <Box bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
-              Non spécifié
-            </Box>
-          )}
-        </Box>
-      </Grid>
+            ) : (
+              <>
+                <Typography variant="button">Stand suivant</Typography>
+                {nextStandNames && nextStandNames.length > 0 ? (
+                  nextStandNames.map((item, index) => (
+                    <Box key={index} bgcolor="primary.main" color="primary.contrastText" p={1} borderRadius={1} mb={1}>
+                      {userRole === "ROLE_ANIMATOR"
+                        ? `Equipe ${currentTeams.find(team => team.teamId === item.teamId)?.teamName} va à ${
+                            item.nextStandName || "Non spécifié"
+                          }`
+                        : item.nextStandName
+                        ? item.nextStandName
+                        : status === "NOT_STARTED"
+                        ? "Activitée non démarrée"
+                        : "Non spécifié"}
+                    </Box>
+                  ))
+                ) : (
+                  <Box bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1}>
+                    Non spécifié
+                  </Box>
+                )}
+              </>
+            )}
+          </Box>
+        )}
 
-      {userRole === "ROLE_ANIMATOR" && (
-        <Grid container spacing={1} direction="column" sx={{ width: "100%", gap: "10px" }}>
+        {userRole === "ROLE_ANIMATOR" && !lastTurn && status !== "COMPLETED" && (
           <Box sx={{ mt: "auto", textAlign: "center" }}>
             <Typography variant="button" component="span">
               Équipe(s) suivante :
             </Typography>
             {nextTeams.length > 0 ? (
               nextTeams.map((team, index) => (
-                <Box key={index} bgcolor="text.secondary" color="primary.contrastText" p={1} borderRadius={1} mb={1}>
+                <Box key={index} bgcolor="secondary.main" color="primary.contrastText" p={1} borderRadius={1} mb={1}>
                   {team.teamName}
                 </Box>
               ))
@@ -322,8 +355,8 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
               </Box>
             )}
           </Box>
-        </Grid>
-      )}
+        )}
+      </Grid>
     </Container>
   );
 };
