@@ -90,7 +90,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
       // For nbTeamsOnStand on component mount
       const newNbTeamsOnStand = standsList.reduce<INbTeamsOnStand>((acc, stand) => {
         // Use nbTeamsOnStand on stand if available, otherwise initalize 0
-        acc[stand.id] = stand.nbTeamsOnStand || 0;
+        acc[stand.id] = stand.nbTeamsOnStand || 2;
         return acc;
       }, {});
 
@@ -137,7 +137,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
     setSelectedStands(newStands);
     newStands.forEach(stand => {
       if (nbTeamsOnStand[stand.id] === undefined) {
-        setNbTeamsOnStand(prev => ({ ...prev, [stand.id]: 0 })); // initialise si non défini
+        setNbTeamsOnStand(prev => ({ ...prev, [stand.id]: 2 })); // initialise si non défini
       }
     });
   };
@@ -292,11 +292,11 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
         if ("nbTeamsOnStand" in item) {
           // Safe to access nbTeamsOnStand
 
-          return { id: item.id, name: item.name, nbTeamsOnStand: nbTeamsOnStand[item.id] || 1 };
+          return { id: item.id, name: item.name, nbTeamsOnStand: nbTeamsOnStand[item.id] || 2 };
         } else {
           // This case should theoretically never happen if data handling is correct
           // Default value or handle error
-          return { id: item.teamId, name: item.teamName, nbTeamsOnStand: 1 };
+          return { id: item.teamId, name: item.teamName, nbTeamsOnStand: 2 };
         }
       });
 
@@ -322,7 +322,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
         method: "PUT",
         headers: {
           "x-xsrf-token": csrfToken as string, // Utiliser le token CSRF ici
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         credentials: "include",
         body: JSON.stringify(payload)
@@ -372,9 +372,9 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
         method: "GET",
         headers: {
           "x-xsrf-token": csrfToken as string, // Utiliser le token CSRF ici
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        credentials: "include",
+        credentials: "include"
       });
       const data = await response.json(); // Assuming the server responds with JSON
       details = data.details;
@@ -459,7 +459,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
                   <Typography sx={{ mr: 1 }}>Nb d'équipes:</Typography>
                   <TextField
                     type="number"
-                    value={nbTeamsOnStand[stand.id] || 1}
+                    value={nbTeamsOnStand[stand.id] || 2}
                     onChange={e => handleNbTeamsOnStand(stand.id, parseInt(e.target.value, 10))}
                     inputProps={{ min: 1, max: 5 }}
                     sx={{
