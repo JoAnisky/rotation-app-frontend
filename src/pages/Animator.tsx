@@ -59,6 +59,7 @@ const Animator: React.FC = () => {
       setSelectedStands(storedData.stands);
       setAnimatorStandSetted(true);
     }
+  // eslint-disable-next-line
   }, []);
 
   // Add a function to handle changing the selection
@@ -101,6 +102,7 @@ const Animator: React.FC = () => {
 
   useEffect(() => {
     saveSelectionToLocalStorage();
+    // eslint-disable-next-line
   }, [selectedAnimator, selectedStands]);
 
   const handleSelectedStands = () => {
