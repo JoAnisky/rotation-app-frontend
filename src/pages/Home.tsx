@@ -7,19 +7,19 @@ const Home: React.FC = () => {
     <div className="index">
       <Box className="_welcome">
         <h1>Bienvenue !</h1>
-        <p>Quel rôle avez-vous pour cette insolite activité ?</p>
+        <p>Quel rôle avez-vous pour cette activité insolite ?</p>
       </Box>
 
       <Box className="roles-choice">
-        <Button className="btnChoiceRole" component={Link} to="/activity_code/participant">
+        <Button variant="contained" component={Link} to="/activity_code/participant">
           {" "}
           Participant
         </Button>
-        <Button className="btnChoiceRole" component={Link} to="/activity_code/animator">
+        <Button variant="contained" component={Link} to="/activity_code/animator">
           {" "}
           Animateur
         </Button>
-        <Button className="btnChoiceRole" component={Link} to="/login">
+        <Button variant="contained" component={Link} to="/login">
           {" "}
           Maitre du jeu
         </Button>
