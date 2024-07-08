@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 
 const Home: React.FC = () => {
   return (
-    <div className="index">
+    <Box className="index">
       <Box className="_welcome">
         <h1>Bienvenue !</h1>
         <p>Quel rôle avez-vous pour cette activité insolite ?</p>
@@ -24,7 +24,7 @@ const Home: React.FC = () => {
           Maitre du jeu
         </Button>
       </Box>
-    </div>
+    </Box>
   );
 };
 
