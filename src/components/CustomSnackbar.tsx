@@ -11,7 +11,7 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>((props, ref) => {
 });
 
 const CustomSnackbar = forwardRef((_props, ref) => {
-  const [snackPack, setSnackPack] = useState({
+  const [snackPack, setSnackPack] = useState<{ message: string; severity: Severity }>({
     message: "",
     severity: "info"
   });

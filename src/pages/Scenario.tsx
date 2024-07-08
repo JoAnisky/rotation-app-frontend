@@ -2,10 +2,8 @@ import { useEffect, useState } from "react";
 import { Box, CssBaseline, Typography, Card, CardContent, CardHeader, List, ListItem } from "@mui/material";
 import useFetch from "@/hooks/useFetch";
 import { SCENARIO_API } from "@/routes/api/";
-import { IScenario, ScenarioActivity } from "@/types/ScenarioInterface";
+import { IScenario, ICurrentScenario} from "@/types/ScenarioInterface";
 import { ITeam } from "@/types/ActivityInterface";
-
-
 
 // Définir une interface pour représenter un tour
 type ApiData = IScenario[];
@@ -16,7 +14,7 @@ interface ScenarioProps {
 
 
 const Scenario: React.FC<ScenarioProps> = ({ chosenActivityId }) => {
-  const [scenario, setScenario] = useState<ScenarioActivity[] | null>(null);
+  const [scenario, setScenario] = useState<ICurrentScenario[] | null>(null);
 
   const [data, loading, error] = useFetch<ApiData>(SCENARIO_API.getScenarioByActivityId(chosenActivityId));
 

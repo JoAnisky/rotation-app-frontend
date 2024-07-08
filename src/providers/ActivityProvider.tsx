@@ -7,7 +7,7 @@ interface Props {
 }
 
 export const ActivityProvider: React.FC<Props> = ({ children }) => {
-  const [activityId, setActivityId] = useState<string | null>(null);
+  const [activityId, setActivityId] = useState<string | number>(0);
 
   const setActivityData = (activityId: string) => {
     setActivityId(activityId);
