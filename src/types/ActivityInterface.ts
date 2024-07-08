@@ -22,10 +22,7 @@ export interface IActivityData {
   nb_teams: number | null;
   rotation_duration: number | null;
   stand_duration: number | null;
-  status: string;
   team: TeamMember[] | null;
-  pause_start_time: string | null;
-  pause_duration: string | null;
   stands: IStand[] | null;
   teams: ITeam[] | null;
   animatorCode: string;
