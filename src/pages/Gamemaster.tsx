@@ -7,15 +7,8 @@ import Scenario from "./Scenario";
 import GeneralView from "./GeneralView";
 import ActivityChoice from "./ActivityChoice";
 
-interface IPageContainerProps {
-  role: string;
-  handleChangeSelection?: () => void;
-  animatorStandSetted: boolean;
-}
 
-const Gamemaster: React.FC<IPageContainerProps> = ({
-  handleChangeSelection,
-}) => {
+const Gamemaster: React.FC = () => {
   const [chosenActivityId, setChosenActivityId] = useState<number | string>(0);
 
   const { setActiveComponent, renderActiveComponent } = useActiveComponent({
@@ -31,9 +24,7 @@ const Gamemaster: React.FC<IPageContainerProps> = ({
     <>
       <NavbarUp
         role={"Maitre du jeu"}
-        handleChangeSelection={() => handleChangeSelection?.()}
         animatorStandSetted={false}
-        animatorName={null}
       />
 
       {/* If activity is not yet selected, choice ou create activity */}
