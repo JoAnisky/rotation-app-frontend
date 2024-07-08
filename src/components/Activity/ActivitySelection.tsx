@@ -42,7 +42,7 @@ const ActivitySelection: React.FC<ActivitySelectionProps> = ({
           </li>
         )}
         getOptionLabel={(option) => option.name}
-        onChange={(event, value) => onActivitySelect(value)}
+        onChange={(_event, value) => onActivitySelect(value)}
         loading={activitiesLoading}
         loadingText="Chargement..."
         noOptionsText="Aucune option"

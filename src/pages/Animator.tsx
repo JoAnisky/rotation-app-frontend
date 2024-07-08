@@ -186,7 +186,7 @@ const Animator: React.FC = () => {
               getOptionLabel={option => option.name}
               // returns the string to display for each option
               // use the onChange prop to handle the selection, you can
-              onChange={(event, value: IAnimator | null) => {
+              onChange={(_event, value: IAnimator | null) => {
                 // Update the selectedAnimator state with the id and name of the selected animator
                 setSelectedAnimator(value ? { id: value.id, name: value.name } : null);
               }}
@@ -207,7 +207,7 @@ const Animator: React.FC = () => {
               id="stand-autocomplete"
               options={stands}
               getOptionLabel={option => option.name}
-              onChange={(event, value) => setSelectedStands(value)}
+              onChange={(_event, value) => setSelectedStands(value)}
               loading={standsLoading}
               loadingText="Chargement..."
               noOptionsText="Aucune option"

@@ -10,7 +10,7 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>((props, ref) => {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-const CustomSnackbar = forwardRef((props, ref) => {
+const CustomSnackbar = forwardRef((_props, ref) => {
   const [snackPack, setSnackPack] = useState({
     message: "",
     severity: "info"

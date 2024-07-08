@@ -94,7 +94,7 @@ const Participant: React.FC = () => {
               id="team-autocomplete"
               options={teamsData}
               getOptionLabel={option => option.teamName}
-              onChange={(event, value: ITeam | null) => setSelectedTeam(value)} // Ensuring the value type is correctly hinted
+              onChange={(_event, value: ITeam | null) => setSelectedTeam(value)} // Ensuring the value type is correctly hinted
               loading={teamsDataLoading}
               loadingText="Chargement..."
               noOptionsText="Pas d'équipe trouvée"

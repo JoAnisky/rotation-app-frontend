@@ -15,7 +15,7 @@ interface NavbarDownProps {
 const NavbarDown: React.FC<NavbarDownProps> = ({ setActiveComponent, isAdmin }) => {
   const [value, setValue] = React.useState("recents");
 
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+  const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
 

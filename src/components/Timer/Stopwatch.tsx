@@ -18,9 +18,8 @@ const Stopwatch: React.FC = () => {
   useEffect(() => {
     if (!activityData) return;
 
-    const { status: activityStatus } = activityData;
     setActivityStatus(activityStatus);
-  }, [activityData]);
+  }, [activityStatus, activityData]);
 
   // track activity Status
   useEffect(() => {
