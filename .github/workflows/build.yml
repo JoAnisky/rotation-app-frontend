@@ -63,7 +63,7 @@ jobs:
           ftp -inv $FTP_SERVER <<EOF
             user $FTP_USERNAME $FTP_PASSWORD
             lcd dist
-            mput * /youturn.10torsions.com/ 
+            mput -r dist/* /youturn.10torsions.com/ 
             bye
           EOF
 
