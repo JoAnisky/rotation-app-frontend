@@ -2,9 +2,13 @@ interface Icon {
   src: string;
   sizes: string;
   type: string;
-  purpose: string;
+  purpose?: string;
 }
 
+interface Screenshots extends Icon {
+  form_factor: string;
+  label: string;
+}
 interface Manifest {
   name: string;
   short_name: string;
@@ -24,6 +28,7 @@ interface Manifest {
     | "portrait"
     | "portrait-primary"
     | "portrait-secondary";
+  screenshots: Screenshots[];
 }
 
 interface ManifestForPlugIn {
@@ -38,31 +43,31 @@ export const manifestForPlugIn: ManifestForPlugIn = {
   manifest: {
     name: "Youturn",
     short_name: "Youturn",
-    description: "Youturn - Rotation manager",
+    description: "Application de gestion des rotations des équipes sur les différents stands",
     icons: [
       {
         src: "/android-chrome-192x192.png",
         sizes: "192x192",
         type: "image/png",
-        purpose: "maskable any"
+        purpose: "any"
       },
       {
         src: "/android-chrome-512x512.png",
         sizes: "512x512",
         type: "image/png",
-        purpose: "maskable any"
+        purpose: "any"
       },
       {
         src: "/apple-touch-icon.png",
         sizes: "180x180",
         type: "image/png",
-        purpose: "maskable any"
+        purpose: "any"
       },
       {
         src: "/maskable_icon.png",
         sizes: "512x512",
         type: "image/png",
-        purpose: "maskable any"
+        purpose: "maskable"
       }
     ],
     theme_color: "#171717",
@@ -70,6 +75,15 @@ export const manifestForPlugIn: ManifestForPlugIn = {
     display: "standalone",
     scope: "/",
     start_url: "/",
-    orientation: "portrait"
+    orientation: "portrait",
+    screenshots: [
+      {
+       src: "/desktop_screenshot.png",
+        sizes: "800x463",
+        type: "image/png",
+        form_factor: "unset",
+        label: "Wonder Widgets"
+      }
+  ]
   }
 };
