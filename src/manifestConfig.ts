@@ -37,7 +37,7 @@ export const manifestForPlugIn: ManifestForPlugIn = {
   includeAssets: ["favicon.ico", "apple-touch-icon.png", "maskable_icon.png"],
   manifest: {
     name: "Youturn",
-    short_name: "youturn-rotation-app",
+    short_name: "Youturn",
     description: "Youturn - Rotation manager",
     icons: [
       {
