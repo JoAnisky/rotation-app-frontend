@@ -81,7 +81,7 @@ export const manifestForPlugIn: ManifestForPlugIn = {
        src: "/desktop_screenshot.png",
         sizes: "800x463",
         type: "image/png",
-        form_factor: "unset",
+        form_factor: "wide",
         label: "Wonder Widgets"
       }
   ]
