@@ -7,7 +7,7 @@ const Home: React.FC = () => {
     <Box className="index">
       <Box className="_welcome">
         <h1>Bienvenue !</h1>
-        <p>Quel rôle avez-vous ?</p>
+        <p>Quel rôle avez-vous pour cette activité insolite ?</p>
       </Box>
 
       <Box className="roles-choice">
