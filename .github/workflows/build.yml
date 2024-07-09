@@ -57,7 +57,7 @@ jobs:
         FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       run: |
         echo "Copying files to the root of the subdomain..."
-        lftp -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER -e "
+        ftp -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER -e "
           set ssl:verify-certificate no;
           mirror -R --delete ./dist /youturn.10torsions.com;
           quit"
