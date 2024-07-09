@@ -6,7 +6,7 @@ interface Icon {
 }
 
 interface Screenshots extends Icon {
-  form_factor: string;
+  form_factor?: string;
   label: string;
 }
 interface Manifest {
@@ -82,7 +82,13 @@ export const manifestForPlugIn: ManifestForPlugIn = {
         sizes: "800x463",
         type: "image/png",
         form_factor: "wide",
-        label: "Wonder Widgets"
+        label: "Youturn - Rotation manager"
+      },
+      {
+       src: "/mobile_screenshot.png",
+        sizes: "715x1267",
+        type: "image/png",
+        label: "Youturn - Rotation manager"
       }
   ]
   }
