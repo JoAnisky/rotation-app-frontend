@@ -41,22 +41,28 @@ export const manifestForPlugIn: ManifestForPlugIn = {
     description: "Youturn - Rotation manager",
     icons: [
       {
+        src: "/android-chrome-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "maskable any"
+      },
+      {
         src: "/android-chrome-512x512.png",
         sizes: "512x512",
         type: "image/png",
-        purpose: "favicon"
+        purpose: "maskable any"
       },
       {
         src: "/apple-touch-icon.png",
         sizes: "180x180",
         type: "image/png",
-        purpose: "apple touch icon"
+        purpose: "maskable any"
       },
       {
         src: "/maskable_icon.png",
         sizes: "512x512",
         type: "image/png",
-        purpose: "maskable icon"
+        purpose: "maskable any"
       }
     ],
     theme_color: "#171717",
