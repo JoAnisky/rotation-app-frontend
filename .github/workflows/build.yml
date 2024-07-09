@@ -62,8 +62,9 @@ jobs:
           echo "Copying files to /youturn.10torsions.com..."
           ftp -inv $FTP_SERVER <<EOF
             user $FTP_USERNAME $FTP_PASSWORD
-            cd dist
-            mput * /youturn.10torsions.com/ 
+            lcd dist
+            cd /youturn.10torsions.com
+            mput *
             bye
           EOF
 
