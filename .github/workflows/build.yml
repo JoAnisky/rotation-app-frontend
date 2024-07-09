@@ -50,14 +50,34 @@ jobs:
         name: build
         path: dist
 
-    - name: Deploy to FTP server
+    - name: List dist directory contents
+      run: ls -la dist
+
+    - name: Copy files to the root of the subdomain
       env:
         FTP_SERVER: ${{ secrets.FTP_SERVER }}
         FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
         FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       run: |
         echo "Copying files to the root of the subdomain..."
-        ftp -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER -e "
-          set ssl:verify-certificate no;
-          mirror -R --delete ./dist /youturn.10torsions.com;
-          quit"
+        ftp -inv $FTP_SERVER <<EOF
+        user $FTP_USERNAME $FTP_PASSWORD
+        lcd dist
+        cd /youturn.10torsions.com
+        mput *
+        bye
+        EOF
+
+    - name: List files on the server after upload
+      env:
+        FTP_SERVER: ${{ secrets.FTP_SERVER }}
+        FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+        FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      run: |
+        echo "Listing files on the server after upload..."
+        ftp -inv $FTP_SERVER <<EOF
+        user $FTP_USERNAME $FTP_PASSWORD
+        cd /youturn.10torsions.com
+        ls
+        bye
+        EOF
