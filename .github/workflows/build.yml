@@ -63,7 +63,7 @@ jobs:
           ftp -inv $FTP_SERVER <<EOF
             user $FTP_USERNAME $FTP_PASSWORD
             lcd dist
-            mput * /youturn.10torsions.com/
+            mput * /youturn.10torsions.com/ 
             bye
           EOF
 
@@ -76,7 +76,7 @@ jobs:
           echo "Listing files on the server after upload..."
           ftp -inv $FTP_SERVER <<EOF
             user $FTP_USERNAME $FTP_PASSWORD
-            cd /youturn.10torsions.com
+            cd /youturn.10torsions.com/
             ls
             bye
           EOF
