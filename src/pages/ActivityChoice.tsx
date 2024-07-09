@@ -51,7 +51,7 @@ const ActivityChoice: React.FC<ActivityChoiceProps> = ({ setChosenActivityId }) 
 
     try {
       const response = await fetch(`${ACTIVITY_API.activities}/`, options);
-      const responseData = await response.json(); // Parse the JSON response
+      const responseData = await response.json();
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
