@@ -50,23 +50,23 @@ jobs:
           name: build
           path: dist
 
+      - name: Install lftp
+        run: sudo apt-get install -y lftp
+
       - name: List dist directory contents (optional)
         run: ls -la dist  # Optional step to verify build contents
 
-      - name: Copy files to the root of the subdomain
+      - name: Copy files and directories to the root of the subdomain
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
           echo "Copying files to /youturn.10torsions.com..."
-          ftp -inv $FTP_SERVER <<EOF
-            user $FTP_USERNAME $FTP_PASSWORD
-            lcd dist
-            cd /youturn.10torsions.com
-            mput *
-            bye
-          EOF
+          lftp -c "
+            open -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER;
+            mirror -R dist /youturn.10torsions.com;
+          "
 
       - name: List files on the server after upload (optional)
         env:
@@ -75,9 +75,7 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
           echo "Listing files on the server after upload..."
-          ftp -inv $FTP_SERVER <<EOF
-            user $FTP_USERNAME $FTP_PASSWORD
-            cd /youturn.10torsions.com/
-            ls
-            bye
-          EOF
+          lftp -c "
+            open -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER;
+            ls /youturn.10torsions.com;
+          "
