@@ -64,6 +64,7 @@ jobs:
         run: |
           echo "Copying files to /youturn.10torsions.com..."
           lftp -c "
+            set ssl:verify-certificate no;
             open -u \"$FTP_USERNAME\",\"$FTP_PASSWORD\" \"$FTP_SERVER\";
             mirror -R dist /youturn.10torsions.com;
           "
@@ -76,6 +77,7 @@ jobs:
         run: |
           echo "Listing files on the server after upload..."
           lftp -c "
+            set ssl:verify-certificate no;
             open -u \"$FTP_USERNAME\",\"$FTP_PASSWORD\" \"$FTP_SERVER\";
             ls /youturn.10torsions.com;
           "
