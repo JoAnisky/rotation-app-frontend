@@ -34,18 +34,12 @@ interface ManifestForPlugIn {
 
 export const manifestForPlugIn: ManifestForPlugIn = {
   registerType: "prompt",
-  includeAssets: ["favicon.ico", "apple-touch-icon.png", "masked-icon.svg"],
+  includeAssets: ["favicon.ico", "apple-touch-icon.png", "maskable_icon.png"],
   manifest: {
     name: "Youturn",
     short_name: "youturn-rotation-app",
     description: "Youturn - Rotation manager",
     icons: [
-      {
-        src: "/android-chrome-192x192.png",
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "favicon"
-      },
       {
         src: "/android-chrome-512x512.png",
         sizes: "512x512",
@@ -62,7 +56,7 @@ export const manifestForPlugIn: ManifestForPlugIn = {
         src: "/maskable_icon.png",
         sizes: "512x512",
         type: "image/png",
-        purpose: "any maskable"
+        purpose: "maskable icon"
       }
     ],
     theme_color: "#171717",
