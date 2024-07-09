@@ -1,6 +1,6 @@
 .index {
   @include verticalCenterColumn;
-  min-height: 100vh;
+  height: 100svh;
 
   & ._content {
     @extend .index;
