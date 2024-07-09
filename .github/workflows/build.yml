@@ -1,0 +1,63 @@
+name: Build and Deploy
+# Trigger ON
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'yarn'
+
+    - name: Install dependencies
+      run: yarn install
+
+    - name: Lint the code
+      run: yarn run lint
+
+    - name: Build the application
+      run: yarn run build
+
+    - name: Upload production-ready build files
+      uses: actions/upload-artifact@v3
+      with:
+        name: build
+        path: dist
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Download build artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: build
+        path: dist
+
+    - name: Deploy to FTP server
+      env:
+        FTP_SERVER: ${{ secrets.FTP_SERVER }}
+        FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+        FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      run: |
+        echo "Copying files to the root of the subdomain..."
+        lftp -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER -e "
+          set ssl:verify-certificate no;
+          mirror -R --delete ./dist /youturn.10torsions.com;
+          quit"
