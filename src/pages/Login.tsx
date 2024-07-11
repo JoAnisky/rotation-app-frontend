@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -32,6 +32,10 @@ const Login: React.FC = () => {
 
   const errorMessage = "Ce champ est requis";
 
+  useEffect(() => {
+    console.log(LOGIN_API);
+  }, [])
+  
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
 
