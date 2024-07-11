@@ -13,29 +13,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'yarn'
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
 
-    - name: Install dependencies
-      run: yarn install
+      - name: Install dependencies
+        run: yarn install
 
-    - name: Lint the code
-      run: yarn run lint
+      - name: Lint the code
+        run: yarn run lint
 
-    - name: Build the application
-      run: yarn run build
+      - name: Build the application
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+        run: |
+          yarn build
 
-    - name: Upload production-ready build files
-      uses: actions/upload-artifact@v4
-      with:
-        name: build
-        path: dist
+      - name: Upload production-ready build files
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: dist
 
   deploy:
     runs-on: ubuntu-latest
@@ -54,7 +57,7 @@ jobs:
         run: sudo apt-get install -y lftp
 
       - name: List dist directory contents
-        run: ls -la dist  # Optional step to verify build contents
+        run: ls -la dist # Optional step to verify build contents
 
       - name: Copy files and directories to the root of the subdomain
         env:
