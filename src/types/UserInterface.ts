@@ -6,3 +6,10 @@ export interface User {
     role: UserRoles
     authToken?: string;
 }
+
+export interface UserInfos {
+    username: string;
+    user_id: number;
+    role: string[];
+    csrfToken: string;
+  }
