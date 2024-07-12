@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import useActiveComponent from "@/hooks/useActiveComponent";
 import NavbarUp from "@/components/NavbarUp";
 import ActivityForm from "@/components/Activity/Form/ActivityForm";
@@ -6,15 +6,15 @@ import NavbarDown from "@/components/NavbarDown";
 import Scenario from "./Scenario";
 import GeneralView from "./GeneralView";
 import ActivityChoice from "./ActivityChoice";
-import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
-import useCheckAuthentication from "@/hooks/useCheckAuthentication";
+// import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
+// import useCheckAuthentication from "@/hooks/useCheckAuthentication";
 
 const Gamemaster: React.FC = () => {
   const [chosenActivityId, setChosenActivityId] = useState<number | string>(0);
-  const snackbarRef = useRef<CustomSnackbarMethods>(null);
+  // const snackbarRef = useRef<CustomSnackbarMethods>(null);
 
-  // Utilisation du hook de vérification de l'authentification
-  useCheckAuthentication(snackbarRef);
+  // // Utilisation du hook de vérification de l'authentification
+  // useCheckAuthentication(snackbarRef);
 
   const { setActiveComponent, renderActiveComponent } = useActiveComponent({
     defaultComponent: "ActivityForm",
