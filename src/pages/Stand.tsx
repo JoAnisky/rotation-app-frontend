@@ -22,7 +22,6 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
   const [currentScenario, setCurrentScenario] = useState<ICurrentScenario[]>([]);
   const [status, setStatus] = useState<ActivityStatus | null>(null);
 
-  const [loading, setLoading] = useState(false);
   const [lastTurn, setLastTurn] = useState<boolean>(false);
 
   const [standName, setStandName] = useState<string | null>(null);
@@ -34,7 +33,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
   // Get base Scenario
   const fetchScenario = useCallback(async () => {
     if (activityId) {
-      setLoading(true);
+
       try {
         const response = await fetch(SCENARIO_API.getScenarioByActivityId(activityId));
         const data = await response.json();
@@ -44,9 +43,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
       } catch (err) {
         setBaseScenario([]);
         console.error("erreur de fetch : ", err);
-      } finally {
-        setLoading(false);
-      }
+      } 
     }
   }, [activityId]);
 
@@ -191,9 +188,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
     findTeamsArrivingNextByStandId
   ]);
 
-  return loading ? (
-    "Chargement du scénario des rotations"
-  ) : (
+  return  (
     <Container
       maxWidth="sm"
       sx={{
