@@ -53,7 +53,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
 
   useEffect(() => {
     if (navigator.vibrate) {
-      navigator.vibrate(500);
+      navigator.vibrate(200);
     }
   }, [status]);
   // Fetch data every X seconds
