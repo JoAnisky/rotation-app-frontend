@@ -200,7 +200,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
         mt: 2,
         width: "85%",
         p: 2,
-        height: "75vh",
+        height: "86svh",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between"
@@ -300,9 +300,9 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
       </Box>
 
       {/**Bottom part */}
-      <Grid container spacing={1} direction="column" sx={{ width: "100%", gap: "10px" }}>
+      <Grid container spacing={1} direction="column" sx={{ width: "100%", gap: "10px", mt: "auto" }}>
         {status !== "COMPLETED" && (
-          <Box sx={{ mt: "auto", textAlign: "center" }}>
+          <Box sx={{ textAlign: "center" }}>
             {lastTurn ? (
               <Box bgcolor="success.main" color="primary.contrastText" p={1} borderRadius={1}>
                 Dernier tour !
@@ -335,7 +335,7 @@ const Stand: React.FC<StandProps> = ({ animatorInfo, teamInfo }) => {
         )}
 
         {userRole === "ROLE_ANIMATOR" && !lastTurn && status !== "COMPLETED" && (
-          <Box sx={{ mt: "auto", textAlign: "center" }}>
+          <Box sx={{ textAlign: "center" }}>
             <Typography variant="button" component="span">
               Équipe(s) suivante :
             </Typography>
