@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 
-interface UseFetchOptions {
+export interface UseFetchOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   headers?: HeadersInit;
   body?: BodyInit | null;
+  credentials : RequestCredentials
 }
 
 interface FetchError {
@@ -24,6 +25,7 @@ const useFetch = <T>(url: string, options?: UseFetchOptions): [T | null, boolean
           method: options?.method || 'GET',
           headers: options?.headers,
           body: options?.body,
+          credentials: options?.credentials,
         });
         const json = await response.json();
         if (!response.ok) {
