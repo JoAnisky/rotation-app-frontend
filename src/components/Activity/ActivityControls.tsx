@@ -1,15 +1,21 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { Box, Button, Typography } from "@mui/material";
 import { SCENARIO_API } from "@/routes/api";
 import { IScenario, ICurrentScenario } from "@/types/ScenarioInterface";
-import Status from "../Status";
+import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
+
 import { ActivityStatus } from "@/types/ActivityStatus";
+import Status from "../Status";
+import CustomSnackbar from "@/components/CustomSnackbar";
 
 interface ActivityControlsProps {
   activityId: number | string;
 }
 
 const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
+
+  const snackbarRef = useRef<CustomSnackbarMethods>(null);
+
   const [gameLaunched, setGameLaunched] = useState(false);
   const [rotationEnabled, setRotationEnabled] = useState(false);
   const [standEnabled, setStandEnabled] = useState(false);
@@ -81,7 +87,7 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
         return;
       }
       const bodyData: { current_scenario?: ICurrentScenario[]; status?: ActivityStatus } = {};
-
+console.log("currentScenario premier lancement : ", currentScenario);
       if (currentScenario) {
         bodyData.current_scenario = currentScenario;
         if (currentScenario.length === 1) {
@@ -113,17 +119,23 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
 
   // Launch the game
   const handleStart = async () => {
-    setGameLaunched(true);
-    setRotationEnabled(false);
-    setStandEnabled(true);
     const fetchedScenario = await fetchScenario();
-
+  
     if (fetchedScenario) {
+      if (!fetchedScenario.base_scenario) {
+        snackbarRef.current?.showSnackbar("Il faudrait générer un scénario !", "warning");
+        return;
+      }
+      setGameLaunched(true);
+      setRotationEnabled(false);
+      setStandEnabled(true);
       setScenarioId(fetchedScenario.id);
       setBaseScenario(fetchedScenario.base_scenario);
       setRemainingScenarios(fetchedScenario.base_scenario);
-      setCurrentScenario(fetchedScenario.base_scenario); // Initialiser currentScenario
-      await updateScenario(scenarioId, baseScenario, "IN_PROGRESS");
+      setCurrentScenario(fetchedScenario.base_scenario);
+      await updateScenario(fetchedScenario.id, fetchedScenario.base_scenario, "IN_PROGRESS");
+    }else {
+      snackbarRef.current?.showSnackbar("Aucun scénario récupéré !", "error");
     }
   };
 
@@ -204,6 +216,7 @@ const ActivityControls: React.FC<ActivityControlsProps> = ({ activityId }) => {
       <Button variant="outlined" color="error" onClick={handleStop} disabled={!gameLaunched}>
         Arrêter la partie
       </Button>
+      <CustomSnackbar ref={snackbarRef} />
     </Box>
   );
 };
