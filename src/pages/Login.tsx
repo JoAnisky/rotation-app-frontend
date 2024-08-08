@@ -1,8 +1,7 @@
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import { CircularProgress, Container } from "@mui/material";
+import { OutlinedInput, Button, CircularProgress, Container, FormControl, InputLabel, FormHelperText, InputAdornment, IconButton } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { LOGIN_API } from "@/routes/api/loginRoutes";
 import { CustomSnackbarMethods } from "@/types/SnackbarTypes";
 import { CustomSnackbar } from "@/components";
@@ -18,7 +17,7 @@ interface UserInfos {
 const Login: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [usernameError, setUsernameError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
@@ -119,6 +118,15 @@ const Login: React.FC = () => {
 
     navigate("/gamemaster");
   };
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  };
+
   return (
     <Container sx={{ display: "flex", flexDirection: "column", height: "100vh", padding: "0" }}>
       <Container
@@ -138,27 +146,42 @@ const Login: React.FC = () => {
       >
         <h1>Login</h1>
         <form onSubmit={handleLogin}>
-          <TextField
-            label="Username"
-            variant="outlined"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            margin="normal"
-            fullWidth
-            error={usernameError}
-            helperText={usernameError && errorMessage}
-          />
-          <TextField
-            label="Password"
-            type="password"
-            variant="outlined"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            margin="normal"
-            fullWidth
-            error={passwordError}
-            helperText={passwordError && errorMessage}
-          />
+          <FormControl variant="outlined" fullWidth margin="normal" error={usernameError}>
+            <InputLabel htmlFor="username">Username</InputLabel>
+            <OutlinedInput
+              id="username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              label="Username"
+              autoComplete="username"
+            />
+            {usernameError && <FormHelperText>{errorMessage}</FormHelperText>}
+          </FormControl>
+
+          <FormControl variant="outlined" fullWidth margin="normal" error={passwordError}>
+            <InputLabel htmlFor="password">Password</InputLabel>
+            <OutlinedInput
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              autoComplete="password"
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              }
+              label="Password"
+            />
+            {passwordError && <FormHelperText>{errorMessage}</FormHelperText>}
+          </FormControl>
 
           <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
             {loading ? <CircularProgress style={{ color: "#fff" }} /> : "Connexion"}
