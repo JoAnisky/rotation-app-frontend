@@ -339,21 +339,27 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
    * Perform basic checks before sending request to generate Scenario
    * @return void
    */
-  const handleGetScenario = (): void => {
-    // Check if no teams/Stands have been selected (numberOfTeams/selectedStands.length should be greater than 0)
-    if (numberOfTeams <= 0 || selectedStands.length === 0) {
-      let errorMessage = "Il faudrait choisir ";
-      if (numberOfTeams <= 0 && selectedStands.length === 0) {
-        errorMessage += "les stands et les équipes.";
-      } else if (numberOfTeams <= 0) {
-        errorMessage += "un nombre d'équipes.";
-      } else if (selectedStands.length === 0) {
-        errorMessage += "au moins un stand.";
-      }
+  const handleGenerateScenario = (): void => {
+    // Error message to display
+    const errors: string[] = [];
 
-      snackbarRef.current?.showSnackbar(errorMessage, "error");
+    // If number of Teams is negative
+    if (numberOfTeams <= 0) {
+      errors.push("un nombre d'équipes");
+    }
+    // If no selected Stands
+    if (selectedStands.length === 0) {
+      errors.push("au moins un stand");
+    }
+    // If no selected Teams
+    if (!selectedTheme) {
+      errors.push("un thème d'équipe");
+    }
 
-      return; // Stop execution if the condition is not met
+    if (errors.length > 0) {
+      const errorMessage = `Il faudrait choisir ${errors.join(" et ")}.`;
+      snackbarRef.current?.showSnackbar(errorMessage, "warning");
+      return;
     }
 
     // If the conditions are met, proceed to generate the scenario
@@ -543,7 +549,7 @@ const TeamsStandsParams: React.FC<ITeamStandsParamsProps> = ({
           )}
         </Grid>
         <Grid display="flex" flexDirection="column" justifyContent="center" width="100%">
-          <Button variant="outlined" color="secondary" sx={{ minWidth: 300 }} onClick={handleGetScenario}>
+          <Button variant="outlined" color="secondary" sx={{ minWidth: 300 }} onClick={handleGenerateScenario}>
             Générer les rotations
           </Button>
         </Grid>
