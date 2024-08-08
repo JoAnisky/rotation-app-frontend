@@ -86,7 +86,7 @@ const Participant: React.FC = () => {
         >
           <Grid item xs={12} sx={{ width: "100%" }}>
             <Typography variant="h6" component="h1" sx={{ mb: 2, textAlign: "center" }}>
-              Quelle équipe ?
+              Rejoindre une équipe
             </Typography>
 
             <Autocomplete
@@ -97,7 +97,7 @@ const Participant: React.FC = () => {
               onChange={(_event, value: ITeam | null) => setSelectedTeam(value)} // Ensuring the value type is correctly hinted
               loading={teamsDataLoading}
               loadingText="Chargement..."
-              noOptionsText="Pas d'équipe trouvée"
+              noOptionsText="Pas d'équipe dans cette activité"
               renderInput={params => <TextField {...params} label="Quelle équipe ?" />}
             />
           </Grid>
